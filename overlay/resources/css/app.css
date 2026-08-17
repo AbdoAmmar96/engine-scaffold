@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+/* =============================================================
+   Theme Engine — Tailwind v4
+   القيم الفعلية بتيجي من قاعدة البيانات (شاشة: الهوية والألوان)
+   ومحقونة كـ CSS variables في app.blade.php.
+   `@theme inline` بيخلي كلاس زي bg-primary يقرأ var(--primary)
+   وقت التشغيل ⇒ تغيير اللون من الداشبورد = فوري بدون build.
+   ============================================================= */
+@theme inline {
+    --color-primary:       var(--primary);
+    --color-primary-fg:    var(--primary-fg);
+    --color-primary-hover: var(--primary-hover);
+    --color-secondary:     var(--secondary);
+
+    --color-bg:            var(--bg);
+    --color-bg-dark:       var(--bg-dark);
+    --color-surface:       var(--surface);
+    --color-surface-dark:  var(--surface-dark);
+
+    --color-text:          var(--text);
+    --color-text-dark:     var(--text-dark);
+    --color-muted:         var(--muted);
+
+    --color-success:       var(--success);
+    --color-danger:        var(--danger);
+
+    --radius-brand:        var(--radius);
+
+    --font-sans:           var(--font-body), "Cairo", ui-sans-serif, system-ui, sans-serif;
+    --font-heading:        var(--font-heading), "Cairo", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+    h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-heading), "Cairo", sans-serif;
+        font-weight: 800;
+    }
+
+    [dir="rtl"] body { letter-spacing: 0; }
+
+    ::selection {
+        background: var(--primary);
+        color: var(--primary-fg);
+    }
+}
