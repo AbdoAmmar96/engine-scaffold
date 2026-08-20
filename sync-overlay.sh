@@ -34,6 +34,8 @@ PATHS=(
     "resources/js"
     "resources/views/app.blade.php"
     "routes/web.php"
+    # اختبارات الأدوار والصلاحيات جزء من المنتج مش من بيئة التطوير
+    "tests/Feature"
     "tsconfig.json"
     "vite.config.ts"
     "public/images"

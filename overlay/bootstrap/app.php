@@ -20,9 +20,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'role'       => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'locale'     => \App\Http\Middleware\SetLocale::class,
+            // لوحة التحكم للموظفين بس — العميل بيتحوّل لمساحته
+            'staff'      => \App\Http\Middleware\EnsureStaff::class,
         ]);
 
-        $middleware->redirectGuestsTo('/admin/login');
+        // لوحة التحكم ليها لوجين، والموقع ليه لوجين تاني — الضيف بيروح المناسب له
+        $middleware->redirectGuestsTo(fn (Illuminate\Http\Request $request) => $request->is('admin', 'admin/*')
+            ? route('admin.login')
+            : route('account.login', ['locale' => app()->getLocale()]));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

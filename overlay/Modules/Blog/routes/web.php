@@ -10,7 +10,7 @@ use Modules\Blog\Http\Controllers\PostAdminController;
  |----------------------------------------------------------------------
  */
 
-Route::prefix('admin')->name('admin.')->middleware(['web', 'auth', 'permission:manage content'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['web', 'auth', 'staff', 'permission:manage content'])->group(function () {
     Route::get('posts',           [PostAdminController::class, 'index'])->name('posts.index');
     Route::get('posts/create',    [PostAdminController::class, 'create'])->name('posts.create');
     Route::post('posts',          [PostAdminController::class, 'store'])->name('posts.store');

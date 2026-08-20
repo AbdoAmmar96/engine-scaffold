@@ -1,5 +1,6 @@
 import { Link, usePage } from "@inertiajs/react";
 import { ArrowLeft, Bath, BedDouble, MapPin, Ruler } from "lucide-react";
+import FavoriteButton from "@/Components/site/FavoriteButton";
 import type { ReactNode } from "react";
 import type { Property, SharedProps } from "@/lib/types";
 
@@ -85,7 +86,12 @@ export default function PropertyCard({ p, ar, wa }: { p: Property; ar: boolean; 
         );
 
     return (
-        <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-bg transition duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-[0_12px_30px_rgba(11,18,32,0.07)]">
+        <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-bg transition duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-[0_12px_30px_rgba(11,18,32,0.07)]">
+            {/* بره اللينك: <button> جوه <a> مش HTML صالح */}
+            <div className="absolute end-3 top-3 z-10">
+                <FavoriteButton propertyId={p.id} />
+            </div>
+
             {shell(body)}
 
             {wa && (

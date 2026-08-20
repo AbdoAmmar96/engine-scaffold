@@ -6,6 +6,21 @@ export interface AuthUser {
     email: string;
     /** صلاحيات المستخدم — بتحدد اللي بيظهر في سايدبار اللوحة */
     can: string[];
+    /** بيفتح لوحة التحكم؟ العميل لأ — بيشوف «حسابي» بدلها */
+    staff: boolean;
+    /** أرقام الوحدات المحفوظة — عشان القلب يطلع مليان من أول رندر */
+    favorites: number[];
+}
+
+/** طلب في صفحة «طلباتي» */
+export interface AccountRequest {
+    id: number;
+    subject: string;
+    /** رابط الوحدة/المشروع، أو null لو استفسار عام */
+    link: string | null;
+    message: string;
+    status: { label: string; tone: string };
+    date: string;
 }
 
 /** لينك في قائمة الهيدر أو الفوتر — بيتدار من /admin/menus */

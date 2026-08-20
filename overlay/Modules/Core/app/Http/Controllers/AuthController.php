@@ -32,6 +32,11 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
+        // العميل ممكن يجرّب لوجين اللوحة — بنوديه مساحته بدل شاشة فاضية و403ات
+        if (! $request->user()->isStaff()) {
+            return redirect()->route('account.index', ['locale' => app()->getLocale()]);
+        }
+
         return redirect()->intended(route('admin.dashboard'));
     }
 

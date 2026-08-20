@@ -2,6 +2,7 @@
 
 namespace Modules\Compounds\Models;
 
+use App\Models\User;
 use App\Support\Bilingual;
 use App\Support\Sluggable;
 use Illuminate\Database\Eloquent\Collection;
@@ -19,6 +20,7 @@ use Modules\Properties\Models\Property;
  * @property string|null $name_en
  * @property string|null $slug
  * @property int|null $developer_id
+ * @property int|null $owner_id
  * @property int|null $location_id
  * @property string|null $description
  * @property string|null $description_en
@@ -37,6 +39,7 @@ use Modules\Properties\Models\Property;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Developer|null $developer
+ * @property-read User|null $owner
  * @property-read Location|null $location
  * @property-read Collection<int, Property> $properties
  */
@@ -45,7 +48,7 @@ class Compound extends Model
     use Bilingual, Sluggable;
 
     protected $fillable = [
-        'name', 'name_en', 'slug', 'developer_id', 'location_id', 'description', 'description_en',
+        'name', 'name_en', 'slug', 'developer_id', 'owner_id', 'location_id', 'description', 'description_en',
         'features', 'features_en',
         'starting_price', 'down_payment', 'installment_years', 'installment_years_en',
         'delivery', 'image', 'gallery', 'is_new', 'sort', 'is_active',
@@ -66,6 +69,12 @@ class Compound extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
+    }
+
+    /** الشركة صاحبة المشروع — null يعني مشروع المنصّة */
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_id');
     }
 
     public function properties(): HasMany

@@ -2,6 +2,7 @@
 
 namespace Modules\Compounds\Http\Controllers;
 
+use App\Support\OwnedResource;
 use App\Support\ResourceController;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
@@ -11,6 +12,8 @@ use Modules\Locations\Models\Location;
 
 class CompoundAdminController extends ResourceController
 {
+    use OwnedResource;
+
     protected function modelClass(): string { return Compound::class; }
     protected function key(): string { return 'compounds'; }
 
@@ -20,23 +23,25 @@ class CompoundAdminController extends ResourceController
     }
 
     protected function searchable(): array { return ['name', 'name_en']; }
-    protected function with(): array { return ['developer', 'location']; }
+    protected function with(): array { return ['developer', 'location', 'owner']; }
 
     protected function columns(): array
     {
-        return [
+        return array_filter([
             'name' => 'الكمبوند',
             'developer.name' => 'المطوّر',
             'location.name' => 'المنطقة',
+            'owner.name' => self::actorSeesEverything() ? 'الحساب المالك' : null,
             'starting_price' => 'يبدأ من',
             'delivery' => 'التسليم',
             'is_active' => 'مفعّل',
-        ];
+        ]);
     }
 
     protected function fields(): array
     {
         return [
+            ...$this->ownerField('الشركة المالكة'),
             ['name' => 'name',           'label' => 'الاسم (عربي)',      'type' => 'text', 'required' => true],
             ['name' => 'name_en',        'label' => 'الاسم (إنجليزي)',   'type' => 'text'],
             ['name' => 'slug',           'label' => 'رابط الصفحة',       'type' => 'text', 'hint' => 'سيبه فاضي يتولّد من الاسم — /ar/compounds/<الرابط>'],
@@ -61,7 +66,7 @@ class CompoundAdminController extends ResourceController
 
     protected function rules(?int $id): array
     {
-        return [
+        return $this->ownerRules() + [
             // الـ id بيوصل من الفورم، فلازم يتأكد إنه موجود فعلًا
             'developer_id' => ['nullable', 'integer', 'exists:developers,id'],
             'location_id' => ['nullable', 'integer', 'exists:locations,id'],
@@ -72,14 +77,27 @@ class CompoundAdminController extends ResourceController
         ];
     }
 
-    /** الرابط بيتولّد من الاسم لو الأدمن سابه فاضي */
+    /** الرابط بيتولّد من الاسم، والملكية بتتفرض من السيرفر لغير الأدمن */
     protected function transform(array $data, ?Model $model): array
     {
         if (blank($data['slug'] ?? null)) {
             $data['slug'] = Compound::buildSlug($data['name'], $data['name_en'] ?? null, $model ? (int) $model->getKey() : null);
         }
 
-        return $data;
+        return $this->applyOwner($data, $model);
+    }
+
+    /**
+     * المشروع اللي عليه وحدات مايتمسحش — الوحدات هتفضل معلّقة على مشروع مش موجود.
+     */
+    protected function guardDelete(Model $model): ?string
+    {
+        /** @var Compound $model */
+        $units = $model->properties()->count();
+
+        return $units > 0
+            ? "المشروع ده عليه {$units} وحدة — انقلهم أو امسحهم الأول."
+            : null;
     }
 
     private function options(string $model): array

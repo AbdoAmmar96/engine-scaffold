@@ -10,7 +10,7 @@ use Modules\Developers\Http\Controllers\DeveloperAdminController;
  |----------------------------------------------------------------------
  */
 
-Route::prefix('admin')->name('admin.')->middleware(['web', 'auth', 'permission:manage catalog'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['web', 'auth', 'staff', 'permission:manage catalog'])->group(function () {
     Route::get('developers',                [DeveloperAdminController::class, 'index'])->name('developers.index');
     Route::get('developers/create',         [DeveloperAdminController::class, 'create'])->name('developers.create');
     Route::post('developers',               [DeveloperAdminController::class, 'store'])->name('developers.store');

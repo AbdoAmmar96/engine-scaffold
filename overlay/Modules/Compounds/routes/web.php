@@ -10,7 +10,7 @@ use Modules\Compounds\Http\Controllers\CompoundAdminController;
  |----------------------------------------------------------------------
  */
 
-Route::prefix('admin')->name('admin.')->middleware(['web', 'auth', 'permission:manage catalog'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['web', 'auth', 'staff', 'permission:manage catalog|manage projects'])->group(function () {
     Route::get('compounds',                [CompoundAdminController::class, 'index'])->name('compounds.index');
     Route::get('compounds/create',         [CompoundAdminController::class, 'create'])->name('compounds.create');
     Route::post('compounds',               [CompoundAdminController::class, 'store'])->name('compounds.store');

@@ -210,6 +210,37 @@ Route::prefix('{locale}')
             ]);
         })->name('blog.show');
 
+        /* ---------- حساب العميل ---------- */
+        // التسجيل العام بيطلّع دور customer بس — الوسطاء والشركات بيتعملوا من اللوحة
+        Route::middleware('guest')->group(function () {
+            Route::get('login', [\Modules\Core\Http\Controllers\AccountAuthController::class, 'showLogin'])
+                ->name('account.login');
+            Route::post('login', [\Modules\Core\Http\Controllers\AccountAuthController::class, 'login'])
+                ->middleware('throttle:5,1')->name('account.login.store');
+
+            Route::get('register', [\Modules\Core\Http\Controllers\AccountAuthController::class, 'showRegister'])
+                ->name('account.register');
+            Route::post('register', [\Modules\Core\Http\Controllers\AccountAuthController::class, 'register'])
+                ->middleware('throttle:5,1')->name('account.register.store');
+        });
+
+        Route::middleware('auth')->group(function () {
+            Route::post('logout', [\Modules\Core\Http\Controllers\AccountAuthController::class, 'logout'])
+                ->name('account.logout');
+
+            Route::get('account', [\Modules\Core\Http\Controllers\AccountController::class, 'index'])
+                ->name('account.index');
+            Route::get('account/favorites', [\Modules\Core\Http\Controllers\AccountController::class, 'favorites'])
+                ->name('account.favorites');
+            Route::get('account/requests', [\Modules\Core\Http\Controllers\AccountController::class, 'requests'])
+                ->name('account.requests');
+            Route::put('account', [\Modules\Core\Http\Controllers\AccountController::class, 'update'])
+                ->name('account.update');
+
+            Route::post('favorites/{property}', [\Modules\Core\Http\Controllers\FavoriteController::class, 'toggle'])
+                ->whereNumber('property')->name('account.favorites.toggle');
+        });
+
         // استقبال طلبات فورم "اتصل بنا" → موديول Leads
         Route::post('/leads', [\Modules\Leads\Http\Controllers\LeadController::class, 'store'])
             ->middleware('throttle:8,1')

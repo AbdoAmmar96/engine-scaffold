@@ -2,6 +2,7 @@
 
 namespace Modules\Properties\Http\Controllers;
 
+use App\Support\OwnedResource;
 use App\Support\ResourceController;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
@@ -11,6 +12,8 @@ use Modules\Properties\Models\Property;
 
 class PropertyAdminController extends ResourceController
 {
+    use OwnedResource;
+
     protected function modelClass(): string { return Property::class; }
     protected function key(): string { return 'properties'; }
 
@@ -20,29 +23,32 @@ class PropertyAdminController extends ResourceController
     }
 
     protected function searchable(): array { return ['title', 'title_en', 'ref']; }
-    protected function with(): array { return ['location', 'compound']; }
+    protected function with(): array { return ['location', 'compound', 'owner']; }
 
     protected function columns(): array
     {
-        return [
+        return array_filter([
             'ref' => 'الكود',
             'title' => 'العقار',
             'location.name' => 'المنطقة',
+            // عمود المالك مالوش لازمة للوسيط — كله بتاعه أصلًا
+            'owner.name' => self::actorSeesEverything() ? 'الحساب المالك' : null,
             'purpose' => 'الغرض',
             'price' => 'السعر',
             'is_active' => 'مفعّل',
-        ];
+        ]);
     }
 
     protected function fields(): array
     {
         return [
+            ...$this->ownerField(),
             ['name' => 'title',       'label' => 'العنوان (عربي)',    'type' => 'text', 'required' => true],
             ['name' => 'title_en',    'label' => 'العنوان (إنجليزي)', 'type' => 'text'],
             ['name' => 'slug',        'label' => 'رابط الصفحة',       'type' => 'text', 'hint' => 'سيبه فاضي يتولّد من العنوان — /ar/properties/<الرابط>'],
             ['name' => 'ref',         'label' => 'الكود',             'type' => 'text', 'hint' => 'مثال: XH-1001'],
             ['name' => 'location_id', 'label' => 'المنطقة',           'type' => 'select', 'options' => $this->options(Location::class, 'name')],
-            ['name' => 'compound_id', 'label' => 'الكمبوند',          'type' => 'select', 'options' => $this->options(Compound::class, 'name')],
+            ['name' => 'compound_id', 'label' => 'الكمبوند',          'type' => 'select', 'options' => $this->compoundOptions()],
             ['name' => 'purpose',     'label' => 'الغرض',             'type' => 'select', 'options' => [
                 ['value' => 'sale', 'label' => 'بيع'],
                 ['value' => 'rent', 'label' => 'إيجار'],
@@ -69,10 +75,11 @@ class PropertyAdminController extends ResourceController
 
     protected function rules(?int $id): array
     {
-        return [
+        return $this->ownerRules() + [
             // الـ id بيوصل من الفورم، فلازم يتأكد إنه موجود فعلًا
             'location_id' => ['nullable', 'integer', 'exists:locations,id'],
-            'compound_id' => ['nullable', 'integer', 'exists:compounds,id'],
+            // Rule::in على المشاريع اللي من حقه — مايقدرش يعلّق وحدته على مشروع غيره
+            'compound_id' => ['nullable', 'integer', Rule::in(array_column($this->compoundOptions(), 'value'))],
             'ref' => ['nullable', 'string', 'max:40', Rule::unique('properties', 'ref')->ignore($id)],
             'slug' => ['nullable', 'string', 'max:180', 'regex:/^[\\p{L}\\p{N}-]+$/u', Rule::unique('properties', 'slug')->ignore($id)],
             'description' => ['nullable', 'string', 'max:5000'],
@@ -83,14 +90,29 @@ class PropertyAdminController extends ResourceController
         ];
     }
 
-    /** الرابط بيتولّد من العنوان لو الأدمن سابه فاضي */
+    /** الملكية بتتفرض من السيرفر لغير الأدمن */
     protected function transform(array $data, ?Model $model): array
     {
+        $data = parent::transform($data, $model);
+
         if (blank($data['slug'] ?? null)) {
             $data['slug'] = Property::buildSlug($data['title'], $data['title_en'] ?? null, $model ? (int) $model->getKey() : null);
         }
 
-        return $data;
+        return $this->applyOwner($data, $model);
+    }
+
+    /** الشركة بتشوف مشاريعها بس في قائمة الكمبوندات */
+    private function compoundOptions(): array
+    {
+        $user = self::actor();
+
+        return Compound::query()
+            ->when(! self::actorSeesEverything(), fn ($q) => $q->where('owner_id', $user?->id ?? 0))
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Compound $c) => ['value' => (string) $c->id, 'label' => $c->name])
+            ->all();
     }
 
     private function options(string $model, string $col): array

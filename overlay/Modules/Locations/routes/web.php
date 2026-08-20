@@ -10,7 +10,7 @@ use Modules\Locations\Http\Controllers\LocationAdminController;
  |----------------------------------------------------------------------
  */
 
-Route::prefix('admin')->name('admin.')->middleware(['web', 'auth', 'permission:manage catalog'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['web', 'auth', 'staff', 'permission:manage catalog'])->group(function () {
     Route::get('locations',                [LocationAdminController::class, 'index'])->name('locations.index');
     Route::get('locations/create',         [LocationAdminController::class, 'create'])->name('locations.create');
     Route::post('locations',               [LocationAdminController::class, 'store'])->name('locations.store');

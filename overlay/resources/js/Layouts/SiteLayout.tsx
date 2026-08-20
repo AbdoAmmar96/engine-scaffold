@@ -1,5 +1,5 @@
 import { Head, Link, usePage } from "@inertiajs/react";
-import { Mail, Menu, MessageCircle, Phone, X as Close } from "lucide-react";
+import { LayoutDashboard, Mail, Menu, MessageCircle, Phone, UserRound, X as Close } from "lucide-react";
 import { Facebook, Instagram, Linkedin, Snapchat, Tiktok, X, Youtube } from "@/Components/site/SocialIcons";
 import { useState, type ReactNode } from "react";
 import type { MenuLink, SharedProps } from "@/lib/types";
@@ -15,7 +15,7 @@ const socialIcons = [
 ] as const;
 
 export default function SiteLayout({ children }: { children: ReactNode }) {
-    const { settings, locale, menu, meta } = usePage<SharedProps>().props;
+    const { settings, locale, menu, meta, auth } = usePage<SharedProps>().props;
     const general = settings.general ?? {};
     const branding = settings.branding ?? {};
     const contact = settings.contact ?? {};
@@ -163,6 +163,25 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
                             </a>
                         )}
 
+                        {/* الموظف بيروح اللوحة، العميل بيروح حسابه، والضيف بيسجّل */}
+                        {auth.user ? (
+                            <Link
+                                href={auth.user.staff ? "/admin" : `/${locale}/account`}
+                                className="hidden items-center gap-2 rounded-brand border border-gray-200 px-4 py-2 text-sm font-extrabold text-secondary transition hover:border-primary hover:text-primary sm:flex"
+                            >
+                                {auth.user.staff ? <LayoutDashboard size={15} /> : <UserRound size={15} />}
+                                {auth.user.staff ? (ar ? "لوحة التحكم" : "Dashboard") : ar ? "حسابي" : "My account"}
+                            </Link>
+                        ) : (
+                            <Link
+                                href={`/${locale}/login`}
+                                className="hidden items-center gap-2 rounded-brand border border-gray-200 px-4 py-2 text-sm font-extrabold text-secondary transition hover:border-primary hover:text-primary sm:flex"
+                            >
+                                <UserRound size={15} />
+                                {ar ? "دخول" : "Sign in"}
+                            </Link>
+                        )}
+
                         <Link
                             href={`/${locale}/contact`}
                             className="hidden rounded-brand bg-primary px-5 py-2.5 text-sm font-extrabold text-primary-fg transition hover:bg-primary-hover sm:block"
@@ -193,6 +212,25 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
                                 () => setOpen(false),
                             ),
                         )}
+
+                        <Link
+                            href={auth.user ? (auth.user.staff ? "/admin" : `/${locale}/account`) : `/${locale}/login`}
+                            onClick={() => setOpen(false)}
+                            className="mt-1 flex items-center gap-2 rounded-xl border-t border-gray-100 px-4 py-3 text-sm font-extrabold text-secondary"
+                        >
+                            <UserRound size={15} className="text-primary" />
+                            {auth.user
+                                ? auth.user.staff
+                                    ? ar
+                                        ? "لوحة التحكم"
+                                        : "Dashboard"
+                                    : ar
+                                      ? "حسابي"
+                                      : "My account"
+                                : ar
+                                  ? "دخول / حساب جديد"
+                                  : "Sign in / Register"}
+                        </Link>
                     </nav>
                 )}
             </header>

@@ -31,8 +31,12 @@ class HandleInertiaRequests extends Middleware
 
             'auth' => [
                 // can = صلاحيات المستخدم، عشان اللوحة تخفي اللي مش مسموح له بيه
+                // staff = بيفتح لوحة التحكم؟ العميل لأ، فبيشوف لينك «حسابي» بدلها
+                // favorites = أرقام الوحدات المحفوظة، عشان القلب يطلع مليان من أول رندر
                 'user' => $request->user() ? $request->user()->only('id', 'name', 'email') + [
                     'can' => $request->user()->getAllPermissions()->pluck('name')->all(),
+                    'staff' => $request->user()->isStaff(),
+                    'favorites' => $request->user()->favorites()->pluck('properties.id')->all(),
                 ] : null,
             ],
 

@@ -26,8 +26,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->name('login.store');
     });
 
-    // أي حد مسجّل بيدخل اللوحة، وكل قسم بعد كده على صلاحيته
-    Route::middleware('auth')->group(function () {
+    // موظف مسجّل بيدخل اللوحة، وكل قسم بعد كده على صلاحيته
+    Route::middleware(['auth', 'staff'])->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
         Route::post('logout', [AuthController::class, 'destroy'])->name('logout');
 

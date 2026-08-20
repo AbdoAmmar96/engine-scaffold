@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -75,9 +76,25 @@ abstract class ResourceController extends Controller
         return null;
     }
 
+    /**
+     * فلتر الملكية. بيتطبّق على القائمة **وعلى أي وصول بالـ id** —
+     * من غير التاني ده الوسيط بيكتب /admin/properties/5/edit في العنوان
+     * ويعدّل وحدة مش بتاعته حتى لو القائمة مبتوريهاش.
+     */
+    protected function scope(Builder $query): Builder
+    {
+        return $query;
+    }
+
+    /** الصف مع تطبيق الـ scope — 404 لو مش من حقه */
+    protected function findModel(int $id): Model
+    {
+        return $this->scope($this->modelClass()::query())->findOrFail($id);
+    }
+
     public function index(Request $request): Response
     {
-        $query = $this->modelClass()::query()->with($this->with());
+        $query = $this->scope($this->modelClass()::query())->with($this->with());
 
         if ($q = trim((string) $request->get('q'))) {
             $query->where(function ($sub) use ($q) {
@@ -112,7 +129,7 @@ abstract class ResourceController extends Controller
 
     public function edit(int $id): Response
     {
-        $item = $this->modelClass()::findOrFail($id);
+        $item = $this->findModel($id);
 
         return Inertia::render('Admin/Resource/Form', [
             'resource' => $this->schema(),
@@ -134,7 +151,7 @@ abstract class ResourceController extends Controller
 
     public function update(Request $request, int $id): RedirectResponse
     {
-        $model = $this->modelClass()::findOrFail($id);
+        $model = $this->findModel($id);
         $data = $this->validated($request, $id);
 
         $model->update($this->transform($data, $model));
@@ -147,7 +164,7 @@ abstract class ResourceController extends Controller
 
     public function destroy(int $id): RedirectResponse
     {
-        $model = $this->modelClass()::findOrFail($id);
+        $model = $this->findModel($id);
 
         if ($reason = $this->guardDelete($model)) {
             return back()->with('error', $reason);

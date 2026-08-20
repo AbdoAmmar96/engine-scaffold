@@ -17,8 +17,10 @@
 
     // ميتا الصفحة الحالية جاية من الراوت (App\Support\Seo)، وبتقع على الإعدادات العامة
     $meta        = $page['props']['meta'] ?? [];
-    $title       = $meta['title'] ?? ($seo['meta_title'] ?: ($general['site_name'] ?? config('app.name')));
-    $description = $meta['description'] ?? ($seo['meta_description'] ?: ($general['tagline'] ?? ''));
+    // ?? قبل ?: مطلوبة: مجموعة seo بتبقى فاضية على تثبيت جديد، وكل صفحة
+    // مالهاش prop اسمه meta (كل شاشات اللوحة) كانت بتقع 500 من غيرها
+    $title       = $meta['title'] ?? (($seo['meta_title'] ?? '') ?: ($general['site_name'] ?? config('app.name')));
+    $description = $meta['description'] ?? (($seo['meta_description'] ?? '') ?: ($general['tagline'] ?? ''));
     $canonical   = $meta['canonical'] ?? url()->current();
     $ogImage     = $meta['image'] ?? url($settings->get('branding', 'logo_path', '/images/logo.png'));
 @endphp

@@ -5,15 +5,14 @@ namespace Modules\Core\Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
-use Spatie\Permission\Models\Role;
 
 class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        foreach (['admin', 'editor', 'agent'] as $role) {
-            Role::findOrCreate($role, 'web');
-        }
+        // الأدوار مصدرها RolePermissionSeeder (بيتشغّل قبل ده).
+        // كان فيه هنا findOrCreate لـ 'agent' فكان بيرجّعه بعد ما السيدر التاني
+        // يحوّله لـ broker ويمسحه — يعني الدور القديم عمره ما كان بيموت.
 
         $email = env('ADMIN_EMAIL', 'admin@bp-eg.com');
         $exists = User::where('email', $email)->exists();

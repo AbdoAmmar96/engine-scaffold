@@ -12,6 +12,7 @@ class CoreDatabaseSeeder extends Seeder
             SettingsSeeder::class,
             RolePermissionSeeder::class,
             AdminUserSeeder::class,
+            DemoAccountsSeeder::class,
             MenuSeeder::class,
         ]);
     }

@@ -10,6 +10,7 @@ import {
     Wallet,
 } from "lucide-react";
 import Gallery from "@/Components/site/Gallery";
+import LeadForm from "@/Components/site/LeadForm";
 import PageHero from "@/Components/site/PageHero";
 import PropertyCard from "@/Components/site/PropertyCard";
 import Reveal from "@/Components/site/Reveal";
@@ -35,6 +36,8 @@ const copy = {
         wa: "استفسر واتساب",
         call: "اتصل بنا",
         form: "اطلب عرض الأسعار",
+        formTitle: "اطلب عرض أسعار المشروع",
+        formNote: "الطلب بيروح مباشرة للشركة المسؤولة عن المشروع.",
         note: "أنظمة السداد وتواريخ التسليم كما وردت من المطوّر، وبتتأكّد في العقد.",
     },
     en: {
@@ -55,6 +58,8 @@ const copy = {
         wa: "Ask on WhatsApp",
         call: "Call us",
         form: "Request a quote",
+        formTitle: "Request a project quote",
+        formNote: "Your request goes straight to the company behind this project.",
         note: "Payment plans and delivery dates are as stated by the developer, and confirmed in the contract.",
     },
 };
@@ -171,6 +176,12 @@ export default function CompoundPage({ compound, units }: { compound: CompoundDe
                             </Reveal>
                         )}
 
+                        <div id="lead" className="scroll-mt-24">
+                            <h2 className="mb-1 text-xl font-extrabold text-secondary">{t.formTitle}</h2>
+                            <p className="mb-4 text-[13px] text-muted">{t.formNote}</p>
+                            <LeadForm compoundId={compound.id} source="compound" subject={compound.name} />
+                        </div>
+
                         <Link
                             href={`/${locale}/compounds`}
                             className="flex w-fit items-center gap-2 text-[13px] font-extrabold text-secondary transition hover:text-primary"
@@ -212,12 +223,12 @@ export default function CompoundPage({ compound, units }: { compound: CompoundDe
                                     </a>
                                 )}
 
-                                <Link
-                                    href={`/${locale}/contact`}
+                                <a
+                                    href="#lead"
                                     className="flex items-center justify-center gap-2 rounded-brand border border-gray-200 py-3 text-[13px] font-extrabold text-secondary transition hover:border-primary hover:text-primary"
                                 >
                                     {t.form}
-                                </Link>
+                                </a>
                             </div>
                         </div>
                     </aside>

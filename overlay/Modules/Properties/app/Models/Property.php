@@ -2,6 +2,7 @@
 
 namespace Modules\Properties\Models;
 
+use App\Models\User;
 use App\Support\Bilingual;
 use App\Support\Sluggable;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +18,7 @@ use Modules\Locations\Models\Location;
  * @property string|null $slug
  * @property int|null $location_id
  * @property int|null $compound_id
+ * @property int|null $owner_id
  * @property string $purpose
  * @property string|null $type
  * @property string|null $description
@@ -37,6 +39,7 @@ use Modules\Locations\Models\Location;
  * @property Carbon|null $updated_at
  * @property-read Location|null $location
  * @property-read Compound|null $compound
+ * @property-read User|null $owner
  */
 class Property extends Model
 {
@@ -61,7 +64,7 @@ class Property extends Model
     ];
 
     protected $fillable = [
-        'title', 'title_en', 'slug', 'location_id', 'compound_id', 'purpose', 'type',
+        'title', 'title_en', 'slug', 'location_id', 'compound_id', 'owner_id', 'purpose', 'type',
         'description', 'description_en', 'features', 'features_en',
         'price', 'price_en', 'beds', 'baths', 'size', 'ref', 'image', 'gallery', 'sort', 'is_active',
     ];
@@ -84,6 +87,12 @@ class Property extends Model
     public function compound(): BelongsTo
     {
         return $this->belongsTo(Compound::class);
+    }
+
+    /** الوسيط أو الشركة صاحبة الوحدة — null يعني وحدة المنصّة */
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_id');
     }
 
     /** النوع باللغة المطلوبة — متخزّن بالعربي دايمًا */

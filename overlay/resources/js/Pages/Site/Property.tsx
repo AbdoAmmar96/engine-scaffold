@@ -14,7 +14,9 @@ import {
     Tag,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import FavoriteButton from "@/Components/site/FavoriteButton";
 import Gallery from "@/Components/site/Gallery";
+import LeadForm from "@/Components/site/LeadForm";
 import PageHero from "@/Components/site/PageHero";
 import PropertyCard from "@/Components/site/PropertyCard";
 import Reveal from "@/Components/site/Reveal";
@@ -42,6 +44,8 @@ const copy = {
         wa: "استفسر واتساب",
         call: "اتصل بنا",
         form: "اطلب معاينة",
+        formTitle: "اطلب معاينة الوحدة",
+        formNote: "الطلب بيروح مباشرة للمسؤول عن الوحدة دي.",
         note: "الأسعار والمساحات مذكورة كما وردت من المطوّر/المالك، وبتتأكّد وقت المعاينة.",
         projectCta: "شوف المشروع كامل",
         meter: "م²",
@@ -66,6 +70,8 @@ const copy = {
         wa: "Ask on WhatsApp",
         call: "Call us",
         form: "Request a viewing",
+        formTitle: "Request a viewing",
+        formNote: "Your request goes straight to whoever handles this unit.",
         note: "Prices and sizes are stated as provided by the developer/owner, and confirmed at viewing.",
         projectCta: "See the full project",
         meter: "m²",
@@ -207,6 +213,12 @@ export default function PropertyPage({
                             </Reveal>
                         )}
 
+                        <div id="lead" className="scroll-mt-24">
+                            <h2 className="mb-1 text-xl font-extrabold text-secondary">{t.formTitle}</h2>
+                            <p className="mb-4 text-[13px] text-muted">{t.formNote}</p>
+                            <LeadForm propertyId={property.id} source="property" subject={property.title} />
+                        </div>
+
                         <Link
                             href={`/${locale}/properties`}
                             className="flex w-fit items-center gap-2 text-[13px] font-extrabold text-secondary transition hover:text-primary"
@@ -251,12 +263,18 @@ export default function PropertyPage({
                                     </a>
                                 )}
 
-                                <Link
-                                    href={`/${locale}/contact`}
+                                <a
+                                    href="#lead"
                                     className="flex items-center justify-center gap-2 rounded-brand border border-gray-200 py-3 text-[13px] font-extrabold text-secondary transition hover:border-primary hover:text-primary"
                                 >
                                     {t.form}
-                                </Link>
+                                </a>
+
+                                <FavoriteButton
+                                    propertyId={property.id}
+                                    label
+                                    className="flex items-center justify-center gap-2 rounded-brand border border-gray-200 py-3 text-secondary transition hover:border-primary hover:text-primary"
+                                />
                             </div>
 
                             <p className="mt-4 text-[11px] leading-[1.9] text-muted">{t.note}</p>
