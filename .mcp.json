@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "laravel-boost": {
+      "command": "php",
+      "args": [
+        "/media/abdo-ammar/D8C2434DC2432F56/BSN projects/engine-scaffold/engine/artisan",
+        "boost:mcp"
+      ]
+    }
+  }
+}
