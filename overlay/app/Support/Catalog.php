@@ -4,6 +4,7 @@ namespace App\Support;
 
 use Modules\Blog\Models\Post;
 use Modules\Compounds\Models\Compound;
+use Modules\Developers\Models\Developer;
 use Modules\Locations\Models\Location;
 use Modules\Properties\Models\Property;
 
@@ -95,6 +96,22 @@ class Catalog
         return $rows->map(fn (Compound $c) => $c->toCard($locale))->all();
     }
 
+    /** إحصاءات الهيرو — معدودة من الداتابيز مش مكتوبة بالإيد */
+    public static function stats(string $locale): array
+    {
+        $ar = $locale !== 'en';
+
+        $counts = [
+            [Property::where('is_active', true)->count(), $ar ? 'عقار' : 'properties'],
+            [Compound::where('is_active', true)->count(), $ar ? 'كمبوند' : 'compounds'],
+            [Developer::count(), $ar ? 'مطوّر' : 'developers'],
+        ];
+
+        return collect($counts)
+            ->map(fn ($c) => ['value' => (string) $c[0], 'suffix' => '', 'label' => $c[1]])
+            ->all();
+    }
+
     /** الفلاتر المسموحة من الـ query string، منضّفة */
     public static function filters(\Illuminate\Http\Request $request): array
     {
@@ -157,6 +174,11 @@ class Catalog
         $base['types'] = $locale === 'en'
             ? array_values(Property::TYPES)
             : array_keys(Property::TYPES);
+
+        // الأرقام دي كانت ثابتة في الكود (6000 عقار · 420 كمبوند · 161 مطوّر)
+        // وهي ادعاءات مش صحيحة. بقت محسوبة من الجداول — بتكبر لوحدها
+        // وبتفضل صح مهما اتغيّر المحتوى.
+        $base['stats'] = self::stats($locale);
 
         $locations = Location::where('is_active', true)->orderBy('sort')->orderBy('id')->get();
 

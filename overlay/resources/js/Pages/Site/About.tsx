@@ -18,12 +18,10 @@ const copy = {
             "والوحدة مبتدخلش قائمتنا غير بعد ثلاث خطوات: مراجعة الأوراق والتسجيل، ومعاينة على الأرض، ومطابقة السعر بآخر بيوعات المنطقة. أي وحدة بتسقط في خطوة، بتخرج من القائمة.",
         pledge3:
             "وبعد التعاقد الشغل مبيقفش — فريق ما بعد البيع بيتابع معاك الأقساط وتسليم الوحدة وتوثيق أي تعديل مع المطوّر.",
-        stats: [
-            ["4780", "عميل أتمّ التعاقد"],
-            ["46", "فرد في الفريق"],
-            ["420", "كمبوند شريك"],
-            ["3", "فروع في مصر"],
-        ],
+        clientsLabel: "عميل أتمّ التعاقد",
+        teamLabel: "فرد في الفريق",
+        compoundsLabel: "كمبوند في القائمة",
+        developersLabel: "مطوّر شريك",
         milestonesTitle: "المحطات",
         teamTitle: "الفريق",
     },
@@ -39,20 +37,31 @@ const copy = {
             "And a unit only enters our list after three steps: paperwork and registration review, an on-site viewing, and a price check against the area's latest sales. Any unit that fails a step leaves the list.",
         pledge3:
             "After the contract the work does not stop — the after-sales team follows up on instalments, the handover, and documenting any change with the developer.",
-        stats: [
-            ["4780", "Clients contracted"],
-            ["46", "Team members"],
-            ["420", "Partner compounds"],
-            ["3", "Branches in Egypt"],
-        ],
+        clientsLabel: "Clients contracted",
+        teamLabel: "Team members",
+        compoundsLabel: "Compounds listed",
+        developersLabel: "Partner developers",
         milestonesTitle: "Milestones",
         teamTitle: "The team",
     },
 };
 
-export default function About({ milestones, team }: { milestones: Milestone[]; team: TeamMember[] }) {
-    const { locale } = usePage<SharedProps>().props;
+export default function About({ milestones, team, stats: counts0 }: { milestones: Milestone[]; team: TeamMember[]; stats: { value: string; label: string }[] }) {
+    const { locale, settings } = usePage<SharedProps>().props;
     const t = copy[locale] ?? copy.ar;
+
+    // الكمبوندات والمطوّرين معدودين من الداتابيز، والعملاء وحجم الفريق من
+    // الإعدادات (فاضيين افتراضيًا). أي رقم مش متوفّر بيختفي بدل ما يتلفّق.
+    const counts = (counts0 ?? []).map((c) => c.value);
+    const pair = (value: string | undefined, label: string): [string, string][] =>
+        value ? [[value, label]] : [];
+
+    const stats: [string, string][] = [
+        ...pair(settings.general?.clients_served, t.clientsLabel),
+        ...pair(settings.general?.team_size, t.teamLabel),
+        ...pair(counts[1], t.compoundsLabel),
+        ...pair(counts[2], t.developersLabel),
+    ];
 
     return (
         <SiteLayout>
@@ -76,10 +85,11 @@ export default function About({ milestones, team }: { milestones: Milestone[]; t
                 </div>
             </section>
 
-            {/* ---------- الأرقام ---------- */}
+            {/* ---------- الأرقام (بتختفي كلها لو مفيش ولا رقم متوفّر) ---------- */}
+            {stats.length > 0 && (
             <section className="bg-surface px-4 py-14">
                 <div className="mx-auto grid max-w-7xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                    {t.stats.map(([value, label], i) => (
+                    {stats.map(([value, label], i) => (
                         <Reveal key={label} delay={i * 90}>
                             <div className="rounded-2xl border border-gray-100 bg-bg p-6 text-center">
                                 <div className="text-[32px] font-black text-primary" dir="ltr">
@@ -91,6 +101,7 @@ export default function About({ milestones, team }: { milestones: Milestone[]; t
                     ))}
                 </div>
             </section>
+            )}
 
             {/* ---------- المحطات ---------- */}
             <section className="bg-bg px-4 py-14">

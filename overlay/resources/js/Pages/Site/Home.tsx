@@ -22,11 +22,9 @@ const copy = {
         sub: "منصة عقارية مصرية بتجمع وحدات معتمدة في القاهرة الجديدة والعاصمة الإدارية والإسكندرية، مع بيانات كاملة عن السعر وأنظمة السداد وموعد التسليم قبل أي معاينة.",
         cta: "اتفرج على العقارات",
         cta2: "الكمبوندات",
-        stats: [
-            ["1240", "وحدة متاحة"],
-            ["38", "كمبوند مسجّل"],
-            ["12", "سنة في السوق"],
-        ],
+        unitsLabel: "وحدة متاحة",
+        compoundsLabel: "كمبوند مسجّل",
+        yearsLabel: "سنة في السوق",
         avgLabel: "متوسط سعر المتر · التجمع",
         avgValue: "EGP 34,500",
         planLabel: "أنظمة تقسيط لحد",
@@ -58,11 +56,9 @@ const copy = {
         sub: "An Egyptian real-estate platform gathering verified units in New Cairo, the New Capital and Alexandria — with full data on price, payment plans and delivery date before any viewing.",
         cta: "Browse properties",
         cta2: "Compounds",
-        stats: [
-            ["1240", "Available units"],
-            ["38", "Registered compounds"],
-            ["12", "Years in market"],
-        ],
+        unitsLabel: "Available units",
+        compoundsLabel: "Registered compounds",
+        yearsLabel: "Years in market",
         avgLabel: "Avg. price / m² · Settlement",
         avgValue: "EGP 34,500",
         planLabel: "Installments up to",
@@ -105,6 +101,22 @@ export default function Home({
     const t = copy[locale] ?? copy.ar;
     const wa = settings.contact?.whatsapp;
     const heroMedia = settings.branding?.hero_media;
+
+    // أرقام حقيقية: الوحدات والكمبوندات معدودة من الداتابيز،
+    // والسنين محسوبة من "سنة التأسيس" في الإعدادات. أي رقم مش متوفّر بيتشال.
+    const founded = Number(settings.general?.founded_year);
+    const years = founded > 1900 ? String(new Date().getFullYear() - founded) : null;
+
+    // searchOptions.stats جاية من Catalog::stats() — إجمالي فعلي مش عدد
+    // الكروت المعروضة (دي محدودة بـ 6 و 3)
+    const totals = Object.fromEntries(searchOptions.stats.map((s) => [s.label, s.value]));
+    const [units, compounds] = [Object.values(totals)[0] ?? "0", Object.values(totals)[1] ?? "0"];
+
+    const stats: [string, string][] = [
+        [units, t.unitsLabel],
+        [compounds, t.compoundsLabel],
+        ...(years ? ([[years, t.yearsLabel]] as [string, string][]) : []),
+    ];
     const processMedia = settings.branding?.process_media;
 
     const sectionTitle = (title: string, sub: string, href: string, allLabel: string) => (
@@ -159,7 +171,7 @@ export default function Home({
                         </div>
 
                         <div className="mt-8 flex flex-wrap items-center gap-6">
-                            {t.stats.map(([value, label], i) => (
+                            {stats.map(([value, label], i) => (
                                 <div key={label} className="flex items-center gap-6">
                                     {i > 0 && <span className="h-10 w-px bg-gray-200" aria-hidden />}
                                     <span className="flex flex-col gap-1">

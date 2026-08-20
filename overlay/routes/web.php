@@ -76,6 +76,7 @@ Route::prefix('{locale}')
         Route::get('/about', fn (string $locale) => Inertia::render('Site/About', [
             'milestones' => \App\Support\DemoContent::milestones($locale),
             'team'       => \App\Support\DemoContent::team($locale),
+            'stats'      => \App\Support\Catalog::stats($locale),
             'meta'       => \App\Support\Seo::page(
                 $locale,
                 $locale === 'en' ? 'About us' : 'من نحن',

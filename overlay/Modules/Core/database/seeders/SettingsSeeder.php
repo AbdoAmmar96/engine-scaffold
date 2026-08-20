@@ -4,6 +4,7 @@ namespace Modules\Core\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Modules\Core\Models\Setting;
+use Modules\Core\Services\SettingsService;
 
 class SettingsSeeder extends Seeder
 {
@@ -14,6 +15,12 @@ class SettingsSeeder extends Seeder
             'general' => [
                 'site_name' => 'المنصة العقارية', // ← الاسم النهائي بيتغير من الداشبورد
                 'tagline'   => 'بوابتك الذكية لعقارات مصر',
+                // أرقام الشركة — بتفضل فاضية لحد ما العميل يدخّل أرقامه الحقيقية،
+                // والأقسام اللي بتستخدمها بتختفي وهي فاضية.
+                // (قبل كده كانت مكتوبة في الكود: 12 سنة · 4780 عميل · 46 فرد)
+                'founded_year'   => '',
+                'clients_served' => '',
+                'team_size'      => '',
             ],
 
             // 🎨 Palette A — "Midnight & Gold" (نسخة فاتحة: الموقع أبيض) + خط Cairo
@@ -34,7 +41,7 @@ class SettingsSeeder extends Seeder
                 'radius'        => '14px',
                 'font_heading'  => 'Cairo',
                 'font_body'     => 'Cairo',
-                'hero_variant'  => 'webgl',
+                'hero_variant'  => 'video',
             ],
 
             // اللوجو الحقيقي متركّب في public/images — والفيديو بيتضاف برابط من الداشبورد
@@ -84,6 +91,14 @@ class SettingsSeeder extends Seeder
                     ['value' => $value, 'is_public' => true]
                 );
             }
+        }
+
+        // بنكتب على الموديل مباشرة، والـ SettingsService كاشه دايم —
+        // من غير المسح ده أي seed على موقع شغّال بيسيب القيم القديمة في الكاش
+        $settings = app(SettingsService::class);
+
+        foreach (array_keys($groups) as $group) {
+            $settings->flush($group);
         }
     }
 }

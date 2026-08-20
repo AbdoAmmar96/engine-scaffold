@@ -29,6 +29,9 @@ class SettingsController extends Controller
         // general
         'site_name'     => 'اسم المنصة',
         'tagline'       => 'الوصف التعريفي',
+        'founded_year'  => 'سنة التأسيس',
+        'clients_served' => 'عدد العملاء المتعاقدين',
+        'team_size'     => 'عدد أفراد الفريق',
         // theme
         'primary'       => 'اللون الأساسي (CTA)',
         'primary_fg'    => 'لون النص فوق الأساسي',
@@ -133,6 +136,9 @@ class SettingsController extends Controller
     /** شرح تحت الحقل لما يكون محتاج توضيح */
     public const HINTS = [
         'whatsapp' => 'بكود الدولة وبدون + أو مسافات — مثال: 201001234567',
+        'founded_year' => 'سنة واحدة زي 2014 — بيتحسب منها «سنة في السوق». سيبها فاضية لو مش عايز تعرضها.',
+        'clients_served' => 'رقم حقيقي بس. سيبها فاضية والرقم مش هيظهر في الموقع.',
+        'team_size' => 'رقم حقيقي بس. سيبها فاضية والرقم مش هيظهر في الموقع.',
         'radius' => 'استدارة زوايا الأزرار والكروت — مثال: 14px',
         'hero_variant' => 'شكل الهيرو في الصفحة الرئيسية.',
         'video_url' => 'ملف من المكتبة أو رابط يوتيوب.',
