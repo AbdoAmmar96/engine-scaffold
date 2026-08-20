@@ -1,69 +1,129 @@
 import { usePage } from "@inertiajs/react";
+import { SearchX } from "lucide-react";
+import { useMemo, useState } from "react";
+import ActiveFilters, { type SearchFilters } from "@/Components/site/ActiveFilters";
+import PageHero from "@/Components/site/PageHero";
 import PropertyCard from "@/Components/site/PropertyCard";
 import Reveal from "@/Components/site/Reveal";
 import SiteLayout from "@/Layouts/SiteLayout";
 import type { Property, SharedProps } from "@/lib/types";
 
-/**
- * Properties v0 — قالب صفحة الليستنج.
- * البيانات تجريبية من DemoContent — المرحلة 4 بتوصلها بموديل Properties
- * وبتشغّل الفلاتر server-side بنفس شكل الـ props.
- */
-export default function Properties({ properties }: { properties: Property[] }) {
+const copy = {
+    ar: {
+        crumb: "عقارات",
+        title: "عقارات للبيع والإيجار",
+        results: (n: number, total: number) =>
+            n === total ? `${total} وحدة متاحة حاليًا بكل المناطق.` : `${n} وحدة من أصل ${total} مطابقة للفلاتر.`,
+        purpose: "الغرض",
+        area: "المنطقة",
+        all: "الكل",
+        emptyTitle: "مفيش نتائج بالفلاتر دي",
+        emptyText: "جرّب توسّع نطاق المنطقة أو تغيّر الغرض.",
+        reset: "امسح الفلاتر",
+    },
+    en: {
+        crumb: "Properties",
+        title: "Properties for sale and rent",
+        results: (n: number, total: number) =>
+            n === total ? `${total} units currently available across all areas.` : `${n} of ${total} units match your filters.`,
+        purpose: "Purpose",
+        area: "Area",
+        all: "All",
+        emptyTitle: "No results with these filters",
+        emptyText: "Try widening the area or changing the purpose.",
+        reset: "Clear filters",
+    },
+};
+
+export default function Properties({ properties, filters }: { properties: Property[]; filters: SearchFilters }) {
     const { locale, settings } = usePage<SharedProps>().props;
     const ar = locale === "ar";
+    const t = copy[locale] ?? copy.ar;
     const wa = settings.contact?.whatsapp;
+
+    const [purpose, setPurpose] = useState<string | null>(null);
+    const [area, setArea] = useState<string | null>(null);
+
+    const purposes = useMemo(() => [...new Set(properties.map((p) => p.purpose))], [properties]);
+    const areas = useMemo(() => [...new Set(properties.map((p) => p.area))], [properties]);
+
+    const filtered = properties.filter(
+        (p) => (!purpose || p.purpose === purpose) && (!area || p.area === area),
+    );
+
+    const chip = (label: string, selected: boolean, onClick: () => void) => (
+        <button
+            key={label}
+            type="button"
+            onClick={onClick}
+            className={`rounded-full px-4 py-2 text-[13px] font-extrabold transition ${
+                selected
+                    ? "bg-primary text-primary-fg"
+                    : "border border-gray-200 bg-bg text-secondary hover:border-primary hover:text-primary"
+            }`}
+        >
+            {label}
+        </button>
+    );
 
     return (
         <SiteLayout>
-            <section className="border-b border-gray-100 bg-surface">
-                <div className="mx-auto max-w-7xl px-4 py-12">
-                    <h1 className="text-3xl text-secondary md:text-4xl">{ar ? "العقارات" : "Properties"}</h1>
-                    <p className="mt-2 text-sm text-muted">
-                        {ar
-                            ? "بيانات تجريبية للعرض — الفلاتر بتتفعّل مع موديول العقارات في المرحلة 4."
-                            : "Demo data for preview — filters go live with the Properties module in Phase 4."}
-                    </p>
+            <PageHero
+                bg="/images/demo/bg-props.jpg"
+                crumb={t.crumb}
+                title={t.title}
+                desc={t.results(filtered.length, properties.length)}
+            />
 
-                    {/* شريط الفلاتر (UI) */}
-                    <div className="mt-6 grid gap-3 rounded-2xl border border-gray-100 bg-bg p-4 sm:grid-cols-2 lg:grid-cols-5">
-                        <select className="rounded-lg border border-gray-200 bg-bg px-3 py-2.5 text-sm text-secondary outline-none focus:border-primary">
-                            <option>{ar ? "الغرض: الكل" : "Purpose: all"}</option>
-                            <option>{ar ? "بيع" : "Sale"}</option>
-                            <option>{ar ? "إيجار" : "Rent"}</option>
-                        </select>
-                        <select className="rounded-lg border border-gray-200 bg-bg px-3 py-2.5 text-sm text-secondary outline-none focus:border-primary">
-                            <option>{ar ? "النوع: الكل" : "Type: all"}</option>
-                            <option>{ar ? "شقق" : "Apartments"}</option>
-                            <option>{ar ? "فلل" : "Villas"}</option>
-                            <option>{ar ? "شاليهات" : "Chalets"}</option>
-                        </select>
-                        <select className="rounded-lg border border-gray-200 bg-bg px-3 py-2.5 text-sm text-secondary outline-none focus:border-primary">
-                            <option>{ar ? "المنطقة: الكل" : "Area: all"}</option>
-                            <option>{ar ? "القاهرة الجديدة" : "New Cairo"}</option>
-                            <option>{ar ? "الشيخ زايد" : "Sheikh Zayed"}</option>
-                            <option>{ar ? "الساحل الشمالي" : "North Coast"}</option>
-                        </select>
-                        <input
-                            placeholder={ar ? "أقصى سعر (EGP)" : "Max price (EGP)"}
-                            className="rounded-lg border border-gray-200 bg-bg px-3 py-2.5 text-sm outline-none focus:border-primary"
-                        />
-                        <button className="rounded-brand bg-primary px-4 py-2.5 text-sm font-extrabold text-primary-fg hover:bg-primary-hover">
-                            {ar ? "بحث" : "Search"}
-                        </button>
-                    </div>
-                </div>
-            </section>
+            <section className="bg-bg px-4 py-10">
+                <div className="mx-auto max-w-7xl">
+                    <ActiveFilters filters={filters} path="/properties" />
 
-            <section className="bg-bg">
-                <div className="mx-auto max-w-7xl px-4 py-14">
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                        {properties.map((p, i) => (
-                            <Reveal key={p.id} delay={i * 90}>
-                                <PropertyCard p={p} ar={ar} wa={wa} />
-                            </Reveal>
-                        ))}
+                    {/* ---------- شريط الفلاتر ---------- */}
+                    <div className="mb-6 flex flex-wrap items-center gap-x-7 gap-y-4 rounded-3xl border border-gray-100 bg-bg px-6 py-4 shadow-[0_4px_18px_rgba(11,18,32,0.04)]">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-xs font-extrabold text-secondary">{t.purpose}</span>
+                            {chip(t.all, purpose === null, () => setPurpose(null))}
+                            {purposes.map((v) => chip(v, purpose === v, () => setPurpose(v)))}
+                        </div>
+
+                        <span className="hidden h-8 w-px bg-gray-200 md:block" aria-hidden />
+
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-xs font-extrabold text-secondary">{t.area}</span>
+                            {chip(t.all, area === null, () => setArea(null))}
+                            {areas.map((v) => chip(v, area === v, () => setArea(v)))}
+                        </div>
                     </div>
+
+                    {/* ---------- النتائج ---------- */}
+                    {filtered.length > 0 ? (
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                            {filtered.map((p, i) => (
+                                <Reveal key={p.id} delay={i * 80}>
+                                    <PropertyCard p={p} ar={ar} wa={wa} />
+                                </Reveal>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center rounded-3xl border border-gray-100 bg-surface px-6 py-16 text-center">
+                            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                <SearchX size={26} />
+                            </span>
+                            <h3 className="mt-4 text-xl font-extrabold text-secondary">{t.emptyTitle}</h3>
+                            <p className="mt-2 text-sm text-muted">{t.emptyText}</p>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setPurpose(null);
+                                    setArea(null);
+                                }}
+                                className="mt-6 rounded-brand bg-primary px-6 py-3 text-sm font-extrabold text-primary-fg transition hover:bg-primary-hover"
+                            >
+                                {t.reset}
+                            </button>
+                        </div>
+                    )}
                 </div>
             </section>
         </SiteLayout>

@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 
 /**
- * HeroWebGL — variant: webgl (نسخة فاتحة).
- * شادر WebGL خام (بدون three.js) بيرسم بقع ضوئية ذهبي/كحلي بتتحرك ببطء فوق خلفية فاتحة.
+ * HeroWebGL — خلفية الهيرو لما نمط الهيرو = webgl.
+ * شادر WebGL خام (بدون three.js) بيرسم بقع ضوئية ذهبي/كحلي بتتحرك ببطء فوق الخلفية الداكنة.
  * - بيقرأ الألوان من CSS variables ⇒ بيتبع الثيم من الداشبورد تلقائيًا
  * - prefers-reduced-motion ⇒ فريم ثابت واحد
  * - DPR cap 1.5 + إيقاف الرندر لما السكشن يخرج من الشاشة أو التاب يتخفي
@@ -36,9 +36,9 @@ void main() {
     c3.x *= u_res.x / u_res.y;
 
     vec3 col = u_base;
-    col = mix(col, u_gold, blob(uv, c1, 0.55) * 0.20);
-    col = mix(col, u_navy, blob(uv, c2, 0.60) * 0.10);
-    col = mix(col, u_gold, blob(uv, c3, 0.45) * 0.12);
+    col = mix(col, u_gold, blob(uv, c1, 0.55) * 0.30);
+    col = mix(col, u_navy, blob(uv, c2, 0.60) * 0.45);
+    col = mix(col, u_gold, blob(uv, c3, 0.45) * 0.16);
 
     gl_FragColor = vec4(col, 1.0);
 }`;
@@ -65,19 +65,53 @@ export default function HeroWebGL() {
         const gl = canvas.getContext("webgl", { antialias: true, alpha: false });
         if (!gl) return;
 
+        // لازم نفحص COMPILE_STATUS: من غيره شادر بايظ بيعدّي ويرسم كانفس أسود
+        // على بعض كروت الشاشة بدل ما يرجع null وتفضل الخلفية العادية مكانه
         const compile = (type: number, src: string) => {
-            const s = gl.createShader(type)!;
-            gl.shaderSource(s, src);
-            gl.compileShader(s);
-            return s;
+            const shader = gl.createShader(type);
+            if (!shader) return null;
+
+            gl.shaderSource(shader, src);
+            gl.compileShader(shader);
+
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                gl.deleteShader(shader);
+                return null;
+            }
+
+            return shader;
         };
 
-        const prog = gl.createProgram()!;
-        gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
-        gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
+        const vert = compile(gl.VERTEX_SHADER, VERT);
+        const frag = compile(gl.FRAGMENT_SHADER, FRAG);
+        const prog = gl.createProgram();
+
+        // أي فشل هنا = منظّف ورا نفسه ونسيب الخلفية العادية
+        const abort = () => {
+            if (vert) gl.deleteShader(vert);
+            if (frag) gl.deleteShader(frag);
+            if (prog) gl.deleteProgram(prog);
+            gl.getExtension("WEBGL_lose_context")?.loseContext();
+        };
+
+        if (!vert || !frag || !prog) {
+            abort();
+            return;
+        }
+
+        gl.attachShader(prog, vert);
+        gl.attachShader(prog, frag);
         gl.linkProgram(prog);
-        if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+
+        if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+            abort();
+            return;
+        }
+
         gl.useProgram(prog);
+        // اتلحمت في البرنامج خلاص، فمفيش داعي نستنى بيهم
+        gl.deleteShader(vert);
+        gl.deleteShader(frag);
 
         const buf = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buf);
@@ -88,7 +122,7 @@ export default function HeroWebGL() {
 
         const uRes = gl.getUniformLocation(prog, "u_res");
         const uTime = gl.getUniformLocation(prog, "u_time");
-        gl.uniform3fv(gl.getUniformLocation(prog, "u_base"), cssColor("--surface", [0.973, 0.98, 0.988]));
+        gl.uniform3fv(gl.getUniformLocation(prog, "u_base"), cssColor("--bg-dark", [0.043, 0.071, 0.125]));
         gl.uniform3fv(gl.getUniformLocation(prog, "u_gold"), cssColor("--primary", [0.788, 0.635, 0.153]));
         gl.uniform3fv(gl.getUniformLocation(prog, "u_navy"), cssColor("--secondary", [0.118, 0.227, 0.373]));
 
@@ -138,6 +172,12 @@ export default function HeroWebGL() {
             io.disconnect();
             window.removeEventListener("resize", resize);
             document.removeEventListener("visibilitychange", onVis);
+
+            // من غير التنظيف ده كل تنقّل جوه الـ SPA بيسيب WebGL context مفتوح،
+            // والمتصفح بيقفل أقدم context بعد ~16 فيتبوّظ اللي شغال
+            gl.deleteBuffer(buf);
+            gl.deleteProgram(prog);
+            gl.getExtension("WEBGL_lose_context")?.loseContext();
         };
     }, []);
 

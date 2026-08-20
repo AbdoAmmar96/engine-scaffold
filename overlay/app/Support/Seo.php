@@ -1,0 +1,129 @@
+<?php
+
+namespace App\Support;
+
+use Illuminate\Support\Str;
+use Modules\Core\Services\SettingsService;
+
+/**
+ * ميتا الصفحات. بتتحسب في السيرفر وبتترندر في app.blade.php،
+ * مش عن طريق <Head> بتاعة Inertia — من غير SSR دي بتتكتب بالجافاسكربت
+ * بعد التحميل، وده مش كفاية لموقع عايش على البحث العضوي.
+ */
+class Seo
+{
+    public static function page(
+        string $locale,
+        string $title,
+        ?string $description = null,
+        ?string $image = null,
+        string $type = 'website',
+        array $jsonLd = [],
+    ): array {
+        $settings = app(SettingsService::class);
+        $general = $settings->group('general');
+        $seo = $settings->group('seo');
+
+        $siteName = $general['site_name'] ?? config('app.name');
+        $path = self::pathWithoutLocale();
+
+        return [
+            'title' => $title !== '' ? "{$title} — {$siteName}" : ($seo['meta_title'] ?: $siteName),
+            'description' => Str::limit(strip_tags($description ?: ($seo['meta_description'] ?: ($general['tagline'] ?? ''))), 160),
+            'canonical' => url("/{$locale}{$path}"),
+            'alternates' => [
+                'ar' => url("/ar{$path}"),
+                'en' => url("/en{$path}"),
+            ],
+            'image' => $image ? url($image) : url($settings->get('branding', 'logo_path', '/images/logo.png')),
+            'type' => $type,
+            'siteName' => $siteName,
+            'jsonLd' => array_values(array_filter([self::organization(), ...$jsonLd])),
+        ];
+    }
+
+    /** مسار الصفحة من غير بادئة اللغة — عشان hreflang و canonical */
+    private static function pathWithoutLocale(): string
+    {
+        $path = '/'.ltrim(request()->path(), '/');
+        $path = preg_replace('#^/(ar|en)#', '', $path) ?? '';
+
+        return $path === '/' ? '' : $path;
+    }
+
+    public static function organization(): array
+    {
+        $settings = app(SettingsService::class);
+        $general = $settings->group('general');
+        $contact = $settings->group('contact');
+        $social = array_values(array_filter($settings->group('social')));
+
+        return array_filter([
+            '@context' => 'https://schema.org',
+            '@type' => 'RealEstateAgent',
+            'name' => $general['site_name'] ?? config('app.name'),
+            'url' => url('/'),
+            'logo' => url($settings->get('branding', 'logo_path', '/images/logo.png')),
+            'telephone' => $contact['phone'] ?? null,
+            'email' => $contact['email'] ?? null,
+            'address' => filled($contact['address'] ?? null) ? [
+                '@type' => 'PostalAddress',
+                'streetAddress' => $contact['address'],
+                'addressCountry' => 'EG',
+            ] : null,
+            'sameAs' => $social ?: null,
+        ]);
+    }
+
+    /** مسار التنقّل — بيظهر في نتيجة جوجل تحت الرابط */
+    public static function breadcrumb(string $locale, array $trail): array
+    {
+        $home = $locale === 'en' ? 'Home' : 'الرئيسية';
+        $items = [['name' => $home, 'url' => url("/{$locale}")]];
+
+        foreach ($trail as $name => $url) {
+            $items[] = ['name' => $name, 'url' => url("/{$locale}{$url}")];
+        }
+
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => collect($items)->map(fn ($i, $n) => [
+                '@type' => 'ListItem',
+                'position' => $n + 1,
+                'name' => $i['name'],
+                'item' => $i['url'],
+            ])->all(),
+        ];
+    }
+
+    /** قائمة عقارات — بتخلي جوجل يفهم إن دي صفحة نتايج */
+    public static function itemList(array $rows, string $locale, string $path): array
+    {
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'ItemList',
+            'numberOfItems' => count($rows),
+            'itemListElement' => collect($rows)->take(20)->map(fn ($row, $i) => [
+                '@type' => 'ListItem',
+                'position' => $i + 1,
+                'name' => $row['title'] ?? $row['name'] ?? '',
+            ])->all(),
+        ];
+    }
+
+    public static function article(array $post, string $locale): array
+    {
+        return array_filter([
+            '@context' => 'https://schema.org',
+            '@type' => 'BlogPosting',
+            'headline' => $post['title'],
+            'description' => $post['excerpt'] ?: null,
+            'image' => $post['image'] ? url($post['image']) : null,
+            'author' => $post['author'] ? ['@type' => 'Person', 'name' => $post['author']] : null,
+            'datePublished' => $post['publishedAt'] ?? null,
+            'inLanguage' => $locale,
+            'mainEntityOfPage' => url("/{$locale}/blog/{$post['slug']}"),
+        ]);
+    }
+}

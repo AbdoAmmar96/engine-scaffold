@@ -42,6 +42,10 @@ class SettingsSeeder extends Seeder
                 'logo_path'    => '/images/logo.png',
                 'video_url'    => '',
                 'video_poster' => '',
+                // فيديو أو صورة — FrameMedia بيكتشف الامتداد ويرندر video أو img
+                'hero_bg_video' => '/videos/skyline-dawn.mp4',
+                'hero_media'    => '/images/demo/hero.jpg',
+                'process_media' => '/videos/open-door.mp4',
             ],
 
             'contact' => [

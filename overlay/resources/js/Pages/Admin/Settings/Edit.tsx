@@ -1,13 +1,18 @@
 import { Link, useForm } from "@inertiajs/react";
+import { ImagePlus } from "lucide-react";
+import { useState } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Button, Card, ColorField, Field, Input } from "@/Components/admin/ui";
+import MediaPicker from "@/Components/admin/MediaPicker";
+import { isVideo } from "@/lib/media";
 
 /**
- * شاشة إعدادات ديناميكية واحدة بتخدم كل المجموعات:
- * - قيمة تبدأ بـ # → Color picker
- * - غير كده → Text input
- * الليبلات جاية من السيرفر (SettingsController::LABELS).
+ * شاشة إعدادات ديناميكية واحدة بتخدم كل المجموعات.
+ * نوع كل حقل جاي من السيرفر (SettingsController::TYPES) مش متخمّن من القيمة،
+ * عشان لون اتمسح ميتحولش لحقل نص ويضيع الـ color picker.
  */
+
+type FieldType = "color" | "media" | "select" | "textarea" | "text";
 
 interface Props {
     group: string;
@@ -15,17 +20,92 @@ interface Props {
     groups: { key: string; label: string }[];
     values: Record<string, string>;
     labels: Record<string, string>;
+    types: Record<string, FieldType>;
+    options: Record<string, { value: string; label: string }[]>;
+    hints: Record<string, string>;
 }
 
-export default function Edit({ group, groupLabel, groups, values, labels }: Props) {
+export default function Edit({ group, groupLabel, groups, values, labels, types, options, hints }: Props) {
     const { data, setData, put, processing } = useForm<{ values: Record<string, string> }>({ values });
+    const [picking, setPicking] = useState<string | null>(null);
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
         put(`/admin/settings/${group}`, { preserveScroll: true });
     };
 
-    const isColor = (v: string) => /^#[0-9a-fA-F]{3,8}$/.test(v ?? "");
+    const set = (key: string, v: string) => setData("values", { ...data.values, [key]: v });
+
+    const control = (key: string, value: string) => {
+        const type: FieldType = types[key] ?? "text";
+
+        if (type === "color") return <ColorField value={value ?? ""} onChange={(v) => set(key, v)} />;
+
+        if (type === "select") {
+            return (
+                <select
+                    value={value ?? ""}
+                    onChange={(e) => set(key, e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
+                >
+                    <option value="">— اختر —</option>
+                    {(options[key] ?? []).map((o) => (
+                        <option key={o.value} value={o.value}>
+                            {o.label}
+                        </option>
+                    ))}
+                </select>
+            );
+        }
+
+        if (type === "textarea") {
+            return (
+                <textarea
+                    rows={3}
+                    value={value ?? ""}
+                    onChange={(e) => set(key, e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
+                />
+            );
+        }
+
+        if (type === "media") {
+            const local = value?.startsWith("/");
+
+            return (
+                <div className="flex items-center gap-3">
+                    {local ? (
+                        isVideo(value) ? (
+                            <video src={value} muted className="h-12 w-12 shrink-0 rounded-lg border border-gray-200 object-cover" />
+                        ) : (
+                            <img src={value} alt="" className="h-12 w-12 shrink-0 rounded-lg border border-gray-200 object-cover" />
+                        )
+                    ) : (
+                        <span className="h-12 w-12 shrink-0 rounded-lg border border-dashed border-gray-300" />
+                    )}
+
+                    <Input value={value ?? ""} dir="ltr" onChange={(e) => set(key, e.target.value)} />
+
+                    <button
+                        type="button"
+                        onClick={() => setPicking(key)}
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2.5 text-xs font-bold text-gray-700 transition hover:border-primary hover:text-secondary"
+                    >
+                        <ImagePlus size={15} />
+                        المكتبة
+                    </button>
+                </div>
+            );
+        }
+
+        return (
+            <Input
+                value={value ?? ""}
+                dir={/[؀-ۿ]/.test(value ?? "") ? "rtl" : "ltr"}
+                onChange={(e) => set(key, e.target.value)}
+            />
+        );
+    };
 
     return (
         <AdminLayout title={`الإعدادات — ${groupLabel}`}>
@@ -55,17 +135,11 @@ export default function Edit({ group, groupLabel, groups, values, labels }: Prop
                 >
                     <div className="grid gap-5 md:grid-cols-2">
                         {Object.entries(data.values).map(([key, value]) => (
-                            <Field key={key} label={labels[key] ?? key}>
-                                {isColor(value) ? (
-                                    <ColorField value={value} onChange={(v) => setData("values", { ...data.values, [key]: v })} />
-                                ) : (
-                                    <Input
-                                        value={value ?? ""}
-                                        dir={/[\u0600-\u06FF]/.test(value ?? "") ? "rtl" : "ltr"}
-                                        onChange={(e) => setData("values", { ...data.values, [key]: e.target.value })}
-                                    />
-                                )}
-                            </Field>
+                            <div key={key} className={types[key] === "textarea" ? "md:col-span-2" : ""}>
+                                <Field label={labels[key] ?? key} hint={hints[key]}>
+                                    {control(key, value)}
+                                </Field>
+                            </div>
                         ))}
                     </div>
 
@@ -77,6 +151,13 @@ export default function Edit({ group, groupLabel, groups, values, labels }: Prop
                     )}
                 </Card>
             </form>
+
+            <MediaPicker
+                open={picking !== null}
+                current={picking ? data.values[picking] : undefined}
+                onClose={() => setPicking(null)}
+                onPick={(path) => picking && set(picking, path)}
+            />
         </AdminLayout>
     );
 }

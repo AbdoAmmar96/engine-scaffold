@@ -1,0 +1,169 @@
+<?php
+
+namespace App\Support;
+
+use Modules\Blog\Models\Post;
+use Modules\Compounds\Models\Compound;
+use Modules\Locations\Models\Location;
+use Modules\Properties\Models\Property;
+
+/**
+ * مصدر بيانات الموقع العام — بيقرا من الجداول الحقيقية.
+ * لو الجداول لسه فاضية (تثبيت جديد قبل الـ seed) بيرجع لـ DemoContent
+ * عشان الموقع ميطلعش فاضي.
+ */
+class Catalog
+{
+    /**
+     * @param  array  $filters  q · type · location · purpose — جايين من فورم البحث في الهيرو
+     */
+    public static function properties(string $locale, ?int $limit = null, array $filters = []): array
+    {
+        // الفولباك بيتحدد بجدول فاضي مش بنتيجة فاضية،
+        // عشان بحث ملقاش حاجة ميرجّعش بيانات تجريبية بدل "مفيش نتايج"
+        if (! Property::query()->exists()) {
+            $demo = DemoContent::properties($locale);
+
+            return $limit ? array_slice($demo, 0, $limit) : $demo;
+        }
+
+        $rows = Property::query()
+            ->where('is_active', true)
+            ->with('location')
+            ->tap(fn ($q) => self::applyPropertyFilters($q, $filters))
+            ->orderBy('sort')->orderByDesc('id')
+            ->when($limit, fn ($q) => $q->limit($limit))
+            ->get();
+
+        return $rows->map(fn (Property $p) => $p->toCard($locale))->all();
+    }
+
+    private static function applyPropertyFilters($query, array $filters): void
+    {
+        if ($q = trim((string) ($filters['q'] ?? ''))) {
+            $query->where(fn ($s) => $s
+                ->where('title', 'like', "%{$q}%")
+                ->orWhere('title_en', 'like', "%{$q}%")
+                ->orWhere('ref', 'like', "%{$q}%"));
+        }
+
+        if ($type = trim((string) ($filters['type'] ?? ''))) {
+            // القيمة متخزّنة بالعربي، فالبحث الإنجليزي (Villa) بيترجم الأول
+            $type = Property::TYPES[$type] ?? false
+                ? $type
+                : (array_flip(Property::TYPES)[$type] ?? $type);
+
+            $query->where('type', $type);
+        }
+
+        if (in_array($filters['purpose'] ?? null, ['sale', 'rent'], true)) {
+            $query->where('purpose', $filters['purpose']);
+        }
+
+        if ($location = trim((string) ($filters['location'] ?? ''))) {
+            $query->whereHas('location', fn ($s) => $s
+                ->where('name', $location)
+                ->orWhere('name_en', $location));
+        }
+    }
+
+    /**
+     * @param  array  $filters  q · location — نفس فورم الهيرو في تبويب "مشروع"
+     */
+    public static function compounds(string $locale, ?int $limit = null, array $filters = []): array
+    {
+        if (! Compound::query()->exists()) {
+            $demo = DemoContent::compounds($locale);
+
+            return $limit ? array_slice($demo, 0, $limit) : $demo;
+        }
+
+        $rows = Compound::query()
+            ->where('is_active', true)
+            ->with(['developer', 'location'])
+            ->when(trim((string) ($filters['q'] ?? '')), fn ($query, $q) => $query
+                ->where(fn ($s) => $s
+                    ->where('name', 'like', "%{$q}%")
+                    ->orWhere('name_en', 'like', "%{$q}%")
+                    ->orWhereHas('developer', fn ($d) => $d->where('name', 'like', "%{$q}%"))))
+            ->when(trim((string) ($filters['location'] ?? '')), fn ($query, $loc) => $query
+                ->whereHas('location', fn ($s) => $s->where('name', $loc)->orWhere('name_en', $loc)))
+            ->orderBy('sort')->orderByDesc('id')
+            ->when($limit, fn ($q) => $q->limit($limit))
+            ->get();
+
+        return $rows->map(fn (Compound $c) => $c->toCard($locale))->all();
+    }
+
+    /** الفلاتر المسموحة من الـ query string، منضّفة */
+    public static function filters(\Illuminate\Http\Request $request): array
+    {
+        return [
+            'q' => \Illuminate\Support\Str::limit(trim((string) $request->query('q', '')), 80, ''),
+            'type' => trim((string) $request->query('type', '')),
+            'location' => trim((string) $request->query('location', '')),
+            'purpose' => in_array($request->query('purpose'), ['sale', 'rent'], true) ? $request->query('purpose') : '',
+        ];
+    }
+
+    /** بطاقات المناطق في الرئيسية — بعدد العقارات الحقيقي */
+    public static function areas(string $locale, ?int $limit = 3): array
+    {
+        $rows = Location::query()
+            ->where('is_active', true)
+            ->withCount(['properties' => fn ($q) => $q->where('is_active', true)])
+            ->orderBy('sort')->orderBy('id')
+            ->when($limit, fn ($q) => $q->limit($limit))
+            ->get();
+
+        if ($rows->isEmpty()) {
+            $demo = DemoContent::areas($locale);
+
+            return $limit ? array_slice($demo, 0, $limit) : $demo;
+        }
+
+        $ar = $locale !== 'en';
+
+        return $rows->map(fn (Location $l) => $l->toCard($locale) + [
+            'count' => $l->properties_count.' '.($ar ? 'وحدة' : 'units'),
+        ])->all();
+    }
+
+    /** مقالات المدونة المنشورة */
+    public static function posts(string $locale, ?int $limit = null): array
+    {
+        $rows = Post::published()
+            ->orderBy('sort')
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->when($limit, fn ($q) => $q->limit($limit))
+            ->get();
+
+        return $rows->map(fn (Post $p) => $p->toCard($locale))->all();
+    }
+
+    /** مقال واحد بالرابط — null لو مش موجود أو مش منشور */
+    public static function post(string $locale, string $slug): ?array
+    {
+        return Post::published()->where('slug', $slug)->first()?->toArticle($locale);
+    }
+
+    /** خيارات البحث في الهيرو — الأنواع ثابتة والمناطق من الجدول */
+    public static function searchOptions(string $locale): array
+    {
+        $base = DemoContent::searchOptions($locale);
+
+        // الأنواع من نفس ثابت الموديل — لازم القيمة تطابق اللي متخزّن
+        $base['types'] = $locale === 'en'
+            ? array_values(Property::TYPES)
+            : array_keys(Property::TYPES);
+
+        $locations = Location::where('is_active', true)->orderBy('sort')->orderBy('id')->get();
+
+        if ($locations->isNotEmpty()) {
+            $base['locations'] = $locations->map(fn (Location $l) => $l->t('name', $locale))->all();
+        }
+
+        return $base;
+    }
+}
