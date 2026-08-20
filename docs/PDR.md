@@ -1,7 +1,8 @@
 # PDR — مراجعة تصميم ومتطلبات مشروع BP Engine / Reel Estate Template
 
 > **نوع المستند:** Product Design / Requirements Review — مراجعة فنية مبنية على قراءة الكود سطر بسطر.
-> **تاريخ المراجعة:** 2026-08-20 · **الفرع:** `main` · **آخر كوميت في الـ scaffold:** `506a127` · **آخر كوميت في `engine/`:** `f18c6ed`
+> **تاريخ المراجعة:** 2026-08-20 · **الفرع:** `main` · **آخر كوميت في الـ scaffold:** `506a127` · **آخر كوميت في `engine/`:** `8ce7455`
+> **ملاحظة:** أثناء المراجعة نزلت 3 كوميتات جديدة على `engine/` (`7eb955d`, `52dfd9e`, `8ce7455`). المستند ده متحقَّق منه ضد `8ce7455`، وكل الأرقام تحت أُعيد قياسها عليه.
 > **نطاق المراجعة:** الريبو `engine-scaffold` بالكامل (`setup.sh` + `overlay/`) + التطبيق المتولّد `engine/` (ريبو منفصل: `Real-Estate-Template-`).
 > **قاعدة أساسية:** كل ادعاء في المستند ده مربوط بمسار ملف ورقم سطر. أي حاجة مش موجودة، مكتوب صراحةً إنها **مش موجودة**.
 
@@ -28,9 +29,9 @@
 | **Frontend / Site** | **35%** | 8 صفحات بترندر وتصميمها محترم (3,665 سطر TS/TSX، `tsc --noEmit` نضيف تمامًا، صفر `any`). **بس:** البحث في الهيرو والرئيسية **مش شغال بالمرة**، مفيش صفحة تفاصيل لأي عقار أو كمبوند، مفيش pagination، مفيش `<Head>` واحد في المشروع كله (يعني مفيش title/meta/canonical لأي صفحة)، ومفيش نظام i18n — الترجمة كلها `ternary` مكرّر في كل ملف. |
 | **Admin Dashboard** | **45%** | فكرة `ResourceController` + شاشتين عامّتين (`Index`/`Form`) فكرة ممتازة وبتشتغل: إضافة موديول جديد = كلاس صغير + راوت. الإعدادات والثيم شغالين فعلًا. **بس:** مفيش Media Manager (حقل الصورة = خانة نص لمسار!)، الداشبورد الرئيسي صفر KPIs، مجموعتين إعدادات (`seo`, `integrations`) موجودين في الراوتات ومش موجودين في المنيو، والأدوار `editor`/`agent` بتتعمل ومبتفتحش أي شاشة. |
 | **Content** | **10%** | كل المحتوى تجريبي أو مُختلَق. `app/Support/DemoContent.php` = 310 سطر بيانات وهمية. صفحة "من نحن" بتقول "12 سنة" و"46 فرد" و"4780 عميل" و"420 كمبوند شريك" — كلها أرقام مخترعة (`engine/resources/js/Pages/Site/About.tsx:21-26`)، وصور الفريق ستوك من Unsplash معروضة كأنها الفريق الحقيقي. |
-| **Tests** | **2%** | ملفين تست افتراضيين من Laravel بس، **وواحد منهم بيفشل**. `php artisan test` → `Tests: 1 failed, 1 passed`. مجلدات التستات في الـ 10 موديولات كلها فاضية (`.gitkeep` بس). |
-| **DevOps** | **5%** | مفيش CI، مفيش Dockerfile، مفيش deploy config، مفيش `.env.production`. SQLite بيتشحن كـ default، و`APP_DEBUG=true` في القالب المشحون (`engine/.env.example:4`). |
-| **الإجمالي المرجّح** | **~35%** | المنتج **prototype متقدّم**، مش MVP. الوصف الأدق: "template بواجهة حلوة ومحرك محتوى بدائي". |
+| **Tests / Quality gates** | **15%** | **اتحسّنت مؤخرًا:** بنية Playwright كاملة (`playwright.config.ts` بمشروعين desktop/mobile) + `tests/e2e/smoke.spec.ts` فيه 12 حالة حقيقية · larastan متثبّتة بـ `phpstan.neon` level 5 · سكريبت `composer check` بيجمع pint + phpstan + tsc + phpunit. **بس:** الـ PHPUnit لسه **1 failed / 1 passed** (نفس التست الافتراضي المكسور)، و`phpstan analyse` بيطلّع **78 error**، ومجلدات تستات الـ 10 موديولات كلها فاضية، ومفيش أي unit/feature test مكتوب للدومين. |
+| **DevOps** | **10%** | فيه pipeline جودة **محلي** (`composer check`) — بس **مفيش `.github/` خالص** يعني مفيش CI بيشغّله، مفيش Dockerfile، مفيش deploy config، مفيش `.env.production`. SQLite بيتشحن كـ default، و`APP_DEBUG=true` في القالب المشحون (`engine/.env.example:4`). |
+| **الإجمالي المرجّح** | **~38%** | المنتج **prototype متقدّم**، مش MVP. الوصف الأدق: "template بواجهة حلوة ومحرك محتوى بدائي". |
 
 ### 1.3 الحكم في سطر واحد
 
@@ -347,7 +348,7 @@ grep على `aria-` في كل `resources/js`: **`SiteLayout.tsx` بس فيه 3 �
 - **تبديل اللغة بيعمل full page reload:** `SiteLayout.tsx:127` → `onClick={() => (window.location.href = switchUrl())}`. المفروض `<a href>` عشان الكرولر يقدر يتبع اللينك (وده كمان جزء من مشكلة الـ hreflang).
 - **`dangerouslySetInnerHTML` على labels الباجينيشن:** `ResourceTable.tsx:105` و `:108`. المحتوى جاي من Laravel (`&laquo;`) فالخطر منخفض، بس النمط مش محتاج (تقدر تعمل decode بسيط).
 - **تعليق بيكدب على الكود:** `ResourceTable.tsx:7-9` بيقول "البحث والفرز والباجينيشن كلها query params" — **الفرز مش منفّذ إطلاقًا**: مفيش UI للفرز، و`ResourceController::index` بيقرا `q` بس (`app/Support/ResourceController.php:82`).
-- **صفحة الداشبورد فيها معلومات قديمة:** `Pages/Admin/Dashboard.tsx:13-18` بتعرض "المرحلة 4 — العقارات والكمبوندات… `done: false`" مع إن المرحلة 4 اتشحنت فعلًا في كوميت `35c00b8`. وكمان الداشبورد **مفهوش أي رقم حقيقي** — لا عدد ليدز، لا عدد عقارات (`Modules/Core/app/Http/Controllers/DashboardController.php:11-14` بيرندر بدون props).
+- **الداشبورد مفهوش أي رقم حقيقي:** `Modules/Core/app/Http/Controllers/DashboardController.php:11-14` بيرندر `Inertia::render('Admin/Dashboard')` **بدون أي props**، والصفحة (`Pages/Admin/Dashboard.tsx`) عبارة عن 4 روابط سريعة + قائمة مراحل ثابتة بس. لا عدد ليدز، لا عدد عقارات، لا آخر الطلبات. *(ملاحظة: قائمة المراحل نفسها اتصلّحت في كوميت `8ce7455` وبقت بتخفي نفسها لما تخلص — `Dashboard.tsx:19-29, 38, 68` — فالادعاء القديم بإنها قديمة مابقاش صحيح.)*
 - **مجموعتا إعدادات مقطوعتين عن المنيو:** `SettingsController::GROUPS` فيه 7 مجموعات (`:16-24`) بينما `AdminLayout.tsx:22-28` بيعرض 5 بس. `/admin/settings/seo` و `/admin/settings/integrations` (فيها GTM و Meta Pixel و Google Place ID) **مفيش منها أي لينك في الواجهة** — وصولها بكتابة الـ URL يدوي بس. (التبويبات جوه شاشة الإعدادات `Settings/Edit.tsx:34-44` بتعرض السبعة — فالمستخدم لازم يدخل الإعدادات الأول عشان يشوفهم.)
 - **`remember` دايمًا مفعّل:** `Pages/Admin/Login.tsx:8` → `remember: true` hardcoded من غير checkbox في الواجهة.
 - **`resources/views/welcome.blade.php`** (277 سطر) — صفحة Laravel الافتراضية، ملف ميت مفيش راوت بيوصله.
@@ -390,7 +391,7 @@ grep على `aria-` في كل `resources/js`: **`SiteLayout.tsx` بس فيه 3 �
 
 ### 🟠 CG-5 — 40 راوت API ميت (guard مش موجود)
 
-- **الأثر:** `php artisan route:list` بيطلع **121 راوت**، منهم **40 راوت** تحت `api/v1/*` معرّفين بـ:
+- **الأثر:** `php artisan route:list` بيطلع **122 راوت**، منهم **40 راوت** تحت `api/v1/*` معرّفين بـ:
   ```php
   // engine/Modules/Core/routes/api.php:6 (ونفس السطر في 7 موديولات تانية)
   Route::middleware(['auth:sanctum'])->prefix('v1')->group(...);
@@ -429,25 +430,38 @@ grep على `aria-` في كل `resources/js`: **`SiteLayout.tsx` بس فيه 3 �
 - **الإصلاح:** كل الأرقام والنصوص التسويقية تتنقل لجداول محتوى قابلة للتحرير من الداشبورد (موديول `Pages`)، مع قيم افتراضية فاضية بدل مخترعة، وحذف صور الفريق الستوك.
 - **الجهد:** **5–9 أيام** (بعد بناء `Pages`).
 
-### 🟠 CG-9 — صفر تغطية اختبارات، والاختبار الوحيد بيفشل
+### 🟠 CG-9 — طبقة PHP بلا اختبارات، والاختبار الوحيد بيفشل
 
-- **الأثر:** `php artisan test` النهارده:
+**اتحسّن جزئيًا في كوميت `8ce7455`** — لكن الفجوة الأساسية لسه مفتوحة.
+
+**اللي بقى موجود (يُحسب):**
+- `playwright.config.ts` — إعداد كامل: مشروعين (`Desktop Chrome` + `Pixel 7`)، `locale: 'ar-EG'`، `webServer` بيقوم `php artisan serve` لوحده، retries في CI.
+- `tests/e2e/smoke.spec.ts` — **12 حالة اختبار حقيقية ومكتوبة كويس**: 7 صفحات عامة بتتفحص `status 200` + `#app` مش فاضية + **صفر console errors** + **صفر طلبات ≥400** (`:19-37`)، تحويل الجذر للغة (`:40-43`)، RTL/LTR على `<html>` (`:45-55`)، بوابة الأدمن (`:57-60`)، ووصول توكن `--primary` من قاعدة البيانات للمتصفح (`:62-70`).
+- `phpstan.neon` — larastan level 5 على `app`, `Modules`, `database`, `routes`.
+- `composer check` = `pint --test` + `phpstan` + `tsc --noEmit` + `artisan test` (`composer.json`).
+
+**اللي لسه مكسور:**
+- **`php artisan test` لسه بيفشل عند HEAD:**
   ```
   FAIL  Tests\Feature\ExampleTest
   ⨯ the application returns a successful response
   Expected response status code [200] but received 302.
   Tests: 1 failed, 1 passed (2 assertions)
   ```
-  السبب: `tests/Feature/ExampleTest.php:15-17` بيتوقّع `GET /` = 200، لكن `routes/web.php:7` بيعمل `Route::redirect('/', '/ar')` = 302. الاختبار الوحيد الموجود من ساعة الـ scaffold وماحدش شغّله.
-  وكمان `phpunit.xml:7-14` بيسجّل `tests/Unit` و `tests/Feature` بس — **مجلدات تستات الموديولات مش مضمّنة أصلًا**، و`<source><include>` فيه `app` بس (`:15-19`) يعني `Modules/` خارج قياس التغطية.
-  و 20 مجلد تستات في الموديولات كلها فاضية (`.gitkeep` بس).
-- **الإصلاح:** إصلاح التست الفاشل، إضافة `Modules/*/tests` للـ testsuites، وكتابة Feature tests للمسارات الحرجة (auth, settings save + cache flush, lead store + validation, resource CRUD × 7, locale routing, theme injection) + Playwright E2E.
-- **الجهد:** **8–14 يوم** للوصول لتغطية معقولة (~60% على المسارات الحرجة).
+  السبب: `tests/Feature/ExampleTest.php:15-17` بيتوقّع `GET /` = 200، لكن `routes/web.php:7` بيعمل `Route::redirect('/', '/ar')` = 302. **يعني `composer check` بيفشل من أول تشغيل.**
+- **`./vendor/bin/phpstan analyse` بيطلّع 78 error** (تفصيل في TD-12).
+- **صفر اختبارات PHP للدومين.** مفيش feature test واحد لـ: تسجيل الدخول، حفظ الإعدادات ومسح الكاش، إنشاء ليد ورفض ليد غير صالح، CRUD أي ريسورس، حماية آخر مدير، أو منطق `Bilingual::t()`.
+- `phpunit.xml:7-14` بيسجّل `tests/Unit` و `tests/Feature` بس — **مجلدات تستات الـ 10 موديولات مش مضمّنة أصلًا**، و`<source><include>` فيه `app` بس (`:15-19`) يعني `Modules/` خارج قياس التغطية. و 20 مجلد تستات في الموديولات كلها فاضية (`.gitkeep` بس).
+- الـ e2e مش بيغطي أي مسار كتابة (إرسال ليد، دخول أدمن، حفظ ريسورس) — قراءة بس.
+- **مفيش أي شيء بيشغّل الاختبارات دي تلقائيًا** — مفيش `.github/` (شوف CG-10).
+
+- **الإصلاح:** إصلاح التست الفاشل (سطر واحد: `assertRedirect('/ar')`)، إضافة `Modules/*/tests` للـ testsuites، كتابة Feature tests للمسارات الحرجة، توسيع الـ e2e لمسارات الكتابة، وربط `composer check` بـ CI.
+- **الجهد:** **6–11 يوم** للوصول لتغطية معقولة (~60% على المسارات الحرجة) — أقل من التقدير الأصلي لأن البنية التحتية اتعملت.
 
 ### 🟡 CG-10 — مفيش DevOps ولا إعداد إنتاج
 
-- **الأثر:** مفيش `.github/` (لا CI لا CD) · مفيش `Dockerfile` ولا `docker-compose.yml` · مفيش `.env.production` · قاعدة البيانات SQLite في `database/database.sqlite` · `engine/.env.example:4` فيه `APP_DEBUG=true` (يعني أول deploy بيطلع stack traces للناس) · و`engine/.env` الفعلي **لسه القالب الافتراضي**: `APP_NAME=Laravel`، `APP_URL=http://localhost` (يعني أي رابط مطلق أو sitemap أو إيميل هيطلع غلط) · مفيش `SESSION_SECURE_COOKIE` ولا `queue worker` supervisor config مع إن `QUEUE_CONNECTION=database`.
-- **الإصلاح:** GitHub Actions (pint + tsc + phpunit + build) · `.env.production.example` بـ `APP_DEBUG=false`, `SESSION_SECURE_COOKIE=true`, MySQL · Dockerfile متعدد المراحل أو deploy script · نقل الميديا لـ S3/CDN.
+- **الأثر:** فيه pipeline جودة محلي (`composer check`) بس **مفيش `.github/` خالص** (لا CI لا CD) — يعني ماحدش بيشغّله على الـ PRs، والدليل إنه فاشل حاليًا وماحدش واخد باله · مفيش `Dockerfile` ولا `docker-compose.yml` · مفيش `.env.production` · قاعدة البيانات SQLite في `database/database.sqlite` · `engine/.env.example:4` فيه `APP_DEBUG=true` (يعني أول deploy بيطلع stack traces للناس) · و`engine/.env` الفعلي **لسه القالب الافتراضي**: `APP_NAME=Laravel`، `APP_URL=http://localhost` (يعني أي رابط مطلق أو sitemap أو إيميل هيطلع غلط) · مفيش `SESSION_SECURE_COOKIE` ولا `queue worker` supervisor config مع إن `QUEUE_CONNECTION=database`.
+- **الإصلاح:** GitHub Actions بيشغّل `composer check` + `npm run build` + `npm run e2e` · `.env.production.example` بـ `APP_DEBUG=false`, `SESSION_SECURE_COOKIE=true`, MySQL · Dockerfile متعدد المراحل أو deploy script · نقل الميديا لـ S3/CDN.
 - **الجهد:** **4–7 أيام**.
 
 ---
@@ -465,9 +479,10 @@ grep على `aria-` في كل `resources/js`: **`SiteLayout.tsx` بس فيه 3 �
 | **TD-5** | **over-fetch في شاشات الأدمن** | `PropertyAdminController::options()` (`:62-67`) و `CompoundAdminController::options()` (`:56-61`) بيتنفّذوا جوه `fields()` اللي `schema()` بينادي عليها في **كل** أكشن — يعني `/admin/properties` (الليستنج) بيحمّل كل المناطق وكل الكمبوندات من غير أي داعي | استعلامين زيادة + payload منتفخ على كل تحميل صفحة أدمن. |
 | **TD-6** | **مفيش code-splitting** | `resources/js/app.tsx:7` → `import.meta.glob("./Pages/**/*.tsx", { eager: true })` · ناتج `npm run build` الفعلي: **`app-DoTtseky.js` = 496.18 kB (156.11 kB gzip)** في chunk **واحد** + `app-DEUA_Uc5.css` = 61.94 kB | زائر بيدخل `/ar` بيحمّل كود الأدمن كله. وكل ملف React جديد بيكبّر البندل لكل زائر. |
 | **TD-7** | **حزمتان ثقيلتان متثبّتتان ومش مستخدمتين** | `spatie/laravel-medialibrary ^11.23` و `spatie/laravel-translatable ^6.14` في `composer.json:17-19` — grep على `InteractsWithMedia|HasMedia|HasTranslations` = صفر. جدول `media` مهاجَر و 0 صفوف | وزن vendor + تحديثات أمنية على كود ميت + تشويش على المطور الجديد. |
-| **TD-8** | **الوثائق بتوصف نسخة مش موجودة** | `README.md` v1.2 بيوصف "هيرو WebGL حي… تشغيل/إيقاف من الداشبورد: `hero_variant`" — الكومبوننت مش مستورد والمفتاح مش مقروء (شوف §4.2ب) · `Pages/Admin/Dashboard.tsx:13-18` بيعرض المرحلة 4 كـ "لم تكتمل" وهي مشحونة · `Components/admin/ResourceTable.tsx:8` بيدّعي فرز غير منفّذ | كل مطور جديد هيضيّع وقت يدوّر على features مش موجودة. |
+| **TD-8** | **الوثائق بتوصف نسخة مش موجودة** | `README.md` v1.2 بيوصف "هيرو WebGL حي… تشغيل/إيقاف من الداشبورد: `hero_variant`" — الكومبوننت مش مستورد والمفتاح مش مقروء (شوف §4.2ب) · `Components/admin/ResourceTable.tsx:7-9` بيدّعي فرز غير منفّذ · `overlay/` بيوصف تطبيق مختلف عن `engine/` (CG-6) | كل مطور جديد هيضيّع وقت يدوّر على features مش موجودة. |
 | **TD-9** | **ازدواج/تعارض في ميدل وير الموديولات** | `RouteServiceProvider::mapWebRoutes` (`Modules/*/app/Providers/RouteServiceProvider.php:38`) بيلف الملف في `Route::middleware('web')`، وبعدين 6 من ملفات `routes/web.php` بتضيف `'web'` تاني (`Modules/Blog/routes/web.php:13`, `Compounds:13`, `Developers:13`, `Leads:13`, `Locations:13`, `Properties:13`) بينما `Modules/Core/routes/web.php:16` **مش** بيضيفها | تكرار وعدم اتساق — أي واحد بيقرا الملف مش هيعرف الحقيقة فين. |
 | **TD-10** | **كنترولرات ومسارات stub ميتة** | `Modules/Core/…/CoreController.php` (56 سطر stub) · `PagesController`, `ReviewsController`, `SeoController`, `LocationsController`, `DevelopersController`, `CompoundsController`, `PropertiesController` (كلها stubs) · `resources/views/welcome.blade.php` (277 سطر) · 8 ملفات `Modules/*/vite.config.js` و `resources/assets/{js,sass}` مش مستخدمة | 61 راوت من الـ 121 (50%) ميتة أو stub. `route:list` بقى غير قابل للقراءة. |
+| **TD-12** | **78 خطأ static analysis** — والسبب الجذري تصميم `ResourceController` | `./vendor/bin/phpstan analyse` (level 5) = **78 error**. التوزيع بالمُعرّف: `property.notFound` **×42** · `argument.type` **×24** · `method.notFound` **×8** · `nullsafe.neverNull` ×3 · `function.alreadyNarrowedType` ×1. أكتر الملفات: `Modules/Core/…/UserAdminController.php` (13) · `Modules/Leads/…/LeadAdminController.php` (10) · `Modules/Blog/…/PostAdminController.php` (7) · `Modules/Properties/app/Models/Property.php` (6). السبب الأساسي: `ResourceController::rowPayload(Model $row)` / `itemPayload(Model $model)` (`app/Support/ResourceController.php:175, 192`) بتستقبل `Model` عام، فالكلاسات الوارثة بتعمل `$row->email` و `$row->roles` و `$row->created_at` على نوع مالوش الخصائص دي | كل استدعاء لخاصية على الموديل غير محمي بالـ type checker. الأخطاء دي هي بالظبط نوع الأخطاء اللي بتظهر في الإنتاج بعد rename لعمود. |
 | **TD-11** | **`DemoContent` بيتسرّب في الإنتاج** | `Catalog::properties/compounds/areas` بترجع `DemoContent` لو الجدول فاضي (`Catalog.php:26-30, 44-48, 63-67`) · وصفحتا About/Contact **بتاخد كل بياناتها** من `DemoContent` مباشرة (`routes/web.php:31-32, 36`) من غير أي fallback لجدول | موقع عميل حقيقي ممكن يعرض مشاريع خيالية لو حد نسي يعمل seed أو الداتا اتمسحت. |
 
 ---
@@ -596,7 +611,8 @@ $rule[] = match ($f['type'] ?? 'text') {
 | **Media Manager** (تفعيل medialibrary + رفع + conversions + picker) | CG-4 | 7–12 يوم |
 | حذف 40 راوت API الميت + 21 راوت stub + الكنترولرات الميتة + `welcome.blade.php` | CG-5, TD-10 | 0.5 يوم |
 | إصلاح التست الفاشل + إضافة `Modules/*/tests` لـ `phpunit.xml` + 10 Feature tests للمسارات الحرجة | CG-9 | 3–5 أيام |
-| CI على GitHub Actions (pint + `tsc --noEmit` + phpunit + `npm run build`) | CG-10 | 1–2 يوم |
+| تصفير الـ 78 خطأ phpstan (generics على `ResourceController` أو `@template`) | TD-12 | 2–4 أيام |
+| CI على GitHub Actions بيشغّل `composer check` + `npm run build` + `npm run e2e` (البنية موجودة محليًا، ناقص بس اللي يشغّلها) | CG-10 | 1–2 يوم |
 | مزامنة `overlay/` ↔ `engine/` أو إعلان `engine/` مصدر الحقيقة | CG-6 | 2–4 أيام |
 
 ---
@@ -649,7 +665,7 @@ $rule[] = match ($f['type'] ?? 'text') {
 |---|---|---|
 | **إعادة كتابة WebGL hero** بشادر متعلّق بالدومين (skyline/شبكة معمارية/particles للمدينة) + إعادة ربطه بـ `hero_variant` + فحص `COMPILE_STATUS` + cleanup كامل للـ GL context | §4.2ب | 4–7 أيام |
 | تدقيق a11y كامل (h1 واحد، aria-live، تبويبات، skip link، لوحة مفاتيح) | §4.2ح | 3–5 أيام |
-| Playwright E2E على المسارات الحرجة | CG-9 | 3–5 أيام |
+| توسيع Playwright لمسارات الكتابة (إرسال ليد، دخول أدمن، حفظ ريسورس) — القراءة متغطّية بالفعل | CG-9 | 2–3 أيام |
 | ضغط الميديا (7.4 MB فيديو + 1.7 MB صور في `public/`)، WebP/AVIF، `srcset`, `width/height` | §4.2, TD | 2–3 أيام |
 | موديول `Reviews` + تكامل Google Places (المفتاح `google_place_id` موجود ومهمل) | §3 | 4–7 أيام |
 
@@ -667,6 +683,9 @@ $rule[] = match ($f['type'] ?? 'text') {
 - [ ] `php artisan test` بيعدّي بـ 0 فشل (النهارده: **1 فشل**).
 - [ ] `npx tsc --noEmit` نضيف (النهارده: **نضيف ✅ — يجب الحفاظ عليه**).
 - [ ] `./vendor/bin/pint --test` نضيف.
+- [ ] `./vendor/bin/phpstan analyse` = 0 errors (النهارده: **78**).
+- [ ] `composer check` بيعدّي بالكامل (النهارده: **بيفشل عند خطوة `artisan test`**).
+- [ ] `npm run e2e` أخضر (12 حالة موجودة بالفعل في `tests/e2e/smoke.spec.ts`).
 - [ ] `npm run build` بينجح، وحجم أكبر chunk **مش بيزيد** عن آخر قياس (خط الأساس: **496.18 kB / 156.11 kB gzip**).
 - [ ] كل feature جديدة معاها Feature test واحد على الأقل.
 - [ ] كل نص معروض للمستخدم **مش hardcoded** في `.tsx` (بعد المرحلة 4).
@@ -681,9 +700,9 @@ $rule[] = match ($f['type'] ?? 'text') {
 - [ ] حفظ قيمة `primary = "red; } html{display:none}"` من شاشة الثيم **بيترفض بـ validation error** مش بيتحفظ.
 - [ ] إرسال `location_id` غير موجود لـ `POST /admin/properties` بيرجّع 422 مش 500.
 - [ ] أدمن يقدر يرفع صورة JPEG من `/admin/properties/create` وتظهر في الكارت في `/ar/properties` من غير أي كتابة مسار يدوي.
-- [ ] `php artisan route:list` بيرجّع **صفر** راوتات بـ guard غير موجود (النهارده: **40**).
+- [ ] `php artisan route:list` بيرجّع **صفر** راوتات بـ guard غير موجود (النهارده: **40** من أصل **122**).
 - [ ] `phpunit.xml` بيشغّل تستات الموديولات، وفيه ≥10 Feature tests بتغطي: login نجاح/فشل، حفظ إعداد + التأكد إن الكاش اتمسح، إنشاء ليد + رفض ليد غير صالح، CRUD كامل لريسورس واحد، وراوتنج اللغة.
-- [ ] GitHub Actions workflow أخضر على `main`.
+- [ ] `composer check` بيعدّي بالكامل محليًا، و GitHub Actions workflow أخضر على `main` بيشغّله + `npm run e2e`.
 
 ### DoD المرحلة 3 — «الموقع يبقى موقع»
 
@@ -714,7 +733,7 @@ $rule[] = match ($f['type'] ?? 'text') {
 - [ ] جدول `permissions` فيه صفوف، وكل راوت أدمن محمي بـ `permission:` مش `role:admin`.
 - [ ] عناصر المنيو في `AdminLayout` بتختفي حسب صلاحية المستخدم.
 - [ ] وصول ليد جديد بيبعت إشعار للفريق خلال دقيقة.
-- [ ] داشبورد الأدمن بيعرض ≥4 أرقام حقيقية من قاعدة البيانات، وقايمة "حالة البناء" الثابتة متشالت.
+- [ ] داشبورد الأدمن بيعرض ≥4 أرقام حقيقية من قاعدة البيانات (`DashboardController` بيمرّر props بدل ما يرندر فاضي).
 - [ ] كل عملية create/update/delete في الأدمن متسجّلة في activity log بالمستخدم والوقت.
 - [ ] deploy على staging بـ MySQL و `APP_DEBUG=false` و`SESSION_SECURE_COOKIE=true` و HTTPS شغال.
 - [ ] `curl -I https://staging/...` بيرجّع `Strict-Transport-Security` و `X-Frame-Options` و `Content-Security-Policy`.
@@ -728,7 +747,7 @@ $rule[] = match ($f['type'] ?? 'text') {
 - [ ] Lighthouse على `/ar` و`/ar/properties`: Performance ≥85، Accessibility ≥95، SEO = 100 (موبايل).
 - [ ] `<h1>` واحد بالظبط في كل صفحة.
 - [ ] axe-core بيرجّع 0 مخالفات critical/serious.
-- [ ] Playwright بيغطي: بحث → ليستنج → تفاصيل → إرسال ليد → ظهور الليد في الأدمن. أخضر في CI.
+- [ ] Playwright بيغطي: بحث → ليستنج → تفاصيل → إرسال ليد → ظهور الليد في الأدمن (زيادة على الـ 12 حالة الحالية). أخضر في CI.
 - [ ] كل الصور بتتقدّم WebP/AVIF مع `srcset` و `width`/`height`؛ إجمالي وزن `/ar` أقل من 1.5 MB على أول تحميل.
 
 ---
