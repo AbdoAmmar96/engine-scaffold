@@ -3,13 +3,13 @@
 namespace Modules\Blog\Models;
 
 use App\Support\Bilingual;
+use App\Support\Sluggable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 
 class Post extends Model
 {
-    use Bilingual;
+    use Bilingual, Sluggable;
 
     protected $fillable = [
         'title', 'title_en', 'slug', 'category', 'category_en', 'excerpt', 'excerpt_en',
@@ -28,20 +28,9 @@ class Post extends Model
             ->where(fn ($s) => $s->whereNull('published_at')->orWhere('published_at', '<=', now()));
     }
 
-    /** يبني slug فريد من العنوان — الإنجليزي أولى عشان الرابط يفضل ASCII */
-    public static function buildSlug(string $title, ?string $titleEn = null, ?int $ignoreId = null): string
+    protected static function slugFallback(): string
     {
-        $base = filled($titleEn) ? Str::slug($titleEn) : Str::slug($title, '-', null);
-        $base = $base !== '' ? $base : 'post';
-
-        $slug = $base;
-        $i = 2;
-
-        while (static::where('slug', $slug)->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))->exists()) {
-            $slug = $base.'-'.$i++;
-        }
-
-        return $slug;
+        return 'post';
     }
 
     /** تقدير وقت القراءة بالدقايق */

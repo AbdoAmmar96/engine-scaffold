@@ -1,11 +1,17 @@
-import { Bath, BedDouble, MapPin, Ruler } from "lucide-react";
-import type { Property } from "@/lib/types";
+import { Link, usePage } from "@inertiajs/react";
+import { ArrowLeft, Bath, BedDouble, MapPin, Ruler } from "lucide-react";
+import type { ReactNode } from "react";
+import type { Property, SharedProps } from "@/lib/types";
 
 export default function PropertyCard({ p, ar, wa }: { p: Property; ar: boolean; wa?: string }) {
+    const { locale } = usePage<SharedProps>().props;
     const isRent = p.purpose === "إيجار" || p.purpose === "Rent";
+    const href = p.slug ? `/${locale}/properties/${p.slug}` : null;
 
-    return (
-        <article className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-bg transition duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-[0_12px_30px_rgba(11,18,32,0.07)]">
+    // الكارت كله لينك لصفحة العقار — زرار الواتساب بره اللينك
+    // عشان مينفعش <a> جوه <a>
+    const body = (
+        <>
             <div className="relative h-44 overflow-hidden bg-surface">
                 <img
                     src={p.image}
@@ -20,10 +26,21 @@ export default function PropertyCard({ p, ar, wa }: { p: Property; ar: boolean; 
                 >
                     {p.purpose}
                 </span>
+
+                {href && (
+                    <span className="absolute inset-0 flex items-center justify-center bg-bg-dark/45 opacity-0 transition duration-300 group-hover:opacity-100">
+                        <span className="flex items-center gap-2 rounded-brand bg-primary px-4 py-2.5 text-[13px] font-extrabold text-primary-fg">
+                            {ar ? "عرض التفاصيل" : "View details"}
+                            <ArrowLeft size={15} className="ltr:rotate-180" />
+                        </span>
+                    </span>
+                )}
             </div>
 
             <div className="flex flex-1 flex-col gap-2 p-4">
-                <h3 className="truncate text-[17px] font-extrabold leading-relaxed text-secondary">{p.title}</h3>
+                <h3 className="truncate text-[17px] font-extrabold leading-relaxed text-secondary transition group-hover:text-primary">
+                    {p.title}
+                </h3>
 
                 <div className="flex items-center gap-2 text-xs font-bold text-muted">
                     <MapPin size={13} className="shrink-0 text-primary" />
@@ -54,18 +71,33 @@ export default function PropertyCard({ p, ar, wa }: { p: Property; ar: boolean; 
                         <span>{ar ? "م²" : "m²"}</span>
                     </span>
                 </div>
-
-                {wa && (
-                    <a
-                        href={`https://wa.me/${wa}?text=${encodeURIComponent((ar ? "مهتم بالعقار: " : "Interested in property: ") + p.ref)}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-auto block rounded-brand border-2 border-primary py-3 text-center text-[13px] font-extrabold text-secondary transition hover:bg-primary hover:text-primary-fg"
-                    >
-                        {ar ? "استفسر واتساب" : "Ask on WhatsApp"}
-                    </a>
-                )}
             </div>
+        </>
+    );
+
+    const shell = (children: ReactNode) =>
+        href ? (
+            <Link href={href} className="flex flex-1 flex-col">
+                {children}
+            </Link>
+        ) : (
+            <div className="flex flex-1 flex-col">{children}</div>
+        );
+
+    return (
+        <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-bg transition duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-[0_12px_30px_rgba(11,18,32,0.07)]">
+            {shell(body)}
+
+            {wa && (
+                <a
+                    href={`https://wa.me/${wa}?text=${encodeURIComponent((ar ? "مهتم بالعقار: " : "Interested in property: ") + p.ref)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mx-4 mb-4 block rounded-brand border-2 border-primary py-3 text-center text-[13px] font-extrabold text-secondary transition hover:bg-primary hover:text-primary-fg"
+                >
+                    {ar ? "استفسر واتساب" : "Ask on WhatsApp"}
+                </a>
+            )}
         </article>
     );
 }

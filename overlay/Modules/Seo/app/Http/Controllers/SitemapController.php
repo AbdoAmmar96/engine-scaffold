@@ -27,6 +27,25 @@ class SitemapController extends Controller
             ];
         }
 
+        // صفحات العرض — الوحدات بتتغيّر أكتر من المشاريع فأولويتها أعلى
+        foreach (Property::where('is_active', true)->whereNotNull('slug')->get() as $property) {
+            $urls[] = [
+                'path' => '/properties/'.$property->slug,
+                'lastmod' => $property->updated_at?->toAtomString(),
+                'changefreq' => 'weekly',
+                'priority' => '0.7',
+            ];
+        }
+
+        foreach (Compound::where('is_active', true)->whereNotNull('slug')->get() as $compound) {
+            $urls[] = [
+                'path' => '/compounds/'.$compound->slug,
+                'lastmod' => $compound->updated_at?->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.7',
+            ];
+        }
+
         foreach (Post::published()->get() as $post) {
             $urls[] = [
                 'path' => '/blog/'.$post->slug,
@@ -39,10 +58,6 @@ class SitemapController extends Controller
         $xml = view('seo::sitemap', [
             'urls' => $urls,
             'locales' => self::LOCALES,
-            'counts' => [
-                'properties' => Property::where('is_active', true)->count(),
-                'compounds' => Compound::where('is_active', true)->count(),
-            ],
         ])->render();
 
         return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);

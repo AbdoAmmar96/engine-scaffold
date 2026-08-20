@@ -23,7 +23,7 @@ class Catalog
         // الفولباك بيتحدد بجدول فاضي مش بنتيجة فاضية،
         // عشان بحث ملقاش حاجة ميرجّعش بيانات تجريبية بدل "مفيش نتايج"
         if (! Property::query()->exists()) {
-            $demo = DemoContent::properties($locale);
+            $demo = self::withDemoSlugs(DemoContent::properties($locale), 'property');
 
             return $limit ? array_slice($demo, 0, $limit) : $demo;
         }
@@ -74,7 +74,7 @@ class Catalog
     public static function compounds(string $locale, ?int $limit = null, array $filters = []): array
     {
         if (! Compound::query()->exists()) {
-            $demo = DemoContent::compounds($locale);
+            $demo = self::withDemoSlugs(DemoContent::compounds($locale), 'compound');
 
             return $limit ? array_slice($demo, 0, $limit) : $demo;
         }
@@ -163,6 +163,94 @@ class Catalog
     public static function post(string $locale, string $slug): ?array
     {
         return Post::published()->where('slug', $slug)->first()?->toArticle($locale);
+    }
+
+    /** عقار واحد بالرابط — null لو مش موجود أو متوقّف */
+    public static function property(string $locale, string $slug): ?array
+    {
+        if (! Property::query()->exists()) {
+            $demo = self::withDemoSlugs(DemoContent::properties($locale), 'property');
+            $hit = collect($demo)->firstWhere('slug', $slug);
+
+            return $hit ? $hit + ['description' => '', 'features' => [], 'gallery' => [$hit['image']], 'compound' => null] : null;
+        }
+
+        return Property::query()
+            ->where('is_active', true)
+            ->where('slug', $slug)
+            ->with(['location', 'compound.developer'])
+            ->first()
+            ?->toDetail($locale);
+    }
+
+    /** كمبوند واحد بالرابط — null لو مش موجود أو متوقّف */
+    public static function compound(string $locale, string $slug): ?array
+    {
+        if (! Compound::query()->exists()) {
+            $demo = self::withDemoSlugs(DemoContent::compounds($locale), 'compound');
+            $hit = collect($demo)->firstWhere('slug', $slug);
+
+            return $hit ? $hit + ['features' => [], 'gallery' => [$hit['image']]] : null;
+        }
+
+        return Compound::query()
+            ->where('is_active', true)
+            ->where('slug', $slug)
+            ->with(['developer', 'location'])
+            ->first()
+            ?->toDetail($locale);
+    }
+
+    /** عقارات شبه المعروض — نفس المنطقة أو نفس النوع */
+    public static function relatedProperties(string $locale, array $property, int $limit = 3): array
+    {
+        if (! Property::query()->exists()) {
+            return [];
+        }
+
+        $rows = Property::query()
+            ->where('is_active', true)
+            ->where('id', '!=', $property['id'])
+            ->with('location')
+            ->where(fn ($q) => $q
+                ->whereHas('location', fn ($l) => $l->where('name', $property['area'])->orWhere('name_en', $property['area']))
+                ->when($property['type'] ?? '', fn ($s, $type) => $s->orWhere('type', $type)))
+            ->orderBy('sort')->orderByDesc('id')
+            ->limit($limit)
+            ->get();
+
+        return $rows->map(fn (Property $p) => $p->toCard($locale))->all();
+    }
+
+    /** الوحدات المتاحة جوّه كمبوند */
+    public static function compoundUnits(string $locale, int $compoundId, ?int $limit = null): array
+    {
+        $rows = Property::query()
+            ->where('is_active', true)
+            ->where('compound_id', $compoundId)
+            ->with('location')
+            ->orderBy('sort')->orderByDesc('id')
+            ->when($limit, fn ($q) => $q->limit($limit))
+            ->get();
+
+        return $rows->map(fn (Property $p) => $p->toCard($locale))->all();
+    }
+
+    /**
+     * بيانات DemoContent مالهاش slug — بنولّده هنا عشان كروت التثبيت الجديد
+     * (قبل الـ seed) تفضل تفتح صفحة تفاصيل. ثابت مع اختلاف اللغة.
+     */
+    private static function withDemoSlugs(array $rows, string $kind): array
+    {
+        return array_map(function (array $row) use ($kind) {
+            $row['slug'] = $kind === 'property'
+                ? \Illuminate\Support\Str::slug((string) ($row['ref'] ?? ''))
+                : $kind.'-'.$row['id'];
+
+            $row['type'] ??= '';
+
+            return $row;
+        }, $rows);
     }
 
     /** خيارات البحث في الهيرو — الأنواع ثابتة والمناطق من الجدول */

@@ -13,6 +13,7 @@ export default function PageHero({
     title,
     desc,
     crumb,
+    crumbHref,
     children,
 }: {
     bg: string;
@@ -20,6 +21,8 @@ export default function PageHero({
     desc?: string;
     /** اسم الصفحة في مسار التنقّل — "الرئيسية · <crumb>" */
     crumb: string;
+    /** لو الصفحة دي تحت صفحة تانية، الـ crumb بيبقى لينك ليها */
+    crumbHref?: string;
     children?: ReactNode;
 }) {
     const { locale } = usePage<SharedProps>().props;
@@ -38,7 +41,13 @@ export default function PageHero({
                         {ar ? "الرئيسية" : "Home"}
                     </Link>
                     <ChevronLeft size={13} className="rtl:rotate-180" />
-                    <span className="text-white/85">{crumb}</span>
+                    {crumbHref ? (
+                        <Link href={crumbHref} className="transition hover:text-primary">
+                            {crumb}
+                        </Link>
+                    ) : (
+                        <span className="text-white/85">{crumb}</span>
+                    )}
                 </nav>
 
                 <h1 className="mt-3 text-3xl font-black leading-[1.3] text-white md:text-5xl">{title}</h1>

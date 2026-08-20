@@ -1,5 +1,5 @@
-import { usePage } from "@inertiajs/react";
-import { CalendarCheck, MapPin } from "lucide-react";
+import { Link, usePage } from "@inertiajs/react";
+import { ArrowLeft, CalendarCheck, MapPin } from "lucide-react";
 import ActiveFilters, { type SearchFilters } from "@/Components/site/ActiveFilters";
 import PageHero from "@/Components/site/PageHero";
 import Reveal from "@/Components/site/Reveal";
@@ -17,6 +17,7 @@ const copy = {
         delivery: "التسليم",
         wa: "استفسر واتساب",
         newTag: "إطلاق جديد",
+        details: "تفاصيل المشروع",
     },
     en: {
         crumb: "Compounds",
@@ -28,6 +29,7 @@ const copy = {
         delivery: "Delivery",
         wa: "Ask on WhatsApp",
         newTag: "New launch",
+        details: "Project details",
     },
 };
 
@@ -59,6 +61,10 @@ export default function Compounds({ compounds, filters }: { compounds: Compound[
                     {compounds.map((c, i) => (
                         <Reveal key={c.id} delay={i * 90}>
                             <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-bg transition duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-[0_12px_30px_rgba(11,18,32,0.07)]">
+                                <Link
+                                    href={c.slug ? `/${locale}/compounds/${c.slug}` : `/${locale}/compounds`}
+                                    className="flex flex-1 flex-col"
+                                >
                                 <div className="relative h-48 overflow-hidden bg-surface">
                                     <img
                                         src={c.image}
@@ -74,7 +80,9 @@ export default function Compounds({ compounds, filters }: { compounds: Compound[
                                 </div>
 
                                 <div className="flex flex-1 flex-col gap-2 p-4">
-                                    <h3 className="text-lg font-extrabold leading-relaxed text-secondary">{c.name}</h3>
+                                    <h3 className="text-lg font-extrabold leading-relaxed text-secondary transition group-hover:text-primary">
+                                        {c.name}
+                                    </h3>
 
                                     <div className="flex items-center gap-2 text-xs font-bold text-muted">
                                         <MapPin size={13} className="shrink-0 text-primary" />
@@ -97,17 +105,23 @@ export default function Compounds({ compounds, filters }: { compounds: Compound[
                                         {ar ? "تاريخ التسليم موثّق في العقد" : "Delivery date documented in the contract"}
                                     </div>
 
-                                    {wa && (
-                                        <a
-                                            href={`https://wa.me/${wa}?text=${encodeURIComponent((ar ? "مهتم بمشروع: " : "Interested in project: ") + c.name)}`}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="mt-2 block rounded-brand border-2 border-primary py-3 text-center text-[13px] font-extrabold text-secondary transition hover:bg-primary hover:text-primary-fg"
-                                        >
-                                            {t.wa}
-                                        </a>
-                                    )}
+                                    <span className="mt-2 flex items-center justify-center gap-2 rounded-brand bg-primary py-3 text-[13px] font-extrabold text-primary-fg transition group-hover:opacity-90">
+                                        {t.details}
+                                        <ArrowLeft size={15} className="ltr:rotate-180" />
+                                    </span>
                                 </div>
+                                </Link>
+
+                                {wa && (
+                                    <a
+                                        href={`https://wa.me/${wa}?text=${encodeURIComponent((ar ? "مهتم بمشروع: " : "Interested in project: ") + c.name)}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="mx-4 mb-4 block rounded-brand border-2 border-primary py-3 text-center text-[13px] font-extrabold text-secondary transition hover:bg-primary hover:text-primary-fg"
+                                    >
+                                        {t.wa}
+                                    </a>
+                                )}
                             </article>
                         </Reveal>
                     ))}

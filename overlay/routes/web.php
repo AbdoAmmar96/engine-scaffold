@@ -47,6 +47,38 @@ Route::prefix('{locale}')
             ]);
         })->name('properties');
 
+        Route::get('/properties/{slug}', function (string $locale, string $slug) {
+            $property = \App\Support\Catalog::property($locale, $slug);
+
+            abort_if(! $property, 404);
+
+            $crumb = $locale === 'en' ? 'Properties' : 'عقارات';
+
+            // لو الأدمن مكتبش وصف، بنركّب جملة من البيانات نفسها — أحسن من ميتا فاضية
+            $summary = $property['description'] ?: ($locale === 'en'
+                ? trim("{$property['type']} {$property['size']}m² in {$property['area']} — {$property['beds']} bedrooms, {$property['baths']} bathrooms. {$property['price']}")
+                : trim("{$property['type']} {$property['size']} م² في {$property['area']} — {$property['beds']} غرف نوم و{$property['baths']} حمام. {$property['price']}"));
+
+            return Inertia::render('Site/Property', [
+                'property' => $property,
+                'related' => \App\Support\Catalog::relatedProperties($locale, $property),
+                'meta' => \App\Support\Seo::page(
+                    $locale,
+                    $property['title'],
+                    $summary,
+                    $property['image'],
+                    'article',
+                    [
+                        \App\Support\Seo::breadcrumb($locale, [
+                            $crumb => '/properties',
+                            $property['title'] => '/properties/'.$property['slug'],
+                        ]),
+                        \App\Support\Seo::residence($property + ['description' => $summary], $locale),
+                    ],
+                ),
+            ]);
+        })->name('properties.show');
+
         Route::get('/compounds', function (Request $request, string $locale) {
             $filters = \App\Support\Catalog::filters($request);
 
@@ -72,6 +104,37 @@ Route::prefix('{locale}')
                 ),
             ]);
         })->name('compounds');
+
+        Route::get('/compounds/{slug}', function (string $locale, string $slug) {
+            $compound = \App\Support\Catalog::compound($locale, $slug);
+
+            abort_if(! $compound, 404);
+
+            $crumb = $locale === 'en' ? 'Compounds' : 'الكمبوندات';
+
+            $summary = $compound['desc'] ?: ($locale === 'en'
+                ? trim("{$compound['name']} by {$compound['developer']} in {$compound['area']} — from {$compound['starting']}, {$compound['down']} down, {$compound['years']}.")
+                : trim("{$compound['name']} من {$compound['developer']} في {$compound['area']} — يبدأ من {$compound['starting']}، مقدم {$compound['down']}، {$compound['years']}."));
+
+            return Inertia::render('Site/Compound', [
+                'compound' => $compound,
+                'units' => \App\Support\Catalog::compoundUnits($locale, $compound['id']),
+                'meta' => \App\Support\Seo::page(
+                    $locale,
+                    $compound['name'],
+                    $summary,
+                    $compound['image'],
+                    'article',
+                    [
+                        \App\Support\Seo::breadcrumb($locale, [
+                            $crumb => '/compounds',
+                            $compound['name'] => '/compounds/'.$compound['slug'],
+                        ]),
+                        \App\Support\Seo::project($compound + ['desc' => $summary], $locale),
+                    ],
+                ),
+            ]);
+        })->name('compounds.show');
 
         Route::get('/about', fn (string $locale) => Inertia::render('Site/About', [
             'milestones' => \App\Support\DemoContent::milestones($locale),

@@ -107,6 +107,140 @@ class DemoContent
         ];
     }
 
+    /**
+     * تفاصيل صفحة العقار — وصف ومميزات ومعرض صور، مفهرسة بالكود.
+     * محتوى قالب للعرض؛ بيتغيّر من /admin/properties لكل وحدة حقيقية.
+     */
+    public static function propertyDetails(string $locale): array
+    {
+        $ar = $locale === 'ar';
+
+        return [
+            'XH-1001' => [
+                'desc' => $ar
+                    ? "شقة أرضي 165م² بجاردن خاصة 60م² في كمبوند مغلق بالتجمع الخامس. التشطيب سوبر لوكس ومسلّمة بالمطبخ والتكييفات.\nالمساحة موزّعة على ٣ غرف نوم بينهم ماستر، وريسبشن ٣ قطع على الجاردن مباشرة."
+                    : "Ground-floor apartment of 165m² with a private 60m² garden inside a gated compound in Fifth Settlement. Super-lux finishing, delivered with kitchen and ACs.\nLaid out as 3 bedrooms including a master, and a 3-piece reception opening directly onto the garden.",
+                'features' => $ar
+                    ? "جاردن خاصة 60م²\nتشطيب سوبر لوكس بالمطبخ والتكييفات\nغرفة ماستر بحمام خاص\nجراج مغطى\nأمن ٢٤ ساعة\nنادي اجتماعي وحمام سباحة"
+                    : "Private 60m² garden\nSuper-lux finishing with kitchen and ACs\nMaster bedroom with en-suite\nCovered parking\n24/7 security\nSocial club and swimming pool",
+                'gallery' => ['/images/demo/property-1.jpg', '/images/demo/compound-1.jpg', '/images/demo/area-1.jpg'],
+            ],
+            'XH-1002' => [
+                'desc' => $ar
+                    ? "فيلا مستقلة 420م² مباني على أرض 600م² في العاصمة الإدارية، تشطيب كامل وجاهزة للسكن.\nدورين وروف، بحديقة محيطة من ٣ جهات وحمام سباحة خاص."
+                    : "Standalone villa of 420m² built on a 600m² plot in the New Capital, fully finished and ready to move in.\nTwo floors plus a roof, surrounded by garden on three sides with a private pool.",
+                'features' => $ar
+                    ? "أرض 600م² وحديقة محيطة\nحمام سباحة خاص\n٥ غرف نوم بـ٥ حمامات\nغرفة خدم بمدخل مستقل\nجراج يتسع لسيارتين\nتشطيب كامل جاهز للسكن"
+                    : "600m² plot with wrap-around garden\nPrivate swimming pool\n5 bedrooms with 5 bathrooms\nMaid's room with separate entrance\nTwo-car garage\nFully finished, ready to move in",
+                'gallery' => ['/images/demo/property-2.jpg', '/images/demo/compound-2.jpg', '/images/demo/area-2.jpg'],
+            ],
+            'XH-1003' => [
+                'desc' => $ar
+                    ? "شقة 140م² بفيو بحري مفتوح على الكورنيش بالإسكندرية، الدور السابع بأسانسيرين.\nمناسبة للسكن الدائم أو كمصيف، والعقار مسجّل وجاهز للتنازل."
+                    : "A 140m² apartment with an open sea view on the Alexandria Corniche, seventh floor with two elevators.\nSuitable as a primary home or a summer place; the unit is registered and ready for transfer.",
+                'features' => $ar
+                    ? "فيو بحري مفتوح\nدور سابع بأسانسيرين\n٣ غرف نوم و٢ حمام\nبلكونة على الكورنيش\nعقار مسجّل وجاهز للتنازل\nقريب من المواصلات والخدمات"
+                    : "Open sea view\nSeventh floor with two elevators\n3 bedrooms and 2 bathrooms\nBalcony overlooking the Corniche\nRegistered and ready for transfer\nClose to transport and services",
+                'gallery' => ['/images/demo/property-3.jpg', '/images/demo/area-3.jpg'],
+            ],
+            'XH-1004' => [
+                'desc' => $ar
+                    ? "شقة مفروشة 156م² للإيجار بالتجمع الخامس، مفروشة بالكامل بالمطبخ والتكييفات والأجهزة.\nالعقد سنوي والتأمين شهرين، والمرافق مستقلة على الوحدة."
+                    : "Furnished 156m² apartment for rent in Fifth Settlement, fully furnished with kitchen, ACs and appliances.\nAnnual contract with a two-month deposit; utilities are metered separately for the unit.",
+                'features' => $ar
+                    ? "مفروشة بالكامل بالأجهزة\n٢ غرفة نوم و٢ حمام\nمطبخ وتكييفات\nعقد سنوي وتأمين شهرين\nأمن ٢٤ ساعة\nجراج داخل الكمبوند"
+                    : "Fully furnished with appliances\n2 bedrooms and 2 bathrooms\nKitchen and ACs\nAnnual contract, two-month deposit\n24/7 security\nParking inside the compound",
+                'gallery' => ['/images/demo/property-4.jpg', '/images/demo/compound-3.jpg'],
+            ],
+            'XH-1005' => [
+                'desc' => $ar
+                    ? "توين هاوس 280م² في العاصمة الإدارية باستلام فوري — من غير انتظار تسليم.\n٤ غرف نوم، حديقة أمامية وخلفية، والتشطيب نص تشطيب مع إمكانية التسليم كامل بفرق سعر."
+                    : "A 280m² twin house in the New Capital with immediate handover — no waiting for delivery.\n4 bedrooms, front and back gardens, semi-finished with the option to be fully finished for a price difference.",
+                'features' => $ar
+                    ? "استلام فوري\nحديقة أمامية وخلفية\n٤ غرف نوم و٣ حمامات\nنص تشطيب بإمكانية التشطيب الكامل\nجراج خاص\nكمبوند مغلق بأمن ٢٤ ساعة"
+                    : "Immediate handover\nFront and back gardens\n4 bedrooms and 3 bathrooms\nSemi-finished, full finishing optional\nPrivate garage\nGated compound with 24/7 security",
+                'gallery' => ['/images/demo/property-5.jpg', '/images/demo/compound-2.jpg'],
+            ],
+            'XH-1006' => [
+                'desc' => $ar
+                    ? "مكتب إداري 65م² في برج مرخّص إداري بالعاصمة الإدارية، الدور الرابع بفيو على المحور.\nمناسب لشركة صغيرة أو مكتب تمثيل، والترخيص الإداري بيسهّل استخراج السجل التجاري على العنوان."
+                    : "A 65m² office in a licensed administrative tower in the New Capital, fourth floor overlooking the main axis.\nSuitable for a small firm or a representative office; the administrative licence makes registering a company at the address straightforward.",
+                'features' => $ar
+                    ? "برج مرخّص إداري\nالدور الرابع بفيو على المحور\nمساحة مفتوحة قابلة للتقسيم\nحمام داخل الوحدة\nأسانسيرات وأمن ٢٤ ساعة\nجراج للزوار"
+                    : "Licensed administrative tower\nFourth floor overlooking the main axis\nOpen-plan space, partitionable\nIn-unit bathroom\nElevators and 24/7 security\nVisitor parking",
+                'gallery' => ['/images/demo/property-6.jpg', '/images/demo/compound-3.jpg'],
+            ],
+            'XH-1007' => [
+                'desc' => $ar
+                    ? "دوبلكس 235م² بروف خاص 70م² في التجمع الخامس، دورين متصلين بسلم داخلي.\n٤ غرف نوم بينهم ماستر، وريسبشن واسع مناسب للعائلات الكبيرة."
+                    : "A 235m² duplex with a private 70m² roof in Fifth Settlement, two connected floors with an internal staircase.\n4 bedrooms including a master, and a wide reception suited to larger families.",
+                'features' => $ar
+                    ? "روف خاص 70م²\nسلم داخلي بين الدورين\n٤ غرف نوم و٣ حمامات\nريسبشن واسع\nمصعد خاص بالعمارة\nقريب من المدارس والخدمات"
+                    : "Private 70m² roof\nInternal staircase between floors\n4 bedrooms and 3 bathrooms\nSpacious reception\nBuilding elevator\nClose to schools and services",
+                'gallery' => ['/images/demo/property-7.jpg', '/images/demo/area-1.jpg'],
+            ],
+            'XH-1008' => [
+                'desc' => $ar
+                    ? "استوديو 78م² مفروش بالكامل للإيجار بالإسكندرية، مناسب لفرد أو زوجين.\nالإيجار شامل الفرش والأجهزة، والعقد قابل للتجديد سنويًا."
+                    : "A fully furnished 78m² studio for rent in Alexandria, suitable for one person or a couple.\nRent includes furniture and appliances, with an annually renewable contract.",
+                'features' => $ar
+                    ? "مفروش بالكامل\nمطبخ مجهّز وتكييف\nحمام كامل\nعقد سنوي قابل للتجديد\nقريب من البحر\nمدخل مستقل"
+                    : "Fully furnished\nEquipped kitchen and AC\nFull bathroom\nAnnually renewable contract\nClose to the sea\nSeparate entrance",
+                'gallery' => ['/images/demo/property-8.jpg', '/images/demo/area-3.jpg'],
+            ],
+            'XH-1009' => [
+                'desc' => $ar
+                    ? "شقة 190م² بفيو لاندسكيب مفتوح في كمبوند بالتجمع الخامس، الدور الثالث.\n٣ غرف نوم و٣ حمامات، ونظام سداد من المطوّر على أقساط."
+                    : "A 190m² apartment with an open landscape view inside a compound in Fifth Settlement, third floor.\n3 bedrooms and 3 bathrooms, with an instalment plan from the developer.",
+                'features' => $ar
+                    ? "فيو لاندسكيب مفتوح\n٣ غرف نوم و٣ حمامات\nنظام سداد بالتقسيط من المطوّر\nجراج مغطى\nنادي اجتماعي وحمام سباحة\nأمن ٢٤ ساعة"
+                    : "Open landscape view\n3 bedrooms and 3 bathrooms\nDeveloper instalment plan\nCovered parking\nSocial club and swimming pool\n24/7 security",
+                'gallery' => ['/images/demo/property-9.jpg', '/images/demo/compound-1.jpg', '/images/demo/area-2.jpg'],
+            ],
+        ];
+    }
+
+    /** مميزات ومعرض صور الكمبوندات — بالترتيب اللي في compounds() */
+    public static function compoundDetails(string $locale): array
+    {
+        $ar = $locale === 'ar';
+
+        $sets = [
+            $ar
+                ? "لاند سكيب مفتوح على 120 فدان\nنادي اجتماعي وحمام سباحة\nممشى ومسارات دراجات\nمنطقة تجارية داخل الكمبوند\nأمن وحراسة ٢٤ ساعة\nمدارس ومركز طبي على بعد دقائق"
+                : "Open landscape across 120 acres\nSocial club and swimming pool\nWalking and cycling tracks\nRetail area inside the compound\n24/7 security\nSchools and a medical centre minutes away",
+            $ar
+                ? "واجهة بحرية 800 متر\nلاجونز صناعية\nبيتش باي خاص\nمنطقة مطاعم وكافيهات\nإدارة فندقية للوحدات\nأمن ٢٤ ساعة"
+                : "800m seafront\nMan-made lagoons\nPrivate beach bay\nRestaurants and cafés zone\nHotel management for units\n24/7 security",
+            $ar
+                ? "موقع على المحور الرئيسي\nأبراج إدارية وتجارية مرخّصة\nجراجات متعددة الأدوار\nقاعات اجتماعات مشتركة\nأنظمة إطفاء وإنذار\nصيانة وإدارة مرافق"
+                : "Located on the main axis\nLicensed administrative and retail towers\nMulti-storey parking\nShared meeting rooms\nFire and alarm systems\nFacility management and maintenance",
+            $ar
+                ? "كثافة بنائية منخفضة\nمساحات خضراء واسعة\nنادي رياضي وسبا\nمنطقة أطفال\nطرق داخلية بمداخل مؤمّنة\nصيانة دورية للمرافق"
+                : "Low building density\nWide green areas\nGym and spa\nKids' area\nInternal roads with secured gates\nRegular facility maintenance",
+            $ar
+                ? "بروموناد على الواجهة\nمارينا لليخوت\nمحلات ومطاعم على الممشى\nوحدات بإطلالة بحرية\nأمن ٢٤ ساعة\nإدارة وصيانة"
+                : "Waterfront promenade\nYacht marina\nShops and restaurants along the walkway\nUnits with sea views\n24/7 security\nManagement and maintenance",
+            $ar
+                ? "مساحات خضراء تغطي أغلب المشروع\nممشى ومسارات جري\nنادي اجتماعي\nمنطقة تجارية\nمداخل مؤمّنة\nمواقف زوار"
+                : "Green areas covering most of the project\nWalking and running tracks\nSocial club\nRetail area\nSecured gates\nVisitor parking",
+        ];
+
+        $galleries = [
+            ['/images/demo/compound-1.jpg', '/images/demo/property-1.jpg', '/images/demo/area-1.jpg'],
+            ['/images/demo/compound-2.jpg', '/images/demo/property-3.jpg', '/images/demo/area-3.jpg'],
+            ['/images/demo/compound-3.jpg', '/images/demo/property-6.jpg', '/images/demo/area-2.jpg'],
+            ['/images/demo/compound-1.jpg', '/images/demo/property-9.jpg'],
+            ['/images/demo/compound-2.jpg', '/images/demo/property-8.jpg'],
+            ['/images/demo/compound-3.jpg', '/images/demo/property-5.jpg'],
+        ];
+
+        return array_map(
+            fn ($i) => ['features' => $sets[$i], 'gallery' => $galleries[$i]],
+            array_keys($sets),
+        );
+    }
+
     public static function compounds(string $locale): array
     {
         $ar = $locale === 'ar';

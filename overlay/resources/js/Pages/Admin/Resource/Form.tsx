@@ -1,5 +1,5 @@
 import { Link, useForm } from "@inertiajs/react";
-import { ArrowRight, Eye, EyeOff, ImagePlus } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, ImagePlus, X } from "lucide-react";
 import { useState } from "react";
 import { Button, Card, Field, Input } from "@/Components/admin/ui";
 import MediaPicker from "@/Components/admin/MediaPicker";
@@ -28,7 +28,7 @@ export default function ResourceForm({
 
     const { data, setData, post, put, processing, errors } = useForm<Values>(initial);
     const [revealed, setRevealed] = useState<Record<string, boolean>>({});
-    const [picking, setPicking] = useState<string | null>(null);
+    const [picking, setPicking] = useState<ResourceField | null>(null);
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -142,11 +142,63 @@ export default function ResourceForm({
 
                     <button
                         type="button"
-                        onClick={() => setPicking(f.name)}
+                        onClick={() => setPicking(f)}
                         className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2.5 text-xs font-bold text-gray-700 transition hover:border-primary hover:text-secondary"
                     >
                         <ImagePlus size={15} />
                         المكتبة
+                    </button>
+                </div>
+            );
+        }
+
+        if (f.type === "gallery") {
+            const items = String(value ?? "")
+                .split("\n")
+                .map((line) => line.trim())
+                .filter(Boolean);
+
+            const write = (next: string[]) => setData(f.name, next.join("\n"));
+
+            return (
+                <div className="flex flex-col gap-3">
+                    {items.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                            {items.map((path, i) => (
+                                <div key={`${path}-${i}`} className="relative">
+                                    {isVideo(path) ? (
+                                        <video
+                                            src={path}
+                                            muted
+                                            className="h-16 w-20 rounded-lg border border-gray-200 object-cover"
+                                        />
+                                    ) : (
+                                        <img
+                                            src={path}
+                                            alt=""
+                                            className="h-16 w-20 rounded-lg border border-gray-200 object-cover"
+                                        />
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() => write(items.filter((_, j) => j !== i))}
+                                        className="absolute -top-1.5 end-[-6px] rounded-full bg-danger p-1 text-white shadow transition hover:opacity-85"
+                                        aria-label={`حذف الصورة ${i + 1}`}
+                                    >
+                                        <X size={11} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    <button
+                        type="button"
+                        onClick={() => setPicking(f)}
+                        className="inline-flex w-fit items-center gap-1.5 rounded-lg border border-dashed border-gray-300 px-3 py-2.5 text-xs font-bold text-gray-700 transition hover:border-primary hover:text-secondary"
+                    >
+                        <ImagePlus size={15} />
+                        {items.length ? `إضافة صور (${items.length})` : "إضافة صور"}
                     </button>
                 </div>
             );
@@ -198,7 +250,7 @@ export default function ResourceForm({
                 >
                     <div className="grid gap-5 p-6 md:grid-cols-2">
                         {resource.fields.map((f) => (
-                            <div key={f.name} className={f.type === "textarea" ? "md:col-span-2" : ""}>
+                            <div key={f.name} className={f.type === "textarea" || f.type === "gallery" ? "md:col-span-2" : ""}>
                                 <Field label={f.label} hint={f.hint} error={errors[f.name]}>
                                     {control(f)}
                                 </Field>
@@ -210,9 +262,22 @@ export default function ResourceForm({
 
             <MediaPicker
                 open={picking !== null}
-                current={picking ? String(data[picking] ?? "") : undefined}
+                multiple={picking?.type === "gallery"}
+                current={picking && picking.type !== "gallery" ? String(data[picking.name] ?? "") : undefined}
                 onClose={() => setPicking(null)}
-                onPick={(path) => picking && setData(picking, path)}
+                onPick={(path) => {
+                    if (!picking) return;
+
+                    // المعرض بيضيف للقايمة، وحقل الصورة الواحدة بيستبدل
+                    if (picking.type !== "gallery") return setData(picking.name, path);
+
+                    const items = String(data[picking.name] ?? "")
+                        .split("\n")
+                        .map((line) => line.trim())
+                        .filter(Boolean);
+
+                    if (!items.includes(path)) setData(picking.name, [...items, path].join("\n"));
+                }}
             />
         </AdminLayout>
     );

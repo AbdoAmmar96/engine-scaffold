@@ -170,11 +170,14 @@ export function MediaGrid({
 export default function MediaPicker({
     open,
     current,
+    multiple = false,
     onClose,
     onPick,
 }: {
     open: boolean;
     current?: string;
+    /** معرض صور: المنتقي بيفضل مفتوح عشان تختار أكتر من صورة */
+    multiple?: boolean;
     onClose: () => void;
     onPick: (path: string) => void;
 }) {
@@ -193,7 +196,9 @@ export default function MediaPicker({
         <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 py-10">
             <div className="w-full max-w-4xl rounded-2xl bg-white shadow-xl">
                 <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-                    <h2 className="text-base font-extrabold text-gray-900">اختر من مكتبة الميديا</h2>
+                    <h2 className="text-base font-extrabold text-gray-900">
+                        {multiple ? "اختر صور من المكتبة — تقدر تختار أكتر من واحدة" : "اختر من مكتبة الميديا"}
+                    </h2>
                     <button
                         type="button"
                         onClick={onClose}
@@ -210,7 +215,7 @@ export default function MediaPicker({
                         current={current}
                         onPick={(file) => {
                             onPick(file.path);
-                            onClose();
+                            if (!multiple) onClose();
                         }}
                     />
                 </div>

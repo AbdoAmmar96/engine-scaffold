@@ -23,4 +23,19 @@ trait Bilingual
 
         return $this->{$field};
     }
+
+    /** حقل فيه بند في كل سطر (مميزات، صور) → مصفوفة منضّفة */
+    public function tLines(string $field, ?string $locale = null): array
+    {
+        return self::lines($this->t($field, $locale));
+    }
+
+    /** بند في كل سطر → مصفوفة، من غير أسطر فاضية */
+    public static function lines(?string $text): array
+    {
+        return array_values(array_filter(
+            array_map('trim', preg_split('/\r\n|\r|\n/', (string) $text) ?: []),
+            fn ($line) => $line !== '',
+        ));
+    }
 }

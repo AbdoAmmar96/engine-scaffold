@@ -15,6 +15,17 @@ use Modules\Properties\Models\Property;
  */
 class CatalogSeeder extends Seeder
 {
+    /** الوحدة التجريبية دي تبع أنهي مشروع — المفتاح هو كود الوحدة */
+    private const COMPOUND_OF = [
+        'XH-1001' => 'النخيل هايتس',
+        'XH-1002' => 'سيلين ريزيدنس',
+        'XH-1003' => 'مارينا ووك',
+        'XH-1004' => 'جرين أفينيو',
+        'XH-1005' => 'سيلين ريزيدنس',
+        'XH-1006' => 'كابيتال سكوير',
+        'XH-1009' => 'النخيل هايتس',
+    ];
+
     public function run(): void
     {
         $arProps = DemoContent::properties('ar');
@@ -23,6 +34,10 @@ class CatalogSeeder extends Seeder
         $enComps = DemoContent::compounds('en');
         $arAreas = DemoContent::areas('ar');
         $enAreas = DemoContent::areas('en');
+        $arPropDetails = DemoContent::propertyDetails('ar');
+        $enPropDetails = DemoContent::propertyDetails('en');
+        $arCompDetails = DemoContent::compoundDetails('ar');
+        $enCompDetails = DemoContent::compoundDetails('en');
 
         // ---------- المناطق ----------
         $locations = [];
@@ -64,10 +79,19 @@ class CatalogSeeder extends Seeder
         foreach ($arComps as $i => $c) {
             $en = $enComps[$i] ?? [];
 
+            $detail = $arCompDetails[$i] ?? [];
+            $detailEn = $enCompDetails[$i] ?? [];
+            // الـ id بيتمرّر لـ buildSlug عشان إعادة التشغيل متولّدش -2 و-3
+            $existing = Compound::where('name', $c['name'])->first();
+
             $compounds[$c['name']] = Compound::updateOrCreate(
                 ['name' => $c['name']],
                 [
                     'name_en' => $en['name'] ?? null,
+                    'slug' => $existing?->slug ?: Compound::buildSlug($c['name'], $en['name'] ?? null, $existing?->id),
+                    'features' => $detail['features'] ?? null,
+                    'features_en' => $detailEn['features'] ?? null,
+                    'gallery' => implode("\n", $detail['gallery'] ?? []),
                     'developer_id' => $developers[$c['developer']]->id ?? null,
                     'location_id' => $locations[$c['area']]->id ?? null,
                     'description' => $c['desc'] ?? null,
@@ -87,13 +111,24 @@ class CatalogSeeder extends Seeder
         // ---------- العقارات ----------
         foreach ($arProps as $i => $p) {
             $en = $enProps[$i] ?? [];
+            $detail = $arPropDetails[$p['ref']] ?? [];
+            $detailEn = $enPropDetails[$p['ref']] ?? [];
+            $compoundName = self::COMPOUND_OF[$p['ref']] ?? null;
+            $existing = Property::where('ref', $p['ref'])->first();
 
             Property::updateOrCreate(
                 ['ref' => $p['ref']],
                 [
                     'title' => $p['title'],
                     'title_en' => $en['title'] ?? null,
+                    'slug' => $existing?->slug ?: Property::buildSlug($p['title'], $en['title'] ?? null, $existing?->id),
+                    'description' => $detail['desc'] ?? null,
+                    'description_en' => $detailEn['desc'] ?? null,
+                    'features' => $detail['features'] ?? null,
+                    'features_en' => $detailEn['features'] ?? null,
+                    'gallery' => implode("\n", $detail['gallery'] ?? []),
                     'location_id' => $locations[$p['area']]->id ?? null,
+                    'compound_id' => $compoundName ? ($compounds[$compoundName]->id ?? null) : null,
                     'purpose' => $p['purpose'] === 'إيجار' ? 'rent' : 'sale',
                     'type' => $this->guessType($p['title']),
                     'price' => $p['price'],

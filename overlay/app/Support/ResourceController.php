@@ -14,7 +14,7 @@ use Inertia\Response;
  * الشاشتين (Index / Form) في React عامّتين وبيتبنوا من الـ schema اللي هنا،
  * فإضافة موديول جديد = كلاس صغير + راوت، من غير أي صفحة جديدة.
  *
- * أنواع الحقول المدعومة: text · number · password · date · textarea · select · toggle · image
+ * أنواع الحقول المدعومة: text · number · password · date · textarea · select · toggle · image · gallery
  */
 abstract class ResourceController extends Controller
 {

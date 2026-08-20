@@ -37,9 +37,13 @@ export interface Paginated<T> {
 
 export interface Property {
     id: number;
+    /** رابط صفحة العقار — /{locale}/properties/{slug} */
+    slug: string;
     title: string;
     area: string;
     purpose: string;
+    /** نوع العقار باللغة المعروضة (شقة / Apartment) */
+    type: string;
     price: string;
     beds: number;
     baths: number;
@@ -48,8 +52,19 @@ export interface Property {
     image: string;
 }
 
+/** العقار كامل في صفحة التفاصيل */
+export interface PropertyDetail extends Property {
+    description: string;
+    features: string[];
+    /** الصورة الرئيسية أول عنصر دايمًا */
+    gallery: string[];
+    compound: { name: string; slug: string; developer: string; delivery: string } | null;
+}
+
 export interface Compound {
     id: number;
+    /** رابط صفحة الكمبوند — /{locale}/compounds/{slug} */
+    slug: string;
     name: string;
     developer: string;
     area: string;
@@ -60,6 +75,12 @@ export interface Compound {
     image: string;
     desc: string;
     delivery: string;
+}
+
+/** الكمبوند كامل في صفحة التفاصيل */
+export interface CompoundDetail extends Compound {
+    features: string[];
+    gallery: string[];
 }
 
 /** بطاقة منطقة في قسم "مناطق بنغطيها" بالرئيسية */
@@ -126,7 +147,7 @@ export interface ContactOptions {
 export interface ResourceField {
     name: string;
     label: string;
-    type: "text" | "number" | "password" | "date" | "textarea" | "select" | "toggle" | "image";
+    type: "text" | "number" | "password" | "date" | "textarea" | "select" | "toggle" | "image" | "gallery";
     hint?: string;
     required?: boolean;
     options?: { value: string; label: string }[];

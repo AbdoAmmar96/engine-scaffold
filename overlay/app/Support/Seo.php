@@ -28,8 +28,13 @@ class Seo
         $path = self::pathWithoutLocale();
 
         return [
-            'title' => $title !== '' ? "{$title} — {$siteName}" : ($seo['meta_title'] ?: $siteName),
-            'description' => Str::limit(strip_tags($description ?: ($seo['meta_description'] ?: ($general['tagline'] ?? ''))), 160),
+            // ?? مطلوبة: مجموعة seo بتبقى فاضية على تثبيت جديد قبل ما الأدمن يحفظ حاجة
+            'title' => $title !== '' ? "{$title} — {$siteName}" : (($seo['meta_title'] ?? '') ?: $siteName),
+            // الوصف ممكن يكون فقرتين — الأسطر بتتحوّل مسافات عشان meta بيبقى سطر واحد
+            'description' => Str::limit(
+                trim(preg_replace('/\s+/u', ' ', strip_tags($description ?: (($seo['meta_description'] ?? '') ?: ($general['tagline'] ?? '')))) ?? ''),
+                160,
+            ),
             'canonical' => url("/{$locale}{$path}"),
             'alternates' => [
                 'ar' => url("/ar{$path}"),
@@ -109,6 +114,80 @@ class Seo
                 'position' => $i + 1,
                 'name' => $row['title'] ?? $row['name'] ?? '',
             ])->all(),
+        ];
+    }
+
+    /** عقار واحد — بيخلي جوجل يعرض السعر وعدد الغرف تحت النتيجة */
+    public static function residence(array $p, string $locale): array
+    {
+        return array_filter([
+            '@context' => 'https://schema.org',
+            '@type' => 'RealEstateListing',
+            'name' => $p['title'],
+            'description' => $p['description'] ?: null,
+            'url' => url("/{$locale}/properties/{$p['slug']}"),
+            'image' => array_map(fn ($i) => url($i), $p['gallery'] ?: []) ?: null,
+            'identifier' => $p['ref'] ?: null,
+            'inLanguage' => $locale,
+            'offers' => self::offer($p['price'] ?? ''),
+            'mainEntity' => array_filter([
+                '@type' => 'Accommodation',
+                'name' => $p['title'],
+                'accommodationCategory' => $p['type'] ?: null,
+                'numberOfBedrooms' => $p['beds'] ?: null,
+                'numberOfBathroomsTotal' => $p['baths'] ?: null,
+                'floorSize' => $p['size'] ? [
+                    '@type' => 'QuantitativeValue',
+                    'value' => $p['size'],
+                    'unitCode' => 'MTK',
+                ] : null,
+                'address' => $p['area'] ? [
+                    '@type' => 'PostalAddress',
+                    'addressLocality' => $p['area'],
+                    'addressCountry' => 'EG',
+                ] : null,
+            ]),
+        ]);
+    }
+
+    /** مشروع/كمبوند */
+    public static function project(array $c, string $locale): array
+    {
+        return array_filter([
+            '@context' => 'https://schema.org',
+            '@type' => 'ApartmentComplex',
+            'name' => $c['name'],
+            'description' => $c['desc'] ?: null,
+            'url' => url("/{$locale}/compounds/{$c['slug']}"),
+            'image' => array_map(fn ($i) => url($i), $c['gallery'] ?: []) ?: null,
+            'inLanguage' => $locale,
+            'address' => $c['area'] ? [
+                '@type' => 'PostalAddress',
+                'addressLocality' => $c['area'],
+                'addressCountry' => 'EG',
+            ] : null,
+            'amenityFeature' => collect($c['features'] ?? [])->map(fn ($f) => [
+                '@type' => 'LocationFeatureSpecification',
+                'name' => $f,
+                'value' => true,
+            ])->all() ?: null,
+        ]);
+    }
+
+    /** السعر متخزّن كنص منسّق ("EGP 4,850,000") — بنطلّع منه الرقم بس */
+    private static function offer(string $price): ?array
+    {
+        $digits = preg_replace('/\D+/', '', $price) ?? '';
+
+        if ($digits === '') {
+            return null;
+        }
+
+        return [
+            '@type' => 'Offer',
+            'price' => $digits,
+            'priceCurrency' => 'EGP',
+            'availability' => 'https://schema.org/InStock',
         ];
     }
 
