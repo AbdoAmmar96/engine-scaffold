@@ -86,7 +86,10 @@ class SettingsSeeder extends Seeder
 
         foreach ($groups as $group => $values) {
             foreach ($values as $key => $value) {
-                Setting::updateOrCreate(
+                // firstOrCreate مش updateOrCreate: القيم دي قيم افتراضية للتثبيت الجديد.
+                // deploy.sh بيشغّل db:seed في كل رفعة، و updateOrCreate كانت بترجّع
+                // كل إعدادات العميل (ألوان، أرقام تواصل، بيكسل) للأصل في كل مرة.
+                Setting::firstOrCreate(
                     ['group' => $group, 'key' => $key],
                     ['value' => $value, 'is_public' => true]
                 );
