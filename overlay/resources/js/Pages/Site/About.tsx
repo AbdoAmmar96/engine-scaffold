@@ -1,9 +1,10 @@
-import { usePage } from "@inertiajs/react";
+import { Link, usePage } from "@inertiajs/react";
+import { ArrowLeft, Building2 } from "lucide-react";
 import CountUp from "@/Components/site/CountUp";
 import PageHero from "@/Components/site/PageHero";
 import Reveal from "@/Components/site/Reveal";
 import SiteLayout from "@/Layouts/SiteLayout";
-import type { Milestone, SharedProps, TeamMember } from "@/lib/types";
+import type { DeveloperCard, Milestone, SharedProps, TeamMember } from "@/lib/types";
 
 const copy = {
     ar: {
@@ -24,6 +25,10 @@ const copy = {
         developersLabel: "مطوّر شريك",
         milestonesTitle: "المحطات",
         teamTitle: "الفريق",
+        devsTitle: "المطوّرون على المنصة",
+        devsDesc: "المطوّرون اللي بنعرض مشاريعهم دلوقتي — اضغط على أي واحد تشوف مشاريعه.",
+        devsProjects: (n: number) => (n === 1 ? "مشروع واحد" : n === 2 ? "مشروعان" : `${n} مشاريع`),
+        devsCta: "شوف المشاريع",
     },
     en: {
         crumb: "About",
@@ -43,10 +48,19 @@ const copy = {
         developersLabel: "Partner developers",
         milestonesTitle: "Milestones",
         teamTitle: "The team",
+        devsTitle: "Developers on the platform",
+        devsDesc: "The developers whose projects we currently list — pick one to see its projects.",
+        devsProjects: (n: number) => `${n} ${n === 1 ? "project" : "projects"}`,
+        devsCta: "View projects",
     },
 };
 
-export default function About({ milestones, team, stats: counts0 }: { milestones: Milestone[]; team: TeamMember[]; stats: { value: string; label: string }[] }) {
+export default function About({ milestones, team, stats: counts0, developers }: {
+    milestones: Milestone[];
+    team: TeamMember[];
+    stats: { value: string; label: string }[];
+    developers: DeveloperCard[];
+}) {
     const { locale, settings } = usePage<SharedProps>().props;
     const t = copy[locale] ?? copy.ar;
 
@@ -163,6 +177,69 @@ export default function About({ milestones, team, stats: counts0 }: { milestones
                     </div>
                 </div>
             </section>
+
+            {/* المطوّرون — بيتقروا من الداتابيز، فالقسم كله بيختفي لو مفيش ولا واحد بمشاريع منشورة */}
+            {developers.length > 0 && (
+                <section className="bg-bg px-4 py-14">
+                    <div className="mx-auto max-w-7xl">
+                        <Reveal>
+                            <h2 className="text-3xl font-extrabold text-secondary">{t.devsTitle}</h2>
+                            <p className="mt-2 max-w-2xl text-sm font-bold leading-relaxed text-muted">{t.devsDesc}</p>
+                        </Reveal>
+
+                        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                            {developers.map((d, i) => (
+                                <Reveal key={d.id} delay={i * 90}>
+                                    <Link
+                                        href={d.url}
+                                        className="group flex h-full flex-col rounded-2xl border border-gray-100 bg-surface p-6 transition duration-200 hover:-translate-y-1 hover:border-primary/50"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            {d.logo ? (
+                                                <img
+                                                    src={d.logo}
+                                                    alt={d.name}
+                                                    loading="lazy"
+                                                    className="h-14 w-14 shrink-0 rounded-xl object-contain"
+                                                />
+                                            ) : (
+                                                /* اللوجو لسه مترفعش — أول حرف بدل مربع مكسور */
+                                                <span
+                                                    aria-hidden
+                                                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-secondary text-2xl font-extrabold text-white"
+                                                >
+                                                    {d.name.trim().charAt(0)}
+                                                </span>
+                                            )}
+
+                                            <div className="min-w-0">
+                                                <h3 className="truncate text-lg font-extrabold text-secondary transition group-hover:text-primary">
+                                                    {d.name}
+                                                </h3>
+                                                <span className="mt-1 flex items-center gap-2 text-xs font-bold text-muted">
+                                                    <Building2 size={13} className="shrink-0 text-primary" />
+                                                    {t.devsProjects(d.compounds)}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {d.about && (
+                                            <p className="mt-4 line-clamp-3 text-sm font-bold leading-relaxed text-muted">
+                                                {d.about}
+                                            </p>
+                                        )}
+
+                                        <span className="mt-auto flex items-center gap-2 pt-5 text-[13px] font-extrabold text-primary">
+                                            {t.devsCta}
+                                            <ArrowLeft size={15} className="transition group-hover:-translate-x-1 ltr:rotate-180 ltr:group-hover:translate-x-1" />
+                                        </span>
+                                    </Link>
+                                </Reveal>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
         </SiteLayout>
     );
 }

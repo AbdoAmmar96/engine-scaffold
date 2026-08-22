@@ -151,6 +151,20 @@ export interface TeamMember {
     image: string;
 }
 
+/** مطوّر معروض في صفحة «من نحن» */
+export interface DeveloperCard {
+    id: number;
+    name: string;
+    /** نبذة المطوّر — بتفضل فاضية لحد ما تتكتب من الداشبورد */
+    about: string;
+    /** مسار اللوجو — فاضي يعني ارسم أول حرف بدله */
+    logo: string;
+    /** عدد المشاريع المنشورة */
+    compounds: number;
+    /** رابط مشاريع المطوّر — /{locale}/compounds?q=... */
+    url: string;
+}
+
 /** خيارات فورم "اتصل بنا" */
 export interface ContactOptions {
     areas: string[];

@@ -140,6 +140,7 @@ Route::prefix('{locale}')
             'milestones' => \App\Support\DemoContent::milestones($locale),
             'team'       => \App\Support\DemoContent::team($locale),
             'stats'      => \App\Support\Catalog::stats($locale),
+            'developers' => \App\Support\Catalog::developers($locale),
             'meta'       => \App\Support\Seo::page(
                 $locale,
                 $locale === 'en' ? 'About us' : 'من نحن',

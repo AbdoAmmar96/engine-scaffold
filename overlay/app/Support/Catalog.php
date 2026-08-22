@@ -110,6 +110,27 @@ class Catalog
         return $rows->map(fn (Compound $c) => $c->toCard($locale))->all();
     }
 
+    /**
+     * المطوّرون المعروضين في الموقع — بعدد مشاريعهم الحقيقي.
+     *
+     * المطوّر من غير مشاريع منشورة مش بيظهر: القسم ده بيوعد الزائر بمشاريع
+     * يقدر يشوفها، وكارت بيوصّل لصفحة فاضية أسوأ من إنه مايبانش.
+     */
+    public static function developers(string $locale, ?int $limit = null): array
+    {
+        $rows = Developer::query()
+            ->where('is_active', true)
+            // whereHas مش having: withCount بيطلّع subquery مش aggregate،
+            // و HAVING عليه بيرمي "non-aggregate query" في SQLite
+            ->withCount(['compounds' => fn ($q) => $q->where('is_active', true)])
+            ->whereHas('compounds', fn ($q) => $q->where('is_active', true))
+            ->orderBy('sort')->orderBy('id')
+            ->when($limit, fn ($q) => $q->limit($limit))
+            ->get();
+
+        return $rows->map(fn (Developer $d) => $d->toCard($locale))->all();
+    }
+
     /** إحصاءات الهيرو — معدودة من الداتابيز مش مكتوبة بالإيد */
     public static function stats(string $locale): array
     {
