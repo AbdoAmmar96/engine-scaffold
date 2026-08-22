@@ -51,6 +51,9 @@ class SettingsSeeder extends Seeder
                 'video_poster' => '',
                 // فيديو أو صورة — FrameMedia بيكتشف الامتداد ويرندر video أو img
                 'hero_bg_video' => '/videos/skyline-dawn.mp4',
+                // صورة خلفية الهيرو: بتبان قبل ما الفيديو يحمّل، ومع نمط static،
+                // ومع prefers-reduced-motion. كانت متكتبة ثابتة في HeroSearch.
+                'hero_bg_image' => '/images/demo/hero-bg.jpg',
                 'hero_media' => '/images/demo/hero.jpg',
                 'process_media' => '/videos/open-door.mp4',
             ],

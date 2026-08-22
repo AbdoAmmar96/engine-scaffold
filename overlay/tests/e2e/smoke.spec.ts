@@ -192,3 +192,49 @@ test('guest is sent to the admin login for the dashboard', async ({ page }) => {
     await page.goto('/admin/properties');
     await expect(page).toHaveURL(/\/admin\/login$/);
 });
+
+/**
+ * أنماط خلفية الهيرو. النمط بيتغيّر من الداشبورد (theme.hero_variant)، ولو الفيديو
+ * مش شغّال السبب شبه دايمًا إن النمط مش "video" — مش إن الملف مكسور.
+ * التست ده بيثبّت اللي كل نمط بيعمله فعلًا.
+ */
+test('hero video actually plays when the variant is video', async ({ page }) => {
+    await page.goto('/ar', { waitUntil: 'networkidle' });
+
+    // النمط بيتقرا من الإعدادات مش من وجود العنصر — وإلا التست يتخطّى نفسه
+    // بالظبط لما الفيديو يختفي، وهي الحالة اللي المفروض يمسكها
+    const variant = await page.evaluate(
+        () => JSON.parse(document.getElementById('app')!.dataset.page!).props.settings.theme.hero_variant
+    );
+    test.skip(variant !== 'video', `نمط الهيرو = ${variant}، فالفيديو مش مفروض يشتغل`);
+
+    const video = page.locator('section video').first();
+    await expect(video).toHaveCount(1);
+
+    // مش بنكتفي بوجود العنصر: لازم يتحمّل ويمشي فعلًا
+    await expect
+        .poll(async () => video.evaluate((el: HTMLVideoElement) => el.readyState), { timeout: 15_000 })
+        .toBeGreaterThanOrEqual(3);
+
+    const state = await video.evaluate((el: HTMLVideoElement) => ({
+        paused: el.paused,
+        error: el.error?.message ?? null,
+        width: el.videoWidth,
+    }));
+
+    expect(state.error).toBeNull();
+    expect(state.paused).toBe(false);
+    expect(state.width).toBeGreaterThan(0);
+});
+
+test('the hero background image comes from settings, not a hardcoded path', async ({ page }) => {
+    await page.goto('/ar', { waitUntil: 'networkidle' });
+
+    const src = await page.locator('section img').first().getAttribute('src');
+    const settings = await page.evaluate(
+        () => JSON.parse(document.getElementById('app')!.dataset.page!).props.settings.branding
+    );
+
+    expect(settings.hero_bg_image).toBeTruthy();
+    expect(src).toBe(settings.hero_bg_image);
+});

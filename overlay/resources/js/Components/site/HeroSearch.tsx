@@ -62,7 +62,8 @@ export default function HeroSearch({ options, variant = "video" }: { options: Se
     const wa = settings.contact?.whatsapp;
 
     const video = settings.branding?.hero_bg_video;
-    const poster = "/images/demo/hero-bg.jpg";
+    // الفولباك هنا للتثبيتات القديمة اللي لسه مفيهاش المفتاح — الداشبورد هو المصدر
+    const poster = settings.branding?.hero_bg_image || "/images/demo/hero-bg.jpg";
 
     const [tab, setTab] = useState<"property" | "project">("property");
     const [purpose, setPurpose] = useState<"sale" | "rent">("sale");
