@@ -2,23 +2,55 @@
 
 namespace App\Providers;
 
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\ServiceProvider;
+use Modules\Core\Services\SettingsService;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        //
+        $this->configurePasswordResetMail();
+    }
+
+    /**
+     * رسالة استعادة كلمة المرور.
+     *
+     * الافتراضية إنجليزية وباسم "Laravel"، وبتبني اللينك على راوت
+     * password.reset اللي مش موجود عندنا — الراوت بتاعنا تحت بادئة اللغة.
+     * فالاتنين بيتحدّدوا هنا: اللينك والنص.
+     */
+    private function configurePasswordResetMail(): void
+    {
+        $link = fn (object $notifiable, string $token) => url(sprintf(
+            '/%s/reset-password/%s?email=%s',
+            app()->getLocale(),
+            $token,
+            urlencode($notifiable->getEmailForPasswordReset()),
+        ));
+
+        ResetPassword::createUrlUsing($link);
+
+        // toMailUsing بياخد التوكن مش اللينك — بيعدّي على resetUrl() من فوقها،
+        // فالكولباك اللي فوق مبيتناديش هنا واللينك لازم يتبني تاني بنفس المصدر
+        ResetPassword::toMailUsing(function (object $notifiable, string $token) use ($link) {
+            $site = app(SettingsService::class)->get('general', 'site_name', config('app.name'));
+            $minutes = config('auth.passwords.users.expire', 60);
+
+            return (new MailMessage)
+                ->subject("استعادة كلمة المرور — {$site}")
+                ->greeting('أهلًا،')
+                ->line("وصلنا طلب لتغيير كلمة المرور بتاعة حسابك على {$site}.")
+                ->action('غيّر كلمة المرور', $link($notifiable, $token))
+                ->line("اللينك ده بينتهي بعد {$minutes} دقيقة.")
+                ->line('لو مش إنت اللي طلبت، تجاهل الرسالة — حسابك زي ما هو ومحدش هيقدر يغيّر حاجة.')
+                ->salutation("تحياتنا، {$site}");
+        });
     }
 }

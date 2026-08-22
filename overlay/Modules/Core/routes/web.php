@@ -36,13 +36,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('settings/{group}', [SettingsController::class, 'update'])->name('settings.update');
         });
 
-        // مكتبة الميديا — الشاشة + JSON للـ MediaPicker
-        Route::middleware('permission:manage content')->group(function () {
+        // مكتبة الميديا — الشاشة + JSON للـ MediaPicker.
+        // صلاحية مستقلة عن المحتوى: مدخل البيانات محتاج يرفع صور وحدات
+        // من غير ما ياخد المدونة والقوايم معاها.
+        Route::middleware('permission:manage media')->group(function () {
             Route::get('media',           [MediaController::class, 'index'])->name('media.index');
             Route::get('media/files',     [MediaController::class, 'list'])->name('media.list');
             Route::post('media/files',    [MediaController::class, 'store'])->name('media.store');
             Route::delete('media/files',  [MediaController::class, 'destroy'])->name('media.destroy');
+        });
 
+        Route::middleware('permission:manage content')->group(function () {
             // قوائم الهيدر والفوتر
             Route::get('menus',           [MenuAdminController::class, 'index'])->name('menus.index');
             Route::get('menus/create',    [MenuAdminController::class, 'create'])->name('menus.create');
@@ -53,7 +57,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         // إدارة مستخدمي اللوحة (إضافة/حذف حساب وتغيير كلمة المرور والدور)
-        Route::middleware('permission:manage users')->group(function () {
+        Route::middleware('permission:manage users|manage roles')->group(function () {
             Route::get('users',           [UserAdminController::class, 'index'])->name('users.index');
             Route::get('users/create',    [UserAdminController::class, 'create'])->name('users.create');
             Route::post('users',          [UserAdminController::class, 'store'])->name('users.store');

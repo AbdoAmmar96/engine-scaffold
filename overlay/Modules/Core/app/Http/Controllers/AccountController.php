@@ -28,6 +28,8 @@ class AccountController extends Controller
                 'favorites' => $user->favorites()->count(),
                 'requests' => $user->requests()->count(),
                 'open' => $user->requests()->whereNotIn('status', ['won', 'lost'])->count(),
+                // null للعميل العادي — الكارت مبيظهرش أصلًا
+                'listings' => $user->ownsListings() ? $user->properties()->count() : null,
             ],
             'profile' => [
                 'name' => $user->name,

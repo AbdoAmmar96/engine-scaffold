@@ -9,9 +9,13 @@ use App\Support\Sluggable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Modules\Compounds\Models\Compound;
 use Modules\Developers\Models\Developer;
+use Modules\Leads\Models\Lead;
 use Modules\Locations\Models\Location;
 
 /**
@@ -60,6 +64,8 @@ use Modules\Locations\Models\Location;
  * @property-read Compound|null $compound
  * @property-read Developer|null $developer
  * @property-read User|null $owner
+ * @property-read int|null $leads_count
+ * @property-read int|null $favorited_by_count
  */
 class Property extends Model
 {
@@ -266,6 +272,39 @@ class Property extends Model
         return $this->belongsTo(User::class, 'owner_id');
     }
 
+    /** الطلبات اللي جات على الوحدة دي */
+    public function leads(): HasMany
+    {
+        return $this->hasMany(Lead::class);
+    }
+
+    /** الحسابات اللي حافظة الوحدة */
+    public function favoritedBy(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'favorites');
+    }
+
+    /**
+     * زيارة واحدة للصفحة.
+     *
+     * على الـ query builder مش على الموديل عن قصد: كده مفيش أحداث
+     * ولا updated_at بتتحرّك — وإلا كل زيارة كانت هتغيّر lastmod في
+     * خريطة الموقع وتخلّي كل حاجة تبان اتعدّلت دلوقتي.
+     */
+    public static function recordView(int $id): void
+    {
+        DB::table('properties')->where('id', $id)->increment('views_count');
+    }
+
+    /** كل صور العرض بترتيبها — الرئيسية الأول */
+    public function imagePaths(): array
+    {
+        return array_values(array_filter(array_unique([
+            $this->image,
+            ...self::lines($this->gallery),
+        ])));
+    }
+
     /**
      * الوحدات اللي الزائر بيشوفها: معتمدة من الإدارة ومعروضة من صاحبها.
      * أي استعلام عام لازم يعدّي من هنا — مصدر واحد بدل شرطين متكرّرين.
@@ -375,6 +414,7 @@ class Property extends Model
             'features' => $this->tLines('features', $locale),
             // الصورة الرئيسية أول المعرض دايمًا، من غير تكرار
             'gallery' => array_values(array_unique([$main, ...self::lines($this->gallery)])),
+            'views' => (int) $this->views_count,
             'compound' => $this->compound && $this->compound->is_active ? [
                 'name' => $this->compound->t('name', $locale),
                 'slug' => $this->compound->slug ?? '',

@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Core\Database\Seeders\RolePermissionSeeder;
 
 /**
  * صفوف ليها مالك: الوسيط والشركة يشوفوا بتاعهم بس، والأدمن يشوف الكل.
@@ -15,8 +16,6 @@ use Illuminate\Database\Eloquent\Model;
  */
 trait OwnedResource
 {
-    /** الأدوار اللي ينفع تكون مالكة لصف */
-    protected const OWNER_ROLES = ['broker', 'company'];
 
     protected function ownerColumn(): string
     {
@@ -71,7 +70,7 @@ trait OwnedResource
     /** حسابات الوسطاء والشركات */
     protected static function ownerOptions(): array
     {
-        return User::role(self::OWNER_ROLES)
+        return User::role(RolePermissionSeeder::ownerRoles())
             ->orderBy('name')
             ->get()
             ->map(fn (User $u) => [
@@ -94,6 +93,16 @@ trait OwnedResource
         $data[$column] = $current ?? auth()->id();
 
         return $data;
+    }
+
+    /**
+     * صاحب الصف بيمسح بتاعه من غير أي صلاحية زيادة — هو اللي حطّه.
+     * اللي بيشوف الكل (مدخل بيانات، تسويق) لازم يكون معاه صلاحية النشر،
+     * وإلا كان هيقدر يمسح شغل غيره وهو أصلًا مش مسموح له ينشر.
+     */
+    protected function deletePermission(): ?string
+    {
+        return self::actorSeesEverything() ? 'publish listings' : null;
     }
 
     /** قاعدة تحقق لحقل المالك */

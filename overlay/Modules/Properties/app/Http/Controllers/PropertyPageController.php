@@ -66,6 +66,10 @@ class PropertyPageController extends Controller
 
         abort_if(! $property, 404);
 
+        // العدّاد ده هو اللي صاحب الوحدة بيشوفه في «وحداتي» — من غيره
+        // الشاشة بتوعده بإحصائيات وتوريه أصفار على طول
+        Property::recordView((int) $property['id']);
+
         $crumb = $locale === 'en' ? 'Properties' : 'عقارات';
 
         // لو الأدمن مكتبش وصف، بنركّب جملة من البيانات نفسها — أحسن من ميتا فاضية

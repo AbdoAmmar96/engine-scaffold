@@ -398,3 +398,43 @@ test('the add-property form shows its steps and refuses an empty submit', async 
 
     await expect(page.getByText('حقل الاسم مطلوب.').first()).toBeVisible({ timeout: 20_000 });
 });
+
+/* ---------------------------------------------------------------------------
+ | حساب المعلن + استعادة كلمة المرور
+ | السلوك والصلاحيات متغطّيين في MyListingsTest و PasswordResetTest —
+ | هنا الشاشات وطريق الزائر ليها.
+ ---------------------------------------------------------------------------- */
+
+test('the sign-in page offers a way out when you forget the password', async ({ page }) => {
+    await page.goto('/ar/login', { waitUntil: 'networkidle' });
+
+    await page.getByRole('link', { name: 'نسيت كلمة المرور؟' }).click();
+    await page.waitForURL(/\/ar\/forgot-password/, { timeout: 20_000 });
+
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('استعادة كلمة المرور');
+});
+
+test('asking for a reset link answers the same way for any address', async ({ page }) => {
+    await page.goto('/ar/forgot-password', { waitUntil: 'networkidle' });
+
+    await page.getByRole('textbox').fill('nobody-at-all@example.com');
+    await page.getByRole('button', { name: /ابعتلي اللينك/ }).click();
+
+    // نفس الرد للإيميل الموجود والمش موجود — الصفحة مش أداة تعداد حسابات
+    await expect(page.getByText(/لينك التغيير في طريقه/)).toBeVisible({ timeout: 20_000 });
+});
+
+test('the listings area is behind the site login, not the admin one', async ({ page }) => {
+    await page.goto('/ar/account/my-properties');
+
+    await expect(page).toHaveURL(/\/ar\/login/);
+});
+
+test('the admin login links to the same password reset', async ({ page }) => {
+    await page.goto('/admin/login', { waitUntil: 'networkidle' });
+
+    await expect(page.getByRole('link', { name: 'نسيت كلمة المرور؟' })).toHaveAttribute(
+        'href',
+        '/ar/forgot-password',
+    );
+});

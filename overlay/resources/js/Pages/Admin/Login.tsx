@@ -41,6 +41,14 @@ export default function Login() {
                     <Button type="submit" disabled={processing} className="mt-2 w-full">
                         {processing ? "جارٍ الدخول…" : "دخول"}
                     </Button>
+
+                    {/* نفس مسار الموقع — الحساب واحد والجارد واحد */}
+                    <a
+                        href="/ar/forgot-password"
+                        className="text-center text-[13px] font-extrabold text-primary hover:underline"
+                    >
+                        نسيت كلمة المرور؟
+                    </a>
                 </form>
             </div>
         </div>

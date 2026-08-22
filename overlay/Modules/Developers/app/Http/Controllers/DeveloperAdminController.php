@@ -71,6 +71,12 @@ class DeveloperAdminController extends ResourceController
     }
 
     /** المطوّر اللي عليه مشاريع مايتمسحش — المشاريع هتفضل بلا مطوّر */
+    /** الحذف قرار نهائي — مدخل البيانات بيدخل ويعدّل بس */
+    protected function deletePermission(): ?string
+    {
+        return 'publish listings';
+    }
+
     protected function guardDelete(Model $model): ?string
     {
         /** @var Developer $model */

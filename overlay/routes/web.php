@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Modules\Developers\Http\Controllers\DeveloperPageController;
 use Modules\Locations\Http\Controllers\LocationPageController;
+use Modules\Properties\Http\Controllers\AccountPropertyController;
 use Modules\Properties\Http\Controllers\AddPropertyController;
 use Modules\Properties\Http\Controllers\PropertyPageController;
 
@@ -195,6 +196,18 @@ Route::prefix('{locale}')
                 ->name('account.register');
             Route::post('register', [\Modules\Core\Http\Controllers\AccountAuthController::class, 'register'])
                 ->middleware('throttle:5,1')->name('account.register.store');
+
+            /* ---------- نسيت كلمة المرور ---------- */
+            // بتخدم اللوحة والموقع سوا — الحساب واحد
+            Route::get('forgot-password', [\Modules\Core\Http\Controllers\PasswordResetController::class, 'showRequest'])
+                ->name('password.request');
+            Route::post('forgot-password', [\Modules\Core\Http\Controllers\PasswordResetController::class, 'sendLink'])
+                ->middleware('throttle:5,10')->name('password.email');
+
+            Route::get('reset-password/{token}', [\Modules\Core\Http\Controllers\PasswordResetController::class, 'showReset'])
+                ->name('password.reset');
+            Route::post('reset-password', [\Modules\Core\Http\Controllers\PasswordResetController::class, 'reset'])
+                ->middleware('throttle:5,10')->name('password.update');
         });
 
         Route::middleware('auth')->group(function () {
@@ -212,6 +225,19 @@ Route::prefix('{locale}')
 
             Route::post('favorites/{property}', [\Modules\Core\Http\Controllers\FavoriteController::class, 'toggle'])
                 ->whereNumber('property')->name('account.favorites.toggle');
+
+            /* ---------- وحدات المعلن ---------- */
+            // على الصلاحية مش على الدور: الوسيط والشركة والمعلن كلهم
+            // بيديروا وحداتهم من هنا، والفرق بينهم إن الأولانيين معاهم لوحة كمان
+            Route::middleware('permission:manage listings')->group(function () {
+                Route::get('account/my-properties',             [AccountPropertyController::class, 'index'])->name('account.properties');
+                Route::get('account/my-properties/create',      [AccountPropertyController::class, 'create'])->name('account.properties.create');
+                Route::post('account/my-properties',            [AccountPropertyController::class, 'store'])->name('account.properties.store');
+                Route::get('account/my-properties/{id}/edit',   [AccountPropertyController::class, 'edit'])->whereNumber('id')->name('account.properties.edit');
+                Route::put('account/my-properties/{id}',        [AccountPropertyController::class, 'update'])->whereNumber('id')->name('account.properties.update');
+                Route::post('account/my-properties/{id}/toggle', [AccountPropertyController::class, 'toggle'])->whereNumber('id')->name('account.properties.toggle');
+                Route::delete('account/my-properties/{id}',     [AccountPropertyController::class, 'destroy'])->whereNumber('id')->name('account.properties.destroy');
+            });
         });
 
         // استقبال طلبات فورم "اتصل بنا" → موديول Leads

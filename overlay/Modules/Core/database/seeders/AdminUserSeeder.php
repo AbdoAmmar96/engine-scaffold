@@ -30,15 +30,26 @@ class AdminUserSeeder extends Seeder
             ],
         );
 
-        $admin->syncRoles(['admin']);
-
+        // الحساب الموجود مبيتلمسش دوره.
+        //
+        // كان هنا syncRoles(['admin']) على طول، والسيدر ده بيتشغّل بعد
+        // RolePermissionSeeder — فكل ديبلوي كان بيلغي ترقية السوبر أدمن
+        // اللي السيدر التاني عملها، وكمان بيرجّع أي دور اتغيّر من اللوحة.
+        // النتيجة: صلاحية «manage roles» موجودة ومحدش معاه.
         if ($exists) {
-            $this->command?->info("  المدير موجود ({$email}) — كلمة المرور مالهاش دعوة.");
+            if ($admin->roles()->doesntExist()) {
+                $admin->syncRoles(['super_admin']);
+            }
+
+            $this->command?->info("  المدير موجود ({$email}) — الدور وكلمة المرور مالهمش دعوة.");
 
             return;
         }
 
-        $this->command?->warn("  اتعمل مدير: {$email}");
+        // أول حساب على تثبيت جديد لازم يقدر يعمل باقي الفريق كمان
+        $admin->syncRoles(['super_admin']);
+
+        $this->command?->warn("  اتعمل سوبر أدمن: {$email}");
         $this->command?->warn("  كلمة المرور: {$password}");
         $this->command?->warn('  احفظها دلوقتي — مش هتتعرض تاني.');
     }

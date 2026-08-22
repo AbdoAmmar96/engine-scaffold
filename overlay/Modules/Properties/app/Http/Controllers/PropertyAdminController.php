@@ -121,24 +121,38 @@ class PropertyAdminController extends ResourceController
         ];
     }
 
-    /** الاعتماد والتمييز للأدمن بس — الوسيط بيبعت للمراجعة وبس */
+    /**
+     * الاعتماد والتمييز صلاحيتين منفصلتين:
+     *   «publish listings» ⇒ الحالة وسبب الرفض
+     *   «feature listings» ⇒ الإعلان المميّز
+     * فالتسويق يقدر يميّز من غير ما يقدر ينشر، ومدخل البيانات لا ده ولا ده.
+     */
     private function moderationFields(): array
     {
-        if (! self::actorSeesEverything()) {
-            return [];
-        }
+        $fields = [];
 
-        return [
-            ['name' => 'status', 'label' => 'حالة المراجعة', 'type' => 'select', 'required' => true,
+        if (self::actorCan('publish listings')) {
+            $fields[] = ['name' => 'status', 'label' => 'حالة المراجعة', 'type' => 'select', 'required' => true,
                 'hint' => 'النشر بيولّد كود مرجعي للوحدة لو مالهاش واحد',
                 'options' => collect(Property::STATUSES)
                     ->map(fn (array $s, string $key) => ['value' => $key, 'label' => $s['label']])
-                    ->values()->all()],
-            ['name' => 'rejection_reason', 'label' => 'سبب الرفض', 'type' => 'textarea',
-                'hint' => 'بيتعرض لصاحب الوحدة عشان يعرف يصلّح إيه'],
-            ['name' => 'is_featured', 'label' => 'إعلان مميّز', 'type' => 'toggle',
-                'hint' => 'بيتصدّر نتايج البحث'],
-        ];
+                    ->values()->all()];
+
+            $fields[] = ['name' => 'rejection_reason', 'label' => 'سبب الرفض', 'type' => 'textarea',
+                'hint' => 'بيتعرض لصاحب الوحدة عشان يعرف يصلّح إيه'];
+        }
+
+        if (self::actorCan('feature listings')) {
+            $fields[] = ['name' => 'is_featured', 'label' => 'إعلان مميّز', 'type' => 'toggle',
+                'hint' => 'بيتصدّر نتايج البحث'];
+        }
+
+        return $fields;
+    }
+
+    private static function actorCan(string $permission): bool
+    {
+        return (bool) self::actor()?->can($permission);
     }
 
     protected function rules(?int $id): array
@@ -181,23 +195,35 @@ class PropertyAdminController extends ResourceController
     }
 
     /**
-     * الأدمن بيحدد الحالة بإيده. غيره:
-     *   وحدة جديدة → في انتظار المراجعة
-     *   تعديل وحدة منشورة أو مرفوضة → بترجع للمراجعة تاني
-     *   وحدة لسه تحت المراجعة → بتفضل زي ما هي
-     * كده مفيش وسيط بينشر على الموقع من غير ما حد يشوف.
+     * تلات طبقات، من الأعلى للأدنى:
+     *
+     *   معاه «publish listings» → بيحدد الحالة بإيده، مفيش قيود.
+     *   معاه «manage catalog» بس (مدخل بيانات/تسويق) → بيعدّل البيانات،
+     *     والحالة بتفضل زي ما هي، والجديد بيدخل المراجعة. من غير السطر ده
+     *     كان يقدر ينشر بمجرد إنه يعمل وحدة جديدة — ديفولت الموديل «منشور».
+     *   مالوش ولا واحدة (صاحب الوحدة) → أي تعديل بيرجّعها للمراجعة.
      */
     private function applyModeration(array $data, ?Model $model): array
     {
-        if (self::actorSeesEverything()) {
+        if (! self::actorCan('feature listings')) {
+            unset($data['is_featured']);
+        }
+
+        if (self::actorCan('publish listings')) {
             return $data;
         }
 
-        unset($data['is_featured']);
-        $data['rejection_reason'] = null;
-
         /** @var Property|null $model */
         $current = $model?->status;
+
+        if (self::actorSeesEverything()) {
+            unset($data['rejection_reason']);
+            $data['status'] = $current ?? 'pending';
+
+            return $data;
+        }
+
+        $data['rejection_reason'] = null;
 
         // المباع/المؤجّر بيفضل زي ما هو — التعديل عليه مش إعادة عرض.
         // أي حالة تانية (جديدة أو منشورة أو مرفوضة) بترجع للمراجعة.

@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Modules\Compounds\Models\Compound;
+use Modules\Core\Database\Seeders\RolePermissionSeeder;
 use Modules\Leads\Models\Lead;
 use Modules\Properties\Models\Property;
 use Spatie\Permission\Traits\HasRoles;
@@ -88,10 +89,22 @@ class User extends Authenticatable
         return $this->belongsToMany(Property::class, 'favorites')->withTimestamps();
     }
 
-    /** بيفتح لوحة التحكم؟ — أي صلاحية = موظف، ولا حاجة = عميل */
+    /**
+     * بيفتح لوحة التحكم؟
+     *
+     * الدور هو اللي بيحدد، مش «عنده صلاحية»: المعلن معاه «manage listings»
+     * عشان يدير وحداته من «حسابي»، ولو استنتجناها من الصلاحيات كان
+     * هيتحسب موظف وياخد لوحة مالهاش لازمة بالنسبة له.
+     */
     public function isStaff(): bool
     {
-        return $this->getAllPermissions()->isNotEmpty();
+        return $this->hasAnyRole(RolePermissionSeeder::staffRoles());
+    }
+
+    /** بيملك وحدات ويديرها بنفسه — وسيط أو شركة أو معلن */
+    public function ownsListings(): bool
+    {
+        return $this->can('manage listings');
     }
 
     /**

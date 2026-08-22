@@ -18,7 +18,11 @@ class DemoAccountsSeeder extends Seeder
     private const ACCOUNTS = [
         'company' => ['شركة المروج للتطوير', 'company@bp-eg.com', 'شركة المروج للتطوير'],
         'broker' => ['كريم الوسيط', 'broker@bp-eg.com', null],
+        'data_entry' => ['مدخل البيانات', 'data@bp-eg.com', null],
+        'marketing' => ['مسؤول التسويق', 'marketing@bp-eg.com', null],
+        'consultant' => ['المستشار العقاري', 'consultant@bp-eg.com', null],
         'editor' => ['محرّر المحتوى', 'editor@bp-eg.com', null],
+        'lister' => ['مالك عقار', 'lister@bp-eg.com', null],
         'customer' => ['عميل تجريبي', 'customer@bp-eg.com', null],
     ];
 

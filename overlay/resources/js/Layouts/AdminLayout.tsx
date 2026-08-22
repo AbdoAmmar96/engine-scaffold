@@ -25,11 +25,13 @@ import type { SharedProps } from "@/lib/types";
 
 const SETTINGS = "manage settings";
 const CONTENT = "manage content";
+const MEDIA = "manage media";
 const CATALOG = "manage catalog";
 const LISTINGS = "manage listings";
 const PROJECTS = "manage projects";
 const LEADS = "manage leads";
 const USERS = "manage users";
+const ROLES = "manage roles";
 
 /** اللينك بيظهر لو معاه أي صلاحية من دول — الأدمن والوسيط بيدخلوا نفس الشاشة */
 type NavItem = { href: string; label: string; icon: typeof Home; perm: string[] };
@@ -46,7 +48,7 @@ const settingsNav: NavItem[] = [
 
 // محتوى مشترك بين كل الصفحات
 const contentNav: NavItem[] = [
-    { href: "/admin/media", label: "مكتبة الميديا", icon: Images, perm: [CONTENT] },
+    { href: "/admin/media", label: "مكتبة الميديا", icon: Images, perm: [MEDIA] },
     { href: "/admin/menus", label: "القوائم", icon: ListTree, perm: [CONTENT] },
     { href: "/admin/landing-pages", label: "صفحات الهبوط", icon: Search, perm: [CONTENT] },
 ];
@@ -62,7 +64,7 @@ const moduleNav: NavItem[] = [
 ];
 
 // إدارة النظام
-const systemNav: NavItem[] = [{ href: "/admin/users", label: "المستخدمون", icon: UserCog, perm: [USERS] }];
+const systemNav: NavItem[] = [{ href: "/admin/users", label: "المستخدمون", icon: UserCog, perm: [USERS, ROLES] }];
 
 export default function AdminLayout({ title, children }: { title: string; children: ReactNode }) {
     const { auth } = usePage<SharedProps>().props;

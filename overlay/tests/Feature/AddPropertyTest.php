@@ -145,16 +145,28 @@ class AddPropertyTest extends TestCase
         $this->assertSame($broker->id, Lead::sole()->owner_id);
     }
 
-    public function test_a_visitor_submission_has_no_owner(): void
+    public function test_a_customer_who_lists_a_unit_becomes_a_lister(): void
     {
         $customer = User::create(['name' => 'عميل', 'email' => 'customer@example.com', 'password' => 'secret-pass']);
         $customer->assignRole('customer');
 
         $this->actingAs($customer)->post('/ar/add-property', $this->payload());
 
+        // من غير الترقية دي الوحدة بتتسجّل باسمه ومايقدرش يتابعها من حسابه
+        $this->assertTrue($customer->fresh()->hasRole('lister'));
+        $this->assertSame($customer->id, Property::sole()->owner_id);
+
+        // مالك الوحدة مش «عميل قدّم طلب» — الطلب بيوصله في صندوقه
+        $this->assertNull(Lead::sole()->user_id);
+        $this->assertSame($customer->id, Lead::sole()->owner_id);
+    }
+
+    public function test_a_guest_submission_has_no_owner(): void
+    {
+        $this->post('/ar/add-property', $this->payload());
+
         $this->assertNull(Property::sole()->owner_id);
-        // العميل المسجّل بيشوف الطلب في «طلباتي»
-        $this->assertSame($customer->id, Lead::sole()->user_id);
+        $this->assertNull(Lead::sole()->user_id);
     }
 
     public function test_the_honeypot_swallows_bots_without_writing_anything(): void

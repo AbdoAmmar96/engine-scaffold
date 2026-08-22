@@ -1,12 +1,12 @@
 import { Link, router, usePage } from "@inertiajs/react";
-import { CheckCircle2, Heart, Inbox, LogOut, UserRound } from "lucide-react";
+import { Building2, CheckCircle2, Heart, Inbox, LogOut, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import SiteLayout from "@/Layouts/SiteLayout";
 import type { SharedProps } from "@/lib/types";
 
 const copy = {
-    ar: { overview: "نظرة عامة", favorites: "المحفوظة", requests: "طلباتي", logout: "خروج", hello: "أهلًا" },
-    en: { overview: "Overview", favorites: "Saved", requests: "My requests", logout: "Sign out", hello: "Hi" },
+    ar: { overview: "نظرة عامة", favorites: "المحفوظة", requests: "طلباتي", listings: "وحداتي", logout: "خروج", hello: "أهلًا" },
+    en: { overview: "Overview", favorites: "Saved", requests: "My requests", listings: "My listings", logout: "Sign out", hello: "Hi" },
 };
 
 /**
@@ -18,8 +18,14 @@ export default function AccountLayout({ title, children }: { title: string; chil
     const t = copy[locale] ?? copy.ar;
     const path = typeof window !== "undefined" ? window.location.pathname : "";
 
+    // «وحداتي» بتظهر للمعلن والوسيط والشركة بس — نفس الصلاحية اللي على الراوت
+    const lists = auth.user?.can?.includes("manage listings");
+
     const tabs = [
         { href: `/${locale}/account`, label: t.overview, icon: UserRound, exact: true },
+        ...(lists
+            ? [{ href: `/${locale}/account/my-properties`, label: t.listings, icon: Building2, exact: false }]
+            : []),
         { href: `/${locale}/account/favorites`, label: t.favorites, icon: Heart, exact: false },
         { href: `/${locale}/account/requests`, label: t.requests, icon: Inbox, exact: false },
     ];

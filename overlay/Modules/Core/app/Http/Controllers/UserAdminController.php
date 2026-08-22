@@ -4,26 +4,63 @@ namespace Modules\Core\Http\Controllers;
 
 use App\Models\User;
 use App\Support\ResourceController;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 use Modules\Core\Database\Seeders\RolePermissionSeeder;
 
 /**
- * إدارة مستخدمي لوحة التحكم: إضافة/حذف حسابات، تغيير كلمات المرور، وتحديد الدور.
- * بيستخدم نفس شاشتي الريسورس العامّتين — الجديد هنا هو نوع الحقل password
- * وقواعد الحماية (مفيش حذف لنفسك، ولازم يفضل مدير واحد على الأقل).
+ * إدارة الحسابات: إضافة/حذف، كلمات المرور، والدور.
+ *
+ * خط الفصل «manage roles»:
+ *   معاه   ⇒ بيشوف ويعدّل كل الحسابات وبيوزّع أي دور (سوبر أدمن).
+ *   من غيره ⇒ بيشوف حسابات الموقع بس (عميل/معلن) وبيوزّع أدوارها بس.
+ * يعني المدير بيدير عملاء المنصّة، وفريق العمل نفسه مايتلمسش إلا من فوق.
  */
 class UserAdminController extends ResourceController
 {
-    /** الأدوار جاية من RolePermissionSeeder — مصدر واحد للاسم والصلاحيات */
+    /** صلاحيات لو ضاع آخر حساب معاه واحدة منها، اللوحة بتقفل على نفسها */
+    private const CRITICAL = [
+        'manage roles' => 'ده آخر حساب بيقدر يوزّع الأدوار — لازم يفضل واحد على الأقل.',
+        'manage users' => 'ده آخر حساب بيقدر يدير المستخدمين — لازم يفضل واحد على الأقل.',
+    ];
+
+    /**
+     * الأدوار اللي المستخدم الحالي مسموح له يوزّعها.
+     * مصدرها RolePermissionSeeder — مصدر واحد للاسم والصلاحيات.
+     */
     private static function roles(): array
     {
-        return RolePermissionSeeder::ROLES;
+        if (self::canManageRoles()) {
+            return RolePermissionSeeder::ROLES;
+        }
+
+        $staff = RolePermissionSeeder::staffRoles();
+
+        return array_diff_key(RolePermissionSeeder::ROLES, array_flip($staff));
+    }
+
+    private static function canManageRoles(): bool
+    {
+        return (bool) auth()->user()?->can('manage roles');
+    }
+
+    /** مفيش «manage roles» = حسابات الموقع بس، في القايمة وبالـ id */
+    protected function scope(Builder $query): Builder
+    {
+        if (self::canManageRoles()) {
+            return $query;
+        }
+
+        return $query->whereDoesntHave(
+            'roles',
+            fn ($q) => $q->whereIn('name', RolePermissionSeeder::staffRoles()),
+        );
     }
 
     private static function roleLabel(?string $role): string
     {
-        return self::roles()[$role]['label'] ?? '—';
+        return RolePermissionSeeder::ROLES[$role]['label'] ?? '—';
     }
 
     protected function modelClass(): string { return User::class; }
@@ -104,17 +141,31 @@ class UserAdminController extends ResourceController
                 'required',
                 Rule::in(array_keys(self::roles())),
                 function (string $attribute, mixed $value, callable $fail) use ($id) {
-                    if ($id && $value !== 'admin' && $this->isLastAdmin($id)) {
-                        $fail('ده آخر مدير — لازم يفضل في مدير واحد على الأقل.');
+                    if (! $id) {
+                        return;
+                    }
+
+                    $keeps = RolePermissionSeeder::ROLES[$value]['permissions'] ?? [];
+
+                    foreach (self::CRITICAL as $permission => $message) {
+                        if (! in_array($permission, $keeps, true) && $this->isLastWith($id, $permission)) {
+                            $fail($message);
+                        }
                     }
                 },
             ],
             'is_active' => [
                 'boolean',
-                // توقيف آخر مدير = قفل اللوحة على الكل، فنفس حماية تغيير الدور
+                // توقيف آخر حساب معاه صلاحية حرجة = قفل اللوحة على نفسها
                 function (string $attribute, mixed $value, callable $fail) use ($id) {
-                    if ($id && ! $value && $this->isLastAdmin($id)) {
-                        $fail('ده آخر مدير — مينفعش توقف حسابه.');
+                    if (! $id || $value) {
+                        return;
+                    }
+
+                    foreach (self::CRITICAL as $permission => $message) {
+                        if ($this->isLastWith($id, $permission)) {
+                            $fail($message);
+                        }
                     }
                 },
             ],
@@ -154,8 +205,10 @@ class UserAdminController extends ResourceController
             return 'مش هينفع تحذف الحساب اللي انت مسجّل بيه دلوقتي.';
         }
 
-        if ($this->isLastAdmin($model->id)) {
-            return 'ده آخر مدير — لازم يفضل في مدير واحد على الأقل.';
+        foreach (self::CRITICAL as $permission => $message) {
+            if ($this->isLastWith($model->id, $permission)) {
+                return $message;
+            }
         }
 
         return null;
@@ -196,14 +249,24 @@ class UserAdminController extends ResourceController
         ];
     }
 
-    private function isLastAdmin(int $id): bool
+    /**
+     * آخر حساب معاه الصلاحية دي؟
+     *
+     * قبل كده الحماية كانت على دور «admin» بالاسم. بعد ما بقى فيه سوبر
+     * أدمن، الدور ده ممكن يفضى والقفل يتفتح من غير ما حد ياخد باله —
+     * فالحماية بقت على الصلاحية نفسها.
+     */
+    private function isLastWith(int $id, string $permission): bool
     {
         $user = User::find($id);
 
-        if (! $user?->hasRole('admin')) {
+        if (! $user?->can($permission)) {
             return false;
         }
 
-        return User::role('admin')->where('id', '!=', $id)->doesntExist();
+        return User::permission($permission)
+            ->where('id', '!=', $id)
+            ->where('is_active', true)
+            ->doesntExist();
     }
 }

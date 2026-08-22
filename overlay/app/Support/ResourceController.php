@@ -87,6 +87,16 @@ abstract class ResourceController extends Controller
     }
 
     /**
+     * صلاحية زيادة مطلوبة للحذف فوق صلاحية فتح الشاشة.
+     * الشاشة بتفتح لمدخل البيانات عشان يدخل ويعدّل، بس المسح قرار نهائي
+     * — فبيفضل على اللي معاه النشر.
+     */
+    protected function deletePermission(): ?string
+    {
+        return null;
+    }
+
+    /**
      * فلتر الملكية. بيتطبّق على القائمة **وعلى أي وصول بالـ id** —
      * من غير التاني ده الوسيط بيكتب /admin/properties/5/edit في العنوان
      * ويعدّل وحدة مش بتاعته حتى لو القائمة مبتوريهاش.
@@ -188,6 +198,10 @@ abstract class ResourceController extends Controller
     public function destroy(int $id): RedirectResponse
     {
         $model = $this->findModel($id);
+
+        if (($permission = $this->deletePermission()) && ! auth()->user()?->can($permission)) {
+            return back()->with('error', 'الحذف محتاج صلاحية الاعتماد والنشر.');
+        }
 
         if ($reason = $this->guardDelete($model)) {
             return back()->with('error', $reason);

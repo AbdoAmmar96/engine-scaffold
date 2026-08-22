@@ -47,9 +47,11 @@ class LeadController extends Controller
 
         $data['owner_id'] = $property instanceof Property ? $property->owner_id : $compound?->owner_id;
 
-        // العميل المسجّل بيشوف الطلب بعد كده في «طلباتي»
+        // العميل المسجّل بيشوف الطلب بعد كده في «طلباتي».
+        // مالك الوحدات مستثنى: الطلب بيوصله في صندوق الطلبات أصلًا،
+        // ومحطوط تاني في «طلباتي» كان بيبان كأنه هو اللي طالب وحدته.
         $user = $request->user();
-        $data['user_id'] = $user && ! $user->isStaff() ? $user->id : null;
+        $data['user_id'] = $user && ! $user->ownsListings() ? $user->id : null;
 
         Lead::create($data);
 

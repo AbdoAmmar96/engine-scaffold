@@ -122,6 +122,11 @@ if [ ! -f .env ]; then
     sed -i "s|^APP_URL=.*|APP_URL=https://$DOMAIN|"     .env
     sed -i "s|^SESSION_DRIVER=.*|SESSION_DRIVER=file|"  .env
     sed -i "s|^CACHE_STORE=.*|CACHE_STORE=file|"        .env
+
+    # الاستضافة المشتركة فيها sendmail جاهز — من غيره «نسيت كلمة المرور»
+    # بيكتب الرسالة في اللوج والعميل مبيوصلوش حاجة
+    sed -i "s|^MAIL_MAILER=.*|MAIL_MAILER=sendmail|"                        .env
+    sed -i "s|^MAIL_FROM_ADDRESS=.*|MAIL_FROM_ADDRESS=\"no-reply@$DOMAIN\"|" .env
     echo "   .env اتعمل"
 fi
 

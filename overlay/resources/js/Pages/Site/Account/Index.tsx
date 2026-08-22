@@ -8,6 +8,7 @@ const copy = {
     ar: {
         title: "نظرة عامة",
         saved: "عقار محفوظ",
+        listings: "وحدة معروضة",
         requests: "طلب مبعوت",
         open: "طلب لسه مفتوح",
         profile: "بياناتي",
@@ -24,6 +25,7 @@ const copy = {
     en: {
         title: "Overview",
         saved: "saved properties",
+        listings: "listings",
         requests: "requests sent",
         open: "still open",
         profile: "My details",
@@ -43,7 +45,7 @@ export default function AccountIndex({
     stats,
     profile,
 }: {
-    stats: { favorites: number; requests: number; open: number };
+    stats: { favorites: number; requests: number; open: number; listings: number | null };
     profile: { name: string; email: string; phone: string };
 }) {
     const { locale } = usePage<SharedProps>().props;
@@ -80,12 +82,14 @@ export default function AccountIndex({
     return (
         <AccountLayout title={t.title}>
             <div className="grid gap-4 sm:grid-cols-3">
+                {stats.listings !== null &&
+                    stat(stats.listings, t.listings, `/${locale}/account/my-properties`)}
                 {stat(stats.favorites, t.saved, `/${locale}/account/favorites`)}
                 {stat(stats.requests, t.requests, `/${locale}/account/requests`)}
-                {stat(stats.open, t.open)}
+                {stats.listings === null && stat(stats.open, t.open)}
             </div>
 
-            {stats.favorites === 0 && stats.requests === 0 && (
+            {stats.listings === null && stats.favorites === 0 && stats.requests === 0 && (
                 <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-bg-dark p-6">
                     <p className="text-sm font-bold text-white/75">
                         {locale === "en"

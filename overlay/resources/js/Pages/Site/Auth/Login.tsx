@@ -14,6 +14,7 @@ const copy = {
         sending: "جارٍ الدخول…",
         noAccount: "لسه معندكش حساب؟",
         register: "اعمل حساب",
+        forgot: "نسيت كلمة المرور؟",
     },
     en: {
         title: "Sign in",
@@ -25,6 +26,7 @@ const copy = {
         sending: "Signing in…",
         noAccount: "Don't have an account?",
         register: "Create one",
+        forgot: "Forgot your password?",
     },
 };
 
@@ -80,15 +82,24 @@ export default function Login() {
                     />
                 </FormField>
 
-                <label className="flex items-center gap-2 text-[13px] font-bold text-muted">
-                    <input
-                        type="checkbox"
-                        checked={data.remember}
-                        onChange={(e) => setData("remember", e.target.checked)}
-                        className="h-4 w-4 accent-[var(--primary)]"
-                    />
-                    {t.remember}
-                </label>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    <label className="flex items-center gap-2 text-[13px] font-bold text-muted">
+                        <input
+                            type="checkbox"
+                            checked={data.remember}
+                            onChange={(e) => setData("remember", e.target.checked)}
+                            className="h-4 w-4 accent-[var(--primary)]"
+                        />
+                        {t.remember}
+                    </label>
+
+                    <Link
+                        href={`/${locale}/forgot-password`}
+                        className="text-[13px] font-extrabold text-primary hover:underline"
+                    >
+                        {t.forgot}
+                    </Link>
+                </div>
 
                 <button
                     type="submit"
