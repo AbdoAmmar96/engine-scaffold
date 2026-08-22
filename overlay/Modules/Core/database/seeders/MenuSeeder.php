@@ -14,12 +14,15 @@ class MenuSeeder extends Seeder
     public function run(): void
     {
         $header = [
-            ['label' => 'الرئيسية',   'label_en' => 'Home',       'url' => '/'],
-            ['label' => 'العقارات',   'label_en' => 'Properties', 'url' => '/properties'],
-            ['label' => 'الكمبوندات', 'label_en' => 'Compounds',  'url' => '/compounds'],
-            ['label' => 'المدونة',    'label_en' => 'Blog',       'url' => '/blog'],
-            ['label' => 'من نحن',     'label_en' => 'About',      'url' => '/about'],
-            ['label' => 'اتصل بنا',   'label_en' => 'Contact',    'url' => '/contact'],
+            ['label' => 'الرئيسية',     'label_en' => 'Home',       'url' => '/'],
+            ['label' => 'العقارات',     'label_en' => 'Properties', 'url' => '/properties'],
+            ['label' => 'عقارات تجارية', 'label_en' => 'Commercial', 'url' => '/properties/commercial'],
+            ['label' => 'الكمبوندات',   'label_en' => 'Compounds',  'url' => '/compounds'],
+            ['label' => 'المطوّرون',     'label_en' => 'Developers', 'url' => '/developers'],
+            ['label' => 'المناطق',      'label_en' => 'Areas',      'url' => '/areas'],
+            ['label' => 'المدونة',      'label_en' => 'Blog',       'url' => '/blog'],
+            ['label' => 'من نحن',       'label_en' => 'About',      'url' => '/about'],
+            ['label' => 'اتصل بنا',     'label_en' => 'Contact',    'url' => '/contact'],
         ];
 
         foreach ($header as $i => $item) {

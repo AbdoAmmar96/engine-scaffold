@@ -62,6 +62,11 @@ class Catalog
                 ->orWhereHas('compound.developer', $like));
         }
 
+        // القسم بيتحدد من قايمة الأنواع مش من عمود، فمصدر الحقيقة واحد
+        if (in_array($filters['category'] ?? null, array_keys(Property::CATEGORIES), true)) {
+            $query->whereIn('type', Property::typesIn($filters['category']));
+        }
+
         if ($type = trim((string) ($filters['type'] ?? ''))) {
             // القيمة متخزّنة بالعربي، فالبحث الإنجليزي (Villa) بيترجم الأول
             $type = Property::TYPES[$type] ?? false
@@ -155,6 +160,9 @@ class Catalog
             'type' => trim((string) $request->query('type', '')),
             'location' => trim((string) $request->query('location', '')),
             'purpose' => in_array($request->query('purpose'), ['sale', 'rent'], true) ? $request->query('purpose') : '',
+            'category' => in_array($request->query('category'), array_keys(Property::CATEGORIES), true)
+                ? $request->query('category')
+                : '',
         ];
     }
 
@@ -178,6 +186,135 @@ class Catalog
 
         return $rows->map(fn (Location $l) => $l->toCard($locale) + [
             'count' => $l->properties_count.' '.($ar ? 'وحدة' : 'units'),
+        ])->all();
+    }
+
+    /**
+     * كل المطوّرين لصفحة /developers — من غير فلترة على وجود مشاريع،
+     * عكس developers() اللي بتغذّي قسم الرئيسية.
+     */
+    public static function allDevelopers(string $locale): array
+    {
+        $rows = Developer::query()
+            ->where('is_active', true)
+            ->withCount([
+                'compounds' => fn ($q) => $q->where('is_active', true),
+                'properties' => fn ($q) => $q->where('is_active', true),
+            ])
+            ->orderByDesc('compounds_count')
+            ->orderBy('sort')->orderBy('id')
+            ->get();
+
+        return $rows->map(fn (Developer $d) => $d->toCard($locale) + [
+            'units' => (int) $d->properties_count,
+        ])->all();
+    }
+
+    /** صفحة مطوّر — بياناته + مشاريعه + وحداته + المناطق اللي بيشتغل فيها */
+    public static function developer(string $locale, string $slug): ?array
+    {
+        $developer = Developer::query()
+            ->where('is_active', true)
+            ->where('slug', $slug)
+            ->withCount([
+                'compounds' => fn ($q) => $q->where('is_active', true),
+                'properties' => fn ($q) => $q->where('is_active', true),
+            ])
+            ->first();
+
+        if (! $developer) {
+            return null;
+        }
+
+        $compounds = Compound::query()
+            ->where('is_active', true)
+            ->where('developer_id', $developer->id)
+            ->with(['developer', 'location'])
+            ->orderBy('sort')->orderByDesc('id')
+            ->get();
+
+        // وحدات المطوّر: المربوطة بيه مباشرة + اللي جوه مشاريعه
+        $units = Property::query()
+            ->where('is_active', true)
+            ->where(fn ($q) => $q
+                ->where('developer_id', $developer->id)
+                ->orWhereIn('compound_id', $compounds->pluck('id')))
+            ->with('location')
+            ->orderBy('sort')->orderByDesc('id')
+            ->limit(6)
+            ->get();
+
+        return [
+            'developer' => $developer->toDetail($locale) + [
+                'units' => $units->count(),
+                'areas' => $compounds->pluck('location_id')->filter()->unique()->count(),
+            ],
+            'compounds' => $compounds->map(fn (Compound $c) => $c->toCard($locale))->all(),
+            'units' => $units->map(fn (Property $p) => $p->toCard($locale))->all(),
+        ];
+    }
+
+    /** صفحة منطقة — نبذتها + مشاريعها + وحداتها */
+    public static function area(string $locale, string $slug): ?array
+    {
+        $location = Location::query()
+            ->where('is_active', true)
+            ->where('slug', $slug)
+            ->withCount([
+                'properties' => fn ($q) => $q->where('is_active', true),
+                'compounds' => fn ($q) => $q->where('is_active', true),
+            ])
+            ->first();
+
+        if (! $location) {
+            return null;
+        }
+
+        $compounds = Compound::query()
+            ->where('is_active', true)
+            ->where('location_id', $location->id)
+            ->with(['developer', 'location'])
+            ->orderBy('sort')->orderByDesc('id')
+            ->get();
+
+        $properties = Property::query()
+            ->where('is_active', true)
+            ->where('location_id', $location->id)
+            ->with('location')
+            ->orderBy('sort')->orderByDesc('id')
+            ->limit(6)
+            ->get();
+
+        return [
+            'area' => $location->toDetail($locale) + [
+                'properties' => (int) $location->properties_count,
+                'compounds' => (int) $location->compounds_count,
+                'developers' => $compounds->pluck('developer_id')->filter()->unique()->count(),
+            ],
+            'compounds' => $compounds->map(fn (Compound $c) => $c->toCard($locale))->all(),
+            'properties' => $properties->map(fn (Property $p) => $p->toCard($locale))->all(),
+        ];
+    }
+
+    /** كل المناطق المفعّلة للصفحة المخصّصة لها */
+    public static function allAreas(string $locale): array
+    {
+        $rows = Location::query()
+            ->where('is_active', true)
+            ->withCount([
+                'properties' => fn ($q) => $q->where('is_active', true),
+                'compounds' => fn ($q) => $q->where('is_active', true),
+            ])
+            ->orderByDesc('is_featured')
+            ->orderBy('sort')->orderBy('id')
+            ->get();
+
+        $ar = $locale !== 'en';
+
+        return $rows->map(fn (Location $l) => $l->toCard($locale) + [
+            'count' => $l->properties_count.' '.($ar ? 'وحدة' : 'units'),
+            'compounds' => (int) $l->compounds_count,
+            'properties' => (int) $l->properties_count,
         ])->all();
     }
 

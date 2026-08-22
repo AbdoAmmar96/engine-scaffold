@@ -1,5 +1,5 @@
-import { usePage } from "@inertiajs/react";
-import { SearchX } from "lucide-react";
+import { Link, usePage } from "@inertiajs/react";
+import { Building2, Home, LayoutGrid, SearchX } from "lucide-react";
 import { useMemo, useState } from "react";
 import ActiveFilters, { type SearchFilters } from "@/Components/site/ActiveFilters";
 import PageHero from "@/Components/site/PageHero";
@@ -12,6 +12,11 @@ const copy = {
     ar: {
         crumb: "عقارات",
         title: "عقارات للبيع والإيجار",
+        titles: { commercial: "عقارات تجارية", residential: "عقارات سكنية" } as Record<string, string>,
+        section: "القسم",
+        allSections: "الكل",
+        residential: "سكني",
+        commercial: "تجاري",
         results: (n: number, total: number) =>
             n === total ? `${total} وحدة متاحة حاليًا بكل المناطق.` : `${n} وحدة من أصل ${total} مطابقة للفلاتر.`,
         purpose: "الغرض",
@@ -24,6 +29,11 @@ const copy = {
     en: {
         crumb: "Properties",
         title: "Properties for sale and rent",
+        titles: { commercial: "Commercial properties", residential: "Residential properties" } as Record<string, string>,
+        section: "Section",
+        allSections: "All",
+        residential: "Residential",
+        commercial: "Commercial",
         results: (n: number, total: number) =>
             n === total ? `${total} units currently available across all areas.` : `${n} of ${total} units match your filters.`,
         purpose: "Purpose",
@@ -35,7 +45,16 @@ const copy = {
     },
 };
 
-export default function Properties({ properties, filters }: { properties: Property[]; filters: SearchFilters }) {
+export default function Properties({
+    properties,
+    filters,
+    category,
+}: {
+    properties: Property[];
+    filters: SearchFilters;
+    /** جاي من الرابط: /properties/commercial — null يعني كل الأقسام */
+    category: string | null;
+}) {
     const { locale, settings } = usePage<SharedProps>().props;
     const ar = locale === "ar";
     const t = copy[locale] ?? copy.ar;
@@ -49,6 +68,21 @@ export default function Properties({ properties, filters }: { properties: Proper
 
     const filtered = properties.filter(
         (p) => (!purpose || p.purpose === purpose) && (!area || p.area === area),
+    );
+
+    const sectionTab = (key: string | null, label: string, Icon: typeof Home) => (
+        <Link
+            key={key ?? "all"}
+            href={key ? `/${locale}/properties/${key}` : `/${locale}/properties`}
+            className={`flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-extrabold transition ${
+                category === key
+                    ? "bg-secondary text-white"
+                    : "border border-gray-200 bg-bg text-secondary hover:border-primary hover:text-primary"
+            }`}
+        >
+            <Icon size={14} />
+            {label}
+        </Link>
     );
 
     const chip = (label: string, selected: boolean, onClick: () => void) => (
@@ -69,15 +103,24 @@ export default function Properties({ properties, filters }: { properties: Proper
     return (
         <SiteLayout>
             <PageHero
-                bg="/images/demo/bg-props.jpg"
+                bg={category === "commercial" ? "/images/demo/bg-comps.jpg" : "/images/demo/bg-props.jpg"}
                 crumb={t.crumb}
-                title={t.title}
+                title={(category && t.titles[category]) || t.title}
                 desc={t.results(filtered.length, properties.length)}
             />
 
             <section className="bg-bg px-4 py-10">
                 <div className="mx-auto max-w-7xl">
                     <ActiveFilters filters={filters} path="/properties" />
+
+                    {/* ---------- تبويبات القسم ---------- */}
+                    {/* لينكات مش أزرار: كل قسم رابط مستقل بميتا خاصة بيه */}
+                    <div className="mb-4 flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-extrabold text-secondary">{t.section}</span>
+                        {sectionTab(null, t.allSections, LayoutGrid)}
+                        {sectionTab("residential", t.residential, Home)}
+                        {sectionTab("commercial", t.commercial, Building2)}
+                    </div>
 
                     {/* ---------- شريط الفلاتر ---------- */}
                     <div className="mb-6 flex flex-wrap items-center gap-x-7 gap-y-4 rounded-3xl border border-gray-100 bg-bg px-6 py-4 shadow-[0_4px_18px_rgba(11,18,32,0.04)]">

@@ -218,6 +218,44 @@ class Seo
         ]);
     }
 
+    /** مطوّر عقاري — كيان مستقل عن المنصّة نفسها */
+    public static function organizationProfile(array $d, string $locale): array
+    {
+        return array_filter([
+            '@context' => 'https://schema.org',
+            '@type' => 'Organization',
+            'name' => $d['name'],
+            'description' => $d['about'] ?: null,
+            'url' => url("/{$locale}/developers/{$d['slug']}"),
+            'logo' => $d['logo'] ? url($d['logo']) : null,
+            'sameAs' => $d['website'] ? [$d['website']] : null,
+            'foundingDate' => $d['founded'] ?: null,
+            'address' => filled($d['headquarters'] ?? null) ? [
+                '@type' => 'PostalAddress',
+                'addressLocality' => $d['headquarters'],
+                'addressCountry' => 'EG',
+            ] : null,
+        ]);
+    }
+
+    /** منطقة — Place بتخلي جوجل يربط الصفحة بالمكان */
+    public static function place(array $a, string $locale): array
+    {
+        return array_filter([
+            '@context' => 'https://schema.org',
+            '@type' => 'Place',
+            'name' => $a['name'],
+            'description' => ($a['about'] ?: $a['note']) ?: null,
+            'url' => url("/{$locale}/areas/{$a['slug']}"),
+            'image' => $a['cover'] ? url($a['cover']) : null,
+            'address' => [
+                '@type' => 'PostalAddress',
+                'addressLocality' => $a['name'],
+                'addressCountry' => 'EG',
+            ],
+        ]);
+    }
+
     /** السعر متخزّن كنص منسّق ("EGP 4,850,000") — بنطلّع منه الرقم بس */
     private static function offer(string $price): ?array
     {

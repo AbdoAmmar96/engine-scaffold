@@ -238,3 +238,58 @@ test('the hero background image comes from settings, not a hardcoded path', asyn
     expect(settings.hero_bg_image).toBeTruthy();
     expect(src).toBe(settings.hero_bg_image);
 });
+
+/** أقسام المطوّرين والمناطق والعقارات التجارية */
+for (const path of ['/ar/developers', '/ar/areas', '/ar/properties/commercial', '/ar/properties/residential']) {
+    test(`${path} renders without console errors`, async ({ page }) => {
+        const consoleErrors: string[] = [];
+        page.on('console', (msg) => {
+            if (msg.type() === 'error') consoleErrors.push(msg.text());
+        });
+
+        const response = await page.goto(path, { waitUntil: 'networkidle' });
+
+        expect(response?.status()).toBe(200);
+        await expect(page.locator('h1')).not.toBeEmpty();
+        expect(consoleErrors).toEqual([]);
+    });
+}
+
+test('developer card opens the developer page', async ({ page }) => {
+    await page.goto('/ar/developers', { waitUntil: 'networkidle' });
+
+    const card = page.locator('a[href*="/ar/developers/"]').first();
+    const href = await card.getAttribute('href');
+    expect(href).toMatch(/^\/ar\/developers\/.+/);
+
+    await card.click();
+    await page.waitForURL(`**${href}`, { timeout: 20_000 });
+    await expect(page.getByRole('heading', { name: 'مشاريع المطوّر', exact: true })).toBeVisible();
+});
+
+test('area card opens the area page', async ({ page }) => {
+    await page.goto('/ar/areas', { waitUntil: 'networkidle' });
+
+    const card = page.locator('a[href*="/ar/areas/"]').first();
+    const href = await card.getAttribute('href');
+    expect(href).toMatch(/^\/ar\/areas\/.+/);
+
+    await card.click();
+    await page.waitForURL(`**${href}`, { timeout: 20_000 });
+    await expect(page.getByRole('heading', { name: 'مشاريع في المنطقة' })).toBeVisible();
+});
+
+test('the commercial section only lists commercial types', async ({ page }) => {
+    // /properties/commercial لازم يوصل للقسم مش لصفحة وحدة اسمها commercial
+    const response = await page.goto('/ar/properties/commercial', { waitUntil: 'networkidle' });
+    expect(response?.status()).toBe(200);
+
+    const types = await page.evaluate(() => {
+        const el = document.getElementById('app');
+        const page = JSON.parse(el?.getAttribute('data-page') || '{}');
+        return (page.props?.properties ?? []).map((p: { category: string }) => p.category);
+    });
+
+    expect(types.length).toBeGreaterThan(0);
+    expect([...new Set(types)]).toEqual(['commercial']);
+});

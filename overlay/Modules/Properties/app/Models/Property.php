@@ -66,6 +66,18 @@ class Property extends Model
         'عيادة' => 'Clinic',
     ];
 
+    /**
+     * الأنواع التجارية — الباقي سكني.
+     * التقسيمة دي بتغذّي /properties/commercial وفلتر «نوع العقار»،
+     * ومصدرها واحد عشان مايحصلش اختلاف بين الفلتر والصفحة.
+     */
+    public const COMMERCIAL_TYPES = ['مكتب إداري', 'محل تجاري', 'عيادة'];
+
+    public const CATEGORIES = [
+        'residential' => ['ar' => 'سكني', 'en' => 'Residential'],
+        'commercial' => ['ar' => 'تجاري', 'en' => 'Commercial'],
+    ];
+
     protected $fillable = [
         'title', 'title_en', 'slug', 'location_id', 'compound_id', 'developer_id', 'owner_id', 'purpose', 'type',
         'description', 'description_en', 'features', 'features_en',
@@ -115,6 +127,20 @@ class Property extends Model
         return $this->belongsTo(User::class, 'owner_id');
     }
 
+    /** أنواع القسم ده (بالعربي — زي ما هي متخزّنة) */
+    public static function typesIn(string $category): array
+    {
+        return $category === 'commercial'
+            ? self::COMMERCIAL_TYPES
+            : array_values(array_diff(array_keys(self::TYPES), self::COMMERCIAL_TYPES));
+    }
+
+    /** سكني ولا تجاري */
+    public function category(): string
+    {
+        return in_array($this->type, self::COMMERCIAL_TYPES, true) ? 'commercial' : 'residential';
+    }
+
     /** النوع باللغة المطلوبة — متخزّن بالعربي دايمًا */
     public function typeLabel(string $locale): string
     {
@@ -136,6 +162,7 @@ class Property extends Model
             'area' => ($this->location ?? $this->compound?->location)?->t('name', $locale) ?? '',
             'purpose' => $this->purpose === 'rent' ? ($ar ? 'إيجار' : 'Rent') : ($ar ? 'بيع' : 'Sale'),
             'type' => $this->typeLabel($locale),
+            'category' => $this->category(),
             'price' => $this->t('price', $locale) ?? '',
             'beds' => (int) $this->beds,
             'baths' => (int) $this->baths,

@@ -59,6 +59,8 @@ export interface Property {
     purpose: string;
     /** نوع العقار باللغة المعروضة (شقة / Apartment) */
     type: string;
+    /** residential | commercial — مشتق من النوع */
+    category: string;
     price: string;
     beds: number;
     baths: number;
@@ -103,10 +105,57 @@ export interface CompoundDetail extends Compound {
 /** بطاقة منطقة في قسم "مناطق بنغطيها" بالرئيسية */
 export interface Area {
     id: number;
+    slug: string;
     name: string;
     note: string;
     count: string;
     image: string;
+    /** رابط صفحة المنطقة */
+    url: string;
+    compounds?: number;
+    properties?: number;
+}
+
+/** المنطقة كاملة في صفحتها */
+export interface AreaDetail {
+    id: number;
+    slug: string;
+    name: string;
+    note: string;
+    about: string;
+    image: string;
+    cover: string;
+    url: string;
+    properties: number;
+    compounds: number;
+    developers: number;
+}
+
+/** كارت مطوّر — في صفحة المطوّرين وفي «من نحن» */
+export interface DeveloperCard {
+    id: number;
+    slug: string;
+    name: string;
+    /** نبذة المطوّر — بتفضل فاضية لحد ما تتكتب من الداشبورد */
+    about: string;
+    /** مسار اللوجو — فاضي يعني ارسم أول حرف بدله */
+    logo: string;
+    /** عدد المشاريع المنشورة */
+    compounds: number;
+    /** عدد الوحدات المعروضة — بيتبعت في صفحة المطوّرين بس */
+    units?: number;
+    /** رابط صفحة المطوّر — /{locale}/developers/{slug} */
+    url: string;
+}
+
+/** المطوّر كامل في صفحته */
+export interface DeveloperDetail extends DeveloperCard {
+    cover: string;
+    website: string;
+    founded: string;
+    headquarters: string;
+    units: number;
+    areas: number;
 }
 
 /** كارت مقال في المدونة */
@@ -149,20 +198,6 @@ export interface TeamMember {
     name: string;
     role: string;
     image: string;
-}
-
-/** مطوّر معروض في صفحة «من نحن» */
-export interface DeveloperCard {
-    id: number;
-    name: string;
-    /** نبذة المطوّر — بتفضل فاضية لحد ما تتكتب من الداشبورد */
-    about: string;
-    /** مسار اللوجو — فاضي يعني ارسم أول حرف بدله */
-    logo: string;
-    /** عدد المشاريع المنشورة */
-    compounds: number;
-    /** رابط مشاريع المطوّر — /{locale}/compounds?q=... */
-    url: string;
 }
 
 /** خيارات فورم "اتصل بنا" */

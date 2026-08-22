@@ -104,6 +104,47 @@ class DemoContent
                 'ref' => 'XH-1009',
                 'image' => '/images/demo/property-9.jpg',
             ],
+            // ---------- تجاري ----------
+            [
+                'id' => 10,
+                'title' => $ar ? 'محل تجاري 120م على المحور الرئيسي' : 'Retail shop 120m on the main axis',
+                'area' => $ar ? 'العاصمة الإدارية' : 'New Capital',
+                'purpose' => $ar ? 'بيع' : 'Sale',
+                'price' => 'EGP 8,400,000',
+                'beds' => 0, 'baths' => 1, 'size' => 120,
+                'ref' => 'XH-1010',
+                'image' => '/images/demo/property-6.jpg',
+            ],
+            [
+                'id' => 11,
+                'title' => $ar ? 'عيادة 90م في مبنى طبي مرخّص' : 'Clinic 90m in a licensed medical building',
+                'area' => $ar ? 'القاهرة الجديدة' : 'New Cairo',
+                'purpose' => $ar ? 'بيع' : 'Sale',
+                'price' => 'EGP 4,300,000',
+                'beds' => 0, 'baths' => 1, 'size' => 90,
+                'ref' => 'XH-1011',
+                'image' => '/images/demo/property-3.jpg',
+            ],
+            [
+                'id' => 12,
+                'title' => $ar ? 'مكتب إداري 140م للإيجار متشطّب بالكامل' : 'Office 140m for rent, fully finished',
+                'area' => $ar ? 'القاهرة الجديدة' : 'New Cairo',
+                'purpose' => $ar ? 'إيجار' : 'Rent',
+                'price' => $ar ? 'EGP 55,000 / شهريًا' : 'EGP 55,000 / mo',
+                'beds' => 0, 'baths' => 2, 'size' => 140,
+                'ref' => 'XH-1012',
+                'image' => '/images/demo/property-7.jpg',
+            ],
+            [
+                'id' => 13,
+                'title' => $ar ? 'محل تجاري 65م للإيجار في منطقة تجارية' : 'Retail shop 65m for rent in a retail strip',
+                'area' => $ar ? 'الإسكندرية' : 'Alexandria',
+                'purpose' => $ar ? 'إيجار' : 'Rent',
+                'price' => $ar ? 'EGP 24,000 / شهريًا' : 'EGP 24,000 / mo',
+                'beds' => 0, 'baths' => 1, 'size' => 65,
+                'ref' => 'XH-1013',
+                'image' => '/images/demo/property-4.jpg',
+            ],
         ];
     }
 
@@ -188,6 +229,42 @@ class DemoContent
                     : "Fully furnished\nEquipped kitchen and AC\nFull bathroom\nAnnually renewable contract\nClose to the sea\nSeparate entrance",
                 'gallery' => ['/images/demo/property-8.jpg', '/images/demo/area-3.jpg'],
             ],
+            'XH-1010' => [
+                'desc' => $ar
+                    ? "محل تجاري 120م² بواجهة 8 متر على المحور الرئيسي في العاصمة الإدارية.\nالوحدة في مبنى تجاري مرخّص، والدور الأرضي بيديها كثافة مشاة عالية طول اليوم."
+                    : "A 120m² retail unit with an 8-metre frontage on the main axis in the New Capital.\nIt sits in a licensed retail building, and the ground floor gives it steady footfall through the day.",
+                'features' => $ar
+                    ? "واجهة 8 متر على المحور\nدور أرضي بكثافة مشاة عالية\nمبنى تجاري مرخّص\nحمام داخل الوحدة\nمواقف زوار\nأمن ٢٤ ساعة"
+                    : "8-metre frontage on the axis\nGround floor with high footfall\nLicensed retail building\nIn-unit bathroom\nVisitor parking\n24/7 security",
+                'gallery' => ['/images/demo/property-6.jpg', '/images/demo/compound-3.jpg'],
+            ],
+            'XH-1011' => [
+                'desc' => $ar
+                    ? "عيادة 90م² في مبنى طبي مرخّص بالتجمع الخامس، الدور الثاني بأسانسير.\nالمبنى فيه عيادات شغّالة بالفعل، يعني حركة مرضى موجودة من غير ما تبدأ من الصفر."
+                    : "A 90m² clinic in a licensed medical building in Fifth Settlement, second floor with a lift.\nThe building already has operating clinics, so patient traffic exists without starting from zero.",
+                'features' => $ar
+                    ? "مبنى طبي مرخّص\nالدور الثاني بأسانسير\nتقسيم عيادة جاهز\nغرفة انتظار\nمواقف للمرضى\nقريب من مستشفيات"
+                    : "Licensed medical building\nSecond floor with a lift\nReady clinic layout\nWaiting room\nPatient parking\nClose to hospitals",
+                'gallery' => ['/images/demo/property-3.jpg', '/images/demo/area-1.jpg'],
+            ],
+            'XH-1012' => [
+                'desc' => $ar
+                    ? "مكتب إداري 140م² للإيجار متشطّب بالكامل بالتكييفات والأرضيات، جاهز للتشغيل فورًا.\nمقسّم لمساحة مفتوحة وغرفتين اجتماعات، ومناسب لفريق من 12 لـ 18 فرد."
+                    : "A 140m² office for rent, fully finished with ACs and flooring, ready to operate immediately.\nLaid out as an open area plus two meeting rooms, suitable for a team of 12 to 18.",
+                'features' => $ar
+                    ? "متشطّب بالكامل بالتكييفات\nمساحة مفتوحة + غرفتين اجتماعات\n٢ حمام داخل الوحدة\nمبنى إداري مرخّص\nأسانسيرات وأمن ٢٤ ساعة\nجراج للموظفين"
+                    : "Fully finished with ACs\nOpen area plus two meeting rooms\n2 in-unit bathrooms\nLicensed administrative building\nLifts and 24/7 security\nStaff parking",
+                'gallery' => ['/images/demo/property-7.jpg', '/images/demo/compound-1.jpg'],
+            ],
+            'XH-1013' => [
+                'desc' => $ar
+                    ? "محل 65م² للإيجار في شريط تجاري بالإسكندرية، بواجهة زجاجية على شارع رئيسي.\nالعقد سنوي قابل للتجديد، والمرافق مستقلة على الوحدة."
+                    : "A 65m² shop for rent in a retail strip in Alexandria, with a glass frontage on a main street.\nAnnual renewable contract, with utilities metered separately for the unit.",
+                'features' => $ar
+                    ? "واجهة زجاجية على شارع رئيسي\nشريط تجاري شغّال\nمرافق مستقلة\nعقد سنوي قابل للتجديد\nحمام داخل الوحدة\nمخزن صغير"
+                    : "Glass frontage on a main street\nActive retail strip\nSeparately metered utilities\nAnnual renewable contract\nIn-unit bathroom\nSmall storeroom",
+                'gallery' => ['/images/demo/property-4.jpg', '/images/demo/area-3.jpg'],
+            ],
             'XH-1009' => [
                 'desc' => $ar
                     ? "شقة 190م² بفيو لاندسكيب مفتوح في كمبوند بالتجمع الخامس، الدور الثالث.\n٣ غرف نوم و٣ حمامات، ونظام سداد من المطوّر على أقساط."
@@ -196,6 +273,75 @@ class DemoContent
                     ? "فيو لاندسكيب مفتوح\n٣ غرف نوم و٣ حمامات\nنظام سداد بالتقسيط من المطوّر\nجراج مغطى\nنادي اجتماعي وحمام سباحة\nأمن ٢٤ ساعة"
                     : "Open landscape view\n3 bedrooms and 3 bathrooms\nDeveloper instalment plan\nCovered parking\nSocial club and swimming pool\n24/7 security",
                 'gallery' => ['/images/demo/property-9.jpg', '/images/demo/compound-1.jpg', '/images/demo/area-2.jpg'],
+            ],
+        ];
+    }
+
+    /**
+     * صفحات المطوّرين — نبذة وبيانات تعريفية، مفهرسة بالاسم العربي.
+     * أسماء الشركات دي خيالية زي باقي المحتوى التجريبي.
+     */
+    public static function developerProfiles(string $locale): array
+    {
+        $ar = $locale === 'ar';
+
+        return [
+            'شركة المروج للتطوير' => [
+                'about' => $ar
+                    ? "شركة تطوير عقاري بتشتغل على السكن المتوسط والفوق متوسط في شرق القاهرة والعاصمة الإدارية.\nالمشاريع بتتسلّم على مراحل معلنة في العقد، وأنظمة السداد بتتحدّد من الشركة نفسها مش من الوسيط."
+                    : "A developer working on mid and upper-mid residential projects in East Cairo and the New Capital.\nProjects are delivered in phases stated in the contract, and payment plans are set by the developer, not the broker.",
+                'founded' => '2005',
+                'hq' => $ar ? 'القاهرة الجديدة' : 'New Cairo',
+                'website' => '',
+                'cover' => '/images/demo/compound-1.jpg',
+            ],
+            'الوادي القابضة' => [
+                'about' => $ar
+                    ? "مجموعة استثمارية ليها ذراع عقاري متخصص في المشاريع الساحلية على الساحل الشمالي والإسكندرية.\nالوحدات غالبًا بتتباع بنظام إدارة فندقية، يعني الوحدة بتتأجّر لحسابك وإنت مش مقيم فيها."
+                    : "An investment group with a real-estate arm focused on coastal projects on the North Coast and in Alexandria.\nUnits are often sold under hotel management, meaning the unit is rented on your behalf while you are away.",
+                'founded' => '1998',
+                'hq' => $ar ? 'الإسكندرية' : 'Alexandria',
+                'website' => '',
+                'cover' => '/images/demo/compound-2.jpg',
+            ],
+            'بناة المستقبل' => [
+                'about' => $ar
+                    ? "متخصصة في الأبراج الإدارية والتجارية المرخّصة داخل العاصمة الإدارية الجديدة.\nالترخيص الإداري مهم هنا: هو اللي بيسمح بتسجيل شركة على عنوان الوحدة، وده اللي بيفرق سعر المتر."
+                    : "Specialised in licensed administrative and retail towers inside the New Administrative Capital.\nThe administrative licence matters here: it is what lets you register a company at the unit's address, and it is what moves the price per metre.",
+                'founded' => '2015',
+                'hq' => $ar ? 'العاصمة الإدارية' : 'New Capital',
+                'website' => '',
+                'cover' => '/images/demo/compound-3.jpg',
+            ],
+        ];
+    }
+
+    /** صفحات المناطق — نبذة طويلة وغلاف، مفهرسة بالاسم العربي */
+    public static function areaProfiles(string $locale): array
+    {
+        $ar = $locale === 'ar';
+
+        return [
+            'القاهرة الجديدة' => [
+                'about' => $ar
+                    ? "أكبر تجمّع سكني شرق القاهرة، وبيضم التجمع الخامس والرحاب ومدينتي والشروق.\nالمنطقة مناسبة للأسر اللي بتدوّر على مدارس دولية وخدمات قريبة، والأسعار فيها بتتفاوت بشكل كبير حسب الموقع من محور محمد نجيب والطريق الدائري.\nالوحدات المتاحة غالبًا شقق ودوبلكس داخل كمبوندات مغلقة، مع فيلات مستقلة في المشاريع الأكبر."
+                    : "The largest residential cluster east of Cairo, covering Fifth Settlement, Rehab, Madinaty and Shorouk.\nIt suits families looking for international schools and nearby services; prices vary widely with distance from the Mohamed Naguib axis and the Ring Road.\nAvailable units are mostly apartments and duplexes inside gated compounds, with standalone villas in the larger projects.",
+                'featured' => true,
+                'cover' => '/images/demo/area-1.jpg',
+            ],
+            'العاصمة الإدارية' => [
+                'about' => $ar
+                    ? "مدينة جديدة بتتبني على مراحل، وأغلب المعروض فيها لسه تحت الإنشاء بتواريخ تسليم بين 2026 و2029.\nفيها الحي الحكومي والحي المالي وأبراج إدارية مرخّصة، فبتناسب اللي بيدوّر على استثمار إداري أو تجاري مش سكن فوري.\nالمقدمات فيها عادة أقل والتقسيط أطول، مقابل إن الاستلام بعيد."
+                    : "A new city being built in phases; most of what is listed is still under construction with delivery dates between 2026 and 2029.\nIt holds the government and financial districts and licensed administrative towers, so it suits administrative or retail investment rather than immediate housing.\nDown payments are usually lower and instalment terms longer, in exchange for a distant handover.",
+                'featured' => true,
+                'cover' => '/images/demo/area-2.jpg',
+            ],
+            'الإسكندرية' => [
+                'about' => $ar
+                    ? "المعروض هنا بينقسم لحاجتين: وحدات سكنية داخل المدينة، ومشاريع ساحلية على الطريق الساحلي.\nالوحدات داخل المدينة غالبًا في عمارات مش كمبوندات، والعقار المسجّل فيها أهم من أي حتة تانية لأن الملكيات قديمة ومتشابكة.\nالمشاريع الساحلية بتتباع بنظام مصيف أو إدارة فندقية."
+                    : "What is listed here splits in two: residential units inside the city, and coastal projects along the coastal road.\nIn-city units are mostly in standalone buildings rather than compounds, and registered title matters more here than anywhere else because ownership records are old and entangled.\nCoastal projects are sold as summer homes or under hotel management.",
+                'featured' => false,
+                'cover' => '/images/demo/area-3.jpg',
             ],
         ];
     }

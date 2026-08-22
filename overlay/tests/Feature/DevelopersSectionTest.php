@@ -84,11 +84,11 @@ class DevelopersSectionTest extends TestCase
 
         $url = Catalog::developers('ar')[0]['url'];
 
-        $this->assertStringStartsWith('/ar/compounds?q=', $url);
+        // الكارت بقى بيوصّل لصفحة المطوّر نفسها بدل نتيجة بحث في الكمبوندات
+        $this->assertSame("/ar/developers/{$developer->fresh()->slug}", $url);
 
-        // الرابط لازم يرجّع مشاريعه فعلًا — مش يوصّل لصفحة فاضية
-        parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
-        $found = Catalog::compounds('ar', null, ['q' => $query['q']]);
+        // والصفحة دي لازم ترجّع مشاريعه فعلًا — مش تفتح فاضية
+        $found = Catalog::developer('ar', $developer->fresh()->slug)['compounds'];
 
         $this->assertCount(1, $found);
         $this->assertSame($compound->name, $found[0]['name']);

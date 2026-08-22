@@ -6,6 +6,8 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Modules\Blog\Models\Post;
 use Modules\Compounds\Models\Compound;
+use Modules\Developers\Models\Developer;
+use Modules\Locations\Models\Location;
 use Modules\Properties\Models\Property;
 
 /**
@@ -19,11 +21,34 @@ class SitemapController extends Controller
     {
         $urls = [];
 
-        foreach (['', '/properties', '/compounds', '/blog', '/about', '/contact'] as $path) {
+        $static = [
+            '', '/properties', '/properties/residential', '/properties/commercial',
+            '/compounds', '/developers', '/areas', '/blog', '/about', '/contact',
+        ];
+
+        foreach ($static as $path) {
             $urls[] = [
                 'path' => $path,
                 'changefreq' => $path === '' ? 'daily' : 'weekly',
                 'priority' => $path === '' ? '1.0' : '0.8',
+            ];
+        }
+
+        foreach (Developer::where('is_active', true)->whereNotNull('slug')->get() as $developer) {
+            $urls[] = [
+                'path' => '/developers/'.$developer->slug,
+                'lastmod' => $developer->updated_at?->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.6',
+            ];
+        }
+
+        foreach (Location::where('is_active', true)->whereNotNull('slug')->get() as $area) {
+            $urls[] = [
+                'path' => '/areas/'.$area->slug,
+                'lastmod' => $area->updated_at?->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.6',
             ];
         }
 

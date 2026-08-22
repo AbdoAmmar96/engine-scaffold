@@ -3,6 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Modules\Developers\Http\Controllers\DeveloperPageController;
+use Modules\Locations\Http\Controllers\LocationPageController;
+use Modules\Properties\Http\Controllers\PropertyPageController;
 
 // الجذر → العربية (اللغة الافتراضية)
 Route::redirect('/', '/ar');
@@ -21,63 +24,24 @@ Route::prefix('{locale}')
             'meta'             => \App\Support\Seo::page($locale, ''),
         ]))->name('home');
 
-        Route::get('/properties', function (Request $request, string $locale) {
-            $filters = \App\Support\Catalog::filters($request);
+        /* ---------- العقارات ---------- */
+        // ترتيب الراوتات مقصود: القسم (commercial/residential) قبل الـ slug،
+        // و whereIn بيخلّي أي قيمة تانية تعدّي لراوت صفحة الوحدة بدل ما تتاكل هنا.
+        Route::get('/properties', [PropertyPageController::class, 'index'])->name('properties');
 
-            $properties = \App\Support\Catalog::properties($locale, null, $filters);
-            $title = $locale === 'en' ? 'Properties for sale and rent' : 'عقارات للبيع والإيجار';
+        Route::get('/properties/{category}', [PropertyPageController::class, 'index'])
+            ->whereIn('category', ['commercial', 'residential'])
+            ->name('properties.category');
 
-            return Inertia::render('Site/Properties', [
-                'properties' => $properties,
-                'filters' => $filters,
-                'options' => \App\Support\Catalog::searchOptions($locale),
-                'meta' => \App\Support\Seo::page(
-                    $locale,
-                    $title,
-                    $locale === 'en'
-                        ? 'Browse verified units with documented prices, delivery dates and reference numbers.'
-                        : 'تصفّح وحدات موثّقة بأسعار وتواريخ تسليم ورقم كود لكل وحدة.',
-                    $properties[0]['image'] ?? null,
-                    'website',
-                    [
-                        \App\Support\Seo::breadcrumb($locale, [$title => '/properties']),
-                        \App\Support\Seo::itemList($properties, $locale, '/properties'),
-                    ],
-                ),
-            ]);
-        })->name('properties');
+        Route::get('/properties/{slug}', [PropertyPageController::class, 'show'])->name('properties.show');
 
-        Route::get('/properties/{slug}', function (string $locale, string $slug) {
-            $property = \App\Support\Catalog::property($locale, $slug);
+        /* ---------- المطوّرون ---------- */
+        Route::get('/developers', [DeveloperPageController::class, 'index'])->name('developers');
+        Route::get('/developers/{slug}', [DeveloperPageController::class, 'show'])->name('developers.show');
 
-            abort_if(! $property, 404);
-
-            $crumb = $locale === 'en' ? 'Properties' : 'عقارات';
-
-            // لو الأدمن مكتبش وصف، بنركّب جملة من البيانات نفسها — أحسن من ميتا فاضية
-            $summary = $property['description'] ?: ($locale === 'en'
-                ? trim("{$property['type']} {$property['size']}m² in {$property['area']} — {$property['beds']} bedrooms, {$property['baths']} bathrooms. {$property['price']}")
-                : trim("{$property['type']} {$property['size']} م² في {$property['area']} — {$property['beds']} غرف نوم و{$property['baths']} حمام. {$property['price']}"));
-
-            return Inertia::render('Site/Property', [
-                'property' => $property,
-                'related' => \App\Support\Catalog::relatedProperties($locale, $property),
-                'meta' => \App\Support\Seo::page(
-                    $locale,
-                    $property['title'],
-                    $summary,
-                    $property['image'],
-                    'article',
-                    [
-                        \App\Support\Seo::breadcrumb($locale, [
-                            $crumb => '/properties',
-                            $property['title'] => '/properties/'.$property['slug'],
-                        ]),
-                        \App\Support\Seo::residence($property + ['description' => $summary], $locale),
-                    ],
-                ),
-            ]);
-        })->name('properties.show');
+        /* ---------- المناطق ---------- */
+        Route::get('/areas', [LocationPageController::class, 'index'])->name('areas');
+        Route::get('/areas/{slug}', [LocationPageController::class, 'show'])->name('areas.show');
 
         Route::get('/compounds', function (Request $request, string $locale) {
             $filters = \App\Support\Catalog::filters($request);

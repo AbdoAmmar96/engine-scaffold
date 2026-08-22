@@ -6,7 +6,27 @@ use App\Support\Bilingual;
 use App\Support\Sluggable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property string $title
+ * @property string|null $title_en
+ * @property string|null $slug
+ * @property string|null $category
+ * @property string|null $category_en
+ * @property string|null $excerpt
+ * @property string|null $excerpt_en
+ * @property string|null $body
+ * @property string|null $body_en
+ * @property string|null $image
+ * @property string|null $author
+ * @property Carbon|null $published_at
+ * @property int $sort
+ * @property bool $is_active
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class Post extends Model
 {
     use Bilingual, Sluggable;

@@ -38,17 +38,30 @@ class CatalogSeeder extends Seeder
         $enPropDetails = DemoContent::propertyDetails('en');
         $arCompDetails = DemoContent::compoundDetails('ar');
         $enCompDetails = DemoContent::compoundDetails('en');
+        $arDevProfiles = DemoContent::developerProfiles('ar');
+        $enDevProfiles = DemoContent::developerProfiles('en');
+        $arAreaProfiles = DemoContent::areaProfiles('ar');
+        $enAreaProfiles = DemoContent::areaProfiles('en');
 
         // ---------- المناطق ----------
         $locations = [];
         foreach ($arAreas as $i => $a) {
+            $profile = $arAreaProfiles[$a['name']] ?? [];
+            $profileEn = $enAreaProfiles[$a['name']] ?? [];
+            $existingLoc = Location::where('name', $a['name'])->first();
+
             $locations[$a['name']] = Location::updateOrCreate(
                 ['name' => $a['name']],
                 [
                     'name_en' => $enAreas[$i]['name'] ?? null,
+                    'slug' => $existingLoc?->slug ?: Location::buildSlug($a['name'], $enAreas[$i]['name'] ?? null, $existingLoc?->id),
                     'note' => $a['note'],
                     'note_en' => $enAreas[$i]['note'] ?? null,
+                    'about' => $profile['about'] ?? null,
+                    'about_en' => $profileEn['about'] ?? null,
                     'image' => $a['image'],
+                    'cover' => $profile['cover'] ?? null,
+                    'is_featured' => (bool) ($profile['featured'] ?? false),
                     'sort' => $i,
                 ],
             );
@@ -57,7 +70,12 @@ class CatalogSeeder extends Seeder
         // مناطق إضافية ظاهرة في العقارات بس
         foreach (array_unique(array_column($arProps, 'area')) as $name) {
             if (! isset($locations[$name])) {
-                $locations[$name] = Location::updateOrCreate(['name' => $name], ['sort' => 90]);
+                $existingLoc = Location::where('name', $name)->first();
+
+                $locations[$name] = Location::updateOrCreate(['name' => $name], [
+                    'slug' => $existingLoc?->slug ?: Location::buildSlug($name, null, $existingLoc?->id),
+                    'sort' => 90,
+                ]);
             }
         }
 
@@ -67,9 +85,25 @@ class CatalogSeeder extends Seeder
             $name = $c['developer'];
 
             if (! isset($developers[$name])) {
+                $profile = $arDevProfiles[$name] ?? [];
+                $profileEn = $enDevProfiles[$name] ?? [];
+                $existingDev = Developer::where('name', $name)->first();
+                $nameEn = $enComps[$i]['developer'] ?? null;
+
                 $developers[$name] = Developer::updateOrCreate(
                     ['name' => $name],
-                    ['name_en' => $enComps[$i]['developer'] ?? null, 'sort' => count($developers)],
+                    [
+                        'name_en' => $nameEn,
+                        'slug' => $existingDev?->slug ?: Developer::buildSlug($name, $nameEn, $existingDev?->id),
+                        'about' => $profile['about'] ?? null,
+                        'about_en' => $profileEn['about'] ?? null,
+                        'cover' => $profile['cover'] ?? null,
+                        'website' => ($profile['website'] ?? '') ?: null,
+                        'founded_year' => $profile['founded'] ?? null,
+                        'headquarters' => $profile['hq'] ?? null,
+                        'headquarters_en' => $profileEn['hq'] ?? null,
+                        'sort' => count($developers),
+                    ],
                 );
             }
         }
