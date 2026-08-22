@@ -50,8 +50,21 @@ class PropertyAdminController extends ResourceController
             'owner.name' => self::actorSeesEverything() ? 'الحساب المالك' : null,
             'purpose' => 'الغرض',
             'price' => 'السعر',
-            'is_active' => 'مفعّل',
+            'status' => 'الحالة',
+            'is_active' => 'معروض',
         ]);
+    }
+
+    /** قايمة المراجعة: /admin/properties?status=pending */
+    protected function listFilters(): array
+    {
+        return [[
+            'name' => 'status',
+            'label' => 'الحالة',
+            'options' => collect(Property::STATUSES)
+                ->map(fn (array $s, string $key) => ['value' => $key, 'label' => $s['label']])
+                ->values()->all(),
+        ]];
     }
 
     protected function fields(): array
@@ -78,15 +91,53 @@ class PropertyAdminController extends ResourceController
             ['name' => 'description_en', 'label' => 'الوصف (إنجليزي)',   'type' => 'textarea'],
             ['name' => 'features',       'label' => 'المميزات (عربي)',   'type' => 'textarea', 'hint' => 'ميزة في كل سطر'],
             ['name' => 'features_en',    'label' => 'المميزات (إنجليزي)', 'type' => 'textarea', 'hint' => 'ميزة في كل سطر'],
-            ['name' => 'price',       'label' => 'السعر (عربي)',      'type' => 'text', 'hint' => 'مثال: EGP 4,850,000'],
-            ['name' => 'price_en',    'label' => 'السعر (إنجليزي)',   'type' => 'text'],
+            ['name' => 'price_amount', 'label' => 'السعر (رقم)',      'type' => 'number',
+                'hint' => 'الرقم من غير فواصل — الفلاتر والترتيب بيشتغلوا عليه'],
+            ['name' => 'price',       'label' => 'نص السعر (عربي)',   'type' => 'text',
+                'hint' => 'اختياري — بيغلب الرقم في العرض بس. مثال: السعر عند الاستعلام'],
+            ['name' => 'price_en',    'label' => 'نص السعر (إنجليزي)', 'type' => 'text'],
+            ['name' => 'down_payment', 'label' => 'المقدم (رقم)',      'type' => 'number'],
+            ['name' => 'monthly_installment', 'label' => 'القسط الشهري (رقم)', 'type' => 'number'],
+            ['name' => 'installment_years',   'label' => 'سنوات التقسيط',      'type' => 'number'],
+            ['name' => 'delivery_year',       'label' => 'سنة التسليم',        'type' => 'number', 'hint' => 'مثال: 2028'],
             ['name' => 'beds',        'label' => 'غرف النوم',         'type' => 'number'],
             ['name' => 'baths',       'label' => 'الحمامات',          'type' => 'number'],
             ['name' => 'size',        'label' => 'المساحة (م²)',      'type' => 'number'],
+            ['name' => 'finishing',   'label' => 'التشطيب',           'type' => 'select', 'options' => array_map(
+                fn ($labels, $key) => ['value' => $key, 'label' => $labels['ar']],
+                array_values(Property::FINISHING),
+                array_keys(Property::FINISHING),
+            )],
+            ['name' => 'floor',       'label' => 'الدور',             'type' => 'text', 'hint' => 'مثال: الثالث · أرضي'],
+            ['name' => 'has_garden',  'label' => 'حديقة',             'type' => 'toggle'],
+            ['name' => 'has_roof',    'label' => 'روف',               'type' => 'toggle'],
+            ['name' => 'has_dressing_room', 'label' => 'غرفة ملابس',  'type' => 'toggle'],
             ['name' => 'image',       'label' => 'الصورة الرئيسية',   'type' => 'image'],
             ['name' => 'gallery',     'label' => 'صور إضافية',        'type' => 'gallery'],
             ['name' => 'sort',        'label' => 'الترتيب',           'type' => 'number'],
-            ['name' => 'is_active',   'label' => 'مفعّل',             'type' => 'toggle'],
+            ['name' => 'is_active',   'label' => 'معروض على الموقع',  'type' => 'toggle',
+                'hint' => 'إخفاء مؤقت من صاحب الوحدة — مستقل عن حالة المراجعة'],
+            ...$this->moderationFields(),
+        ];
+    }
+
+    /** الاعتماد والتمييز للأدمن بس — الوسيط بيبعت للمراجعة وبس */
+    private function moderationFields(): array
+    {
+        if (! self::actorSeesEverything()) {
+            return [];
+        }
+
+        return [
+            ['name' => 'status', 'label' => 'حالة المراجعة', 'type' => 'select', 'required' => true,
+                'hint' => 'النشر بيولّد كود مرجعي للوحدة لو مالهاش واحد',
+                'options' => collect(Property::STATUSES)
+                    ->map(fn (array $s, string $key) => ['value' => $key, 'label' => $s['label']])
+                    ->values()->all()],
+            ['name' => 'rejection_reason', 'label' => 'سبب الرفض', 'type' => 'textarea',
+                'hint' => 'بيتعرض لصاحب الوحدة عشان يعرف يصلّح إيه'],
+            ['name' => 'is_featured', 'label' => 'إعلان مميّز', 'type' => 'toggle',
+                'hint' => 'بيتصدّر نتايج البحث'],
         ];
     }
 
@@ -105,10 +156,19 @@ class PropertyAdminController extends ResourceController
             'features' => ['nullable', 'string', 'max:3000'],
             'features_en' => ['nullable', 'string', 'max:3000'],
             'gallery' => ['nullable', 'string', 'max:3000'],
+            'price_amount' => ['nullable', 'integer', 'min:0', 'max:9999999999'],
+            'down_payment' => ['nullable', 'integer', 'min:0', 'max:9999999999'],
+            'monthly_installment' => ['nullable', 'integer', 'min:0', 'max:9999999999'],
+            'installment_years' => ['nullable', 'integer', 'min:0', 'max:40'],
+            'delivery_year' => ['nullable', 'integer', 'min:2000', 'max:2100'],
+            'finishing' => ['nullable', Rule::in(array_keys(Property::FINISHING))],
+            'floor' => ['nullable', 'string', 'max:40'],
+            'status' => ['nullable', Rule::in(array_keys(Property::STATUSES))],
+            'rejection_reason' => ['nullable', 'string', 'max:1000'],
         ];
     }
 
-    /** الملكية بتتفرض من السيرفر لغير الأدمن */
+    /** الملكية ودورة الاعتماد بيتفرضوا من السيرفر لغير الأدمن */
     protected function transform(array $data, ?Model $model): array
     {
         $data = parent::transform($data, $model);
@@ -117,7 +177,43 @@ class PropertyAdminController extends ResourceController
             $data['slug'] = Property::buildSlug($data['title'], $data['title_en'] ?? null, $model ? (int) $model->getKey() : null);
         }
 
-        return $this->applyOwner($data, $model);
+        return $this->applyModeration($this->applyOwner($data, $model), $model);
+    }
+
+    /**
+     * الأدمن بيحدد الحالة بإيده. غيره:
+     *   وحدة جديدة → في انتظار المراجعة
+     *   تعديل وحدة منشورة أو مرفوضة → بترجع للمراجعة تاني
+     *   وحدة لسه تحت المراجعة → بتفضل زي ما هي
+     * كده مفيش وسيط بينشر على الموقع من غير ما حد يشوف.
+     */
+    private function applyModeration(array $data, ?Model $model): array
+    {
+        if (self::actorSeesEverything()) {
+            return $data;
+        }
+
+        unset($data['is_featured']);
+        $data['rejection_reason'] = null;
+
+        /** @var Property|null $model */
+        $current = $model?->status;
+
+        // المباع/المؤجّر بيفضل زي ما هو — التعديل عليه مش إعادة عرض.
+        // أي حالة تانية (جديدة أو منشورة أو مرفوضة) بترجع للمراجعة.
+        $data['status'] = in_array($current, ['sold', 'rented'], true) ? $current : 'pending';
+
+        return $data;
+    }
+
+    /** الحالة بتتعرض كشارة ملوّنة — شكل {label, tone} */
+    protected function rowPayload(Model $row): array
+    {
+        /** @var Property $row */
+        // array_replace مش + : الـ + بيسيب قيمة الشمال، فالنص الخام كان هيغلب الشارة
+        return array_replace(parent::rowPayload($row), [
+            'status' => Property::STATUSES[$row->status] ?? ['label' => $row->status, 'tone' => 'muted'],
+        ]);
     }
 
     /** الشركة بتشوف مشاريعها بس في قائمة الكمبوندات */

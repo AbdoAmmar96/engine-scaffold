@@ -5,6 +5,7 @@ namespace Modules\Properties\Models;
 use App\Models\User;
 use App\Support\Bilingual;
 use App\Support\Sluggable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -23,6 +24,21 @@ use Modules\Locations\Models\Location;
  * @property int|null $owner_id
  * @property string $purpose
  * @property string|null $type
+ * @property int|null $price_amount
+ * @property int|null $down_payment
+ * @property int|null $monthly_installment
+ * @property int|null $installment_years
+ * @property int|null $delivery_year
+ * @property string|null $finishing
+ * @property string|null $floor
+ * @property bool $has_garden
+ * @property bool $has_roof
+ * @property bool $has_dressing_room
+ * @property string $status
+ * @property string|null $rejection_reason
+ * @property Carbon|null $published_at
+ * @property bool $is_featured
+ * @property int $views_count
  * @property string|null $description
  * @property string|null $description_en
  * @property string|null $features
@@ -73,6 +89,37 @@ class Property extends Model
      */
     public const COMMERCIAL_TYPES = ['مكتب إداري', 'محل تجاري', 'عيادة'];
 
+    /** العملة — مكان واحد بدل ما تتكرر في العرض */
+    public const CURRENCY = 'EGP';
+
+    /** بادئة الكود المرجعي اللي بيتولّد عند الاعتماد */
+    public const REF_PREFIX = 'BP';
+
+    /** مستويات التشطيب — مفتاح ثابت وترجمة للعرض */
+    public const FINISHING = [
+        'none' => ['ar' => 'بدون تشطيب', 'en' => 'Unfinished'],
+        'semi' => ['ar' => 'نص تشطيب', 'en' => 'Semi-finished'],
+        'full' => ['ar' => 'تشطيب كامل', 'en' => 'Fully finished'],
+        'furnished' => ['ar' => 'مفروش', 'en' => 'Furnished'],
+        'flexi' => ['ar' => 'فليكسي', 'en' => 'Flexi'],
+    ];
+
+    /**
+     * حالة المراجعة. الوحدة مبتظهرش للزوار غير لما تبقى published
+     * و is_active كمان — دي حالة المراجعة، وده «معروض» من صاحبه.
+     */
+    public const STATUSES = [
+        'draft' => ['label' => 'مسودة', 'tone' => 'muted'],
+        'pending' => ['label' => 'في انتظار المراجعة', 'tone' => 'warn'],
+        'published' => ['label' => 'منشور', 'tone' => 'success'],
+        'rejected' => ['label' => 'مرفوض', 'tone' => 'danger'],
+        'sold' => ['label' => 'اتباع', 'tone' => 'muted'],
+        'rented' => ['label' => 'اتأجّر', 'tone' => 'muted'],
+    ];
+
+    /** الحالات اللي الوحدة فيها لسه معروضة للبيع/الإيجار */
+    public const OPEN_STATUSES = ['draft', 'pending', 'published', 'rejected'];
+
     public const CATEGORIES = [
         'residential' => ['ar' => 'سكني', 'en' => 'Residential'],
         'commercial' => ['ar' => 'تجاري', 'en' => 'Commercial'],
@@ -81,17 +128,80 @@ class Property extends Model
     protected $fillable = [
         'title', 'title_en', 'slug', 'location_id', 'compound_id', 'developer_id', 'owner_id', 'purpose', 'type',
         'description', 'description_en', 'features', 'features_en',
-        'price', 'price_en', 'beds', 'baths', 'size', 'ref', 'image', 'gallery', 'sort', 'is_active',
+        'price', 'price_en', 'price_amount', 'down_payment', 'monthly_installment',
+        'installment_years', 'delivery_year', 'finishing', 'floor',
+        'has_garden', 'has_roof', 'has_dressing_room',
+        'beds', 'baths', 'size', 'ref', 'image', 'gallery', 'sort', 'is_active',
+        'status', 'rejection_reason', 'published_at', 'is_featured', 'views_count',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_featured' => 'boolean',
+        'has_garden' => 'boolean',
+        'has_roof' => 'boolean',
+        'has_dressing_room' => 'boolean',
+        'published_at' => 'datetime',
         'beds' => 'integer', 'baths' => 'integer', 'size' => 'integer', 'sort' => 'integer',
+        'price_amount' => 'integer', 'down_payment' => 'integer',
+        'monthly_installment' => 'integer', 'installment_years' => 'integer',
+        'delivery_year' => 'integer', 'views_count' => 'integer',
+    ];
+
+    /**
+     * الديفولت زي ديفولت العمود: الصف اللي بيتعمل من كود (استيراد، سيدر،
+     * أمر) بيبقى منشور. المراجعة بتتفرض في طبقة اللوحة على غير الأدمن —
+     * PropertyAdminController::applyModeration — مش هنا، عشان الاستيراد
+     * ما يقفش والوسيط برضه ما يقدرش ينشر بنفسه.
+     */
+    protected $attributes = [
+        'status' => 'published',
+        'is_active' => true,
     ];
 
     protected static function slugFallback(): string
     {
         return 'property';
+    }
+
+    /**
+     * لحظة الاعتماد: الوحدة بتاخد كود مرجعي وتاريخ نشر.
+     * في الموديل مش في الكنترولر عشان الاعتماد من أي مكان (أمر، استيراد،
+     * سيدر) يطلّع نفس النتيجة.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (self $property) {
+            if ($property->status !== 'published') {
+                return;
+            }
+
+            if (blank($property->ref)) {
+                $property->ref = self::nextRef();
+            }
+
+            $property->published_at ??= now();
+        });
+    }
+
+    /** الكود اللي بعد أكبر رقم موجود بنفس البادئة */
+    public static function nextRef(): string
+    {
+        $prefix = self::REF_PREFIX.'-';
+
+        $last = static::query()
+            ->where('ref', 'like', $prefix.'%')
+            ->orderByRaw('length(ref) desc')
+            ->orderByDesc('ref')
+            ->value('ref');
+
+        $number = (int) preg_replace('/\D+/', '', (string) $last);
+
+        do {
+            $ref = $prefix.str_pad((string) ++$number, 4, '0', STR_PAD_LEFT);
+        } while (static::where('ref', $ref)->exists());
+
+        return $ref;
     }
 
     public function location(): BelongsTo
@@ -125,6 +235,44 @@ class Property extends Model
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    /**
+     * الوحدات اللي الزائر بيشوفها: معتمدة من الإدارة ومعروضة من صاحبها.
+     * أي استعلام عام لازم يعدّي من هنا — مصدر واحد بدل شرطين متكرّرين.
+     */
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where('is_active', true)->where('status', 'published');
+    }
+
+    /** السعر للعرض: النص الاختياري بيغلب، وإلا بنركّب من الرقم */
+    public function priceLabel(string $locale): string
+    {
+        if (filled($override = $this->t('price', $locale))) {
+            return $override;
+        }
+
+        if (! $this->price_amount) {
+            return $locale === 'en' ? 'Price on request' : 'السعر عند الاستعلام';
+        }
+
+        $amount = self::CURRENCY.' '.number_format($this->price_amount);
+
+        return $this->purpose === 'rent'
+            ? $amount.($locale === 'en' ? ' / mo' : ' / شهريًا')
+            : $amount;
+    }
+
+    /** رقم بصيغة العرض — للمقدم والقسط */
+    public static function money(?int $amount): string
+    {
+        return $amount ? self::CURRENCY.' '.number_format($amount) : '';
+    }
+
+    public function finishingLabel(string $locale): string
+    {
+        return self::FINISHING[$this->finishing][$locale === 'en' ? 'en' : 'ar'] ?? '';
     }
 
     /** أنواع القسم ده (بالعربي — زي ما هي متخزّنة) */
@@ -163,7 +311,10 @@ class Property extends Model
             'purpose' => $this->purpose === 'rent' ? ($ar ? 'إيجار' : 'Rent') : ($ar ? 'بيع' : 'Sale'),
             'type' => $this->typeLabel($locale),
             'category' => $this->category(),
-            'price' => $this->t('price', $locale) ?? '',
+            'price' => $this->priceLabel($locale),
+            'priceAmount' => (int) $this->price_amount,
+            'featured' => (bool) $this->is_featured,
+            'finishing' => $this->finishingLabel($locale),
             'beds' => (int) $this->beds,
             'baths' => (int) $this->baths,
             'size' => (int) $this->size,
@@ -180,6 +331,18 @@ class Property extends Model
 
         return $this->toCard($locale) + [
             'description' => $this->t('description', $locale) ?? '',
+            'floor' => $this->floor ?? '',
+            'delivery' => $this->delivery_year ? (string) $this->delivery_year : '',
+            'payment' => array_filter([
+                'down' => self::money($this->down_payment),
+                'monthly' => self::money($this->monthly_installment),
+                'years' => $this->installment_years ? (string) $this->installment_years : '',
+            ]),
+            'amenities' => array_keys(array_filter([
+                'garden' => $this->has_garden,
+                'roof' => $this->has_roof,
+                'dressing' => $this->has_dressing_room,
+            ])),
             'features' => $this->tLines('features', $locale),
             // الصورة الرئيسية أول المعرض دايمًا، من غير تكرار
             'gallery' => array_values(array_unique([$main, ...self::lines($this->gallery)])),

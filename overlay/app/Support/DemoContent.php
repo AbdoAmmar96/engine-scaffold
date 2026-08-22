@@ -149,6 +149,30 @@ class DemoContent
     }
 
     /**
+     * مواصفات رقمية للوحدات التجريبية — مفهرسة بالكود.
+     * مالهاش نسخة إنجليزي: كلها أرقام ومفاتيح ثابتة، والعرض بيترجمها.
+     */
+    public static function propertySpecs(): array
+    {
+        return [
+            //           تشطيب        الدور     تسليم   مقدم      قسط شهري  سنين  حديقة  روف   دريسنج فيتشرد
+            'XH-1001' => ['full',      'أرضي',   2026,   970000,   32000,    8,    true,  false, true,  true],
+            'XH-1002' => ['full',      'فيلا',   null,   3700000,  0,        0,    true,  true,  true,  true],
+            'XH-1003' => ['full',      'السابع', null,   1240000,  0,        0,    false, false, false, false],
+            'XH-1004' => ['furnished', 'الرابع', null,   0,        0,        0,    false, false, true,  false],
+            'XH-1005' => ['semi',      'دورين',  2026,   975000,   40000,    7,    true,  false, false, true],
+            'XH-1006' => ['semi',      'الرابع', 2027,   780000,   26000,    6,    false, false, false, false],
+            'XH-1007' => ['full',      'الخامس', null,   1480000,  0,        0,    false, true,  true,  false],
+            'XH-1008' => ['furnished', 'الثاني', null,   0,        0,        0,    false, false, false, false],
+            'XH-1009' => ['semi',      'الثالث', 2028,   560000,   18500,    10,   false, false, true,  false],
+            'XH-1010' => ['none',      'أرضي',   2028,   1680000,  56000,    8,    false, false, false, true],
+            'XH-1011' => ['full',      'الثاني', null,   860000,   0,        0,    false, false, false, false],
+            'XH-1012' => ['full',      'السادس', null,   0,        0,        0,    false, false, false, false],
+            'XH-1013' => ['none',      'أرضي',   null,   0,        0,        0,    false, false, false, false],
+        ];
+    }
+
+    /**
      * تفاصيل صفحة العقار — وصف ومميزات ومعرض صور، مفهرسة بالكود.
      * محتوى قالب للعرض؛ بيتغيّر من /admin/properties لكل وحدة حقيقية.
      */

@@ -15,7 +15,7 @@ class FavoriteController extends Controller
 {
     public function toggle(Request $request, string $locale, int $property): RedirectResponse
     {
-        $unit = Property::where('is_active', true)->findOrFail($property);
+        $unit = Property::published()->findOrFail($property);
 
         // toggle بترجّع attached/detached فبنعرف نقول للعميل حصل إيه
         $result = $request->user()->favorites()->toggle([$unit->id]);

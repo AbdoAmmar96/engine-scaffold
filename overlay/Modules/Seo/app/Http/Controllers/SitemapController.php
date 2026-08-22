@@ -53,7 +53,7 @@ class SitemapController extends Controller
         }
 
         // صفحات العرض — الوحدات بتتغيّر أكتر من المشاريع فأولويتها أعلى
-        foreach (Property::where('is_active', true)->whereNotNull('slug')->get() as $property) {
+        foreach (Property::published()->whereNotNull('slug')->get() as $property) {
             $urls[] = [
                 'path' => '/properties/'.$property->slug,
                 'lastmod' => $property->updated_at?->toAtomString(),

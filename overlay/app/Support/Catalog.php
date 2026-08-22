@@ -18,6 +18,46 @@ use Modules\Properties\Models\Property;
 class Catalog
 {
     /**
+     * الفلاتر المسموحة ونوع كل واحدة — الحارس الوحيد لأي قيمة جاية من الرابط.
+     * أي مفتاح مش هنا بيتجاهل، فمحدش يقدر يحقن عمود أو ترتيب من الكويري سترنج.
+     */
+    private const FILTER_SCHEMA = [
+        'q' => 'text',
+        'type' => 'text',
+        'location' => 'text',
+        'developer' => 'text',
+        'compound' => 'text',
+        'purpose' => 'purpose',
+        'category' => 'category',
+        'finishing' => 'finishing',
+        'sort' => 'sort',
+        'price_min' => 'int',
+        'price_max' => 'int',
+        'area_min' => 'int',
+        'area_max' => 'int',
+        'beds' => 'int',
+        'baths' => 'int',
+        'down_max' => 'int',
+        'monthly_max' => 'int',
+        'years_max' => 'int',
+        'delivery' => 'int',
+        'featured' => 'bool',
+        'garden' => 'bool',
+        'roof' => 'bool',
+        'dressing' => 'bool',
+    ];
+
+    /** خيارات الترتيب — المفتاح بيتحط في الرابط */
+    public const SORTS = [
+        'newest' => ['ar' => 'الأحدث', 'en' => 'Newest'],
+        'oldest' => ['ar' => 'الأقدم', 'en' => 'Oldest'],
+        'price_asc' => ['ar' => 'السعر: من الأقل', 'en' => 'Price: low to high'],
+        'price_desc' => ['ar' => 'السعر: من الأعلى', 'en' => 'Price: high to low'],
+        'area_desc' => ['ar' => 'المساحة: الأكبر', 'en' => 'Area: largest'],
+        'area_asc' => ['ar' => 'المساحة: الأصغر', 'en' => 'Area: smallest'],
+    ];
+
+    /**
      * @param  array  $filters  q · type · location · purpose — جايين من فورم البحث في الهيرو
      */
     public static function properties(string $locale, ?int $limit = null, array $filters = []): array
@@ -30,11 +70,10 @@ class Catalog
             return $limit ? array_slice($demo, 0, $limit) : $demo;
         }
 
-        $rows = Property::query()
-            ->where('is_active', true)
+        $rows = Property::published()
             ->with(['location', 'developer', 'compound.developer', 'compound.location'])
             ->tap(fn ($q) => self::applyPropertyFilters($q, $filters))
-            ->orderBy('sort')->orderByDesc('id')
+            ->tap(fn ($q) => self::applyPropertySort($q, (string) ($filters['sort'] ?? '')))
             ->when($limit, fn ($q) => $q->limit($limit))
             ->get();
 
@@ -85,6 +124,99 @@ class Catalog
                 ->where('name', $location)
                 ->orWhere('name_en', $location));
         }
+
+        // المطوّر ممكن يكون على الوحدة نفسها أو على مشروعها
+        if ($developer = trim((string) ($filters['developer'] ?? ''))) {
+            $match = fn ($s) => $s->where('name', $developer)
+                ->orWhere('name_en', $developer)
+                ->orWhere('slug', $developer);
+
+            $query->where(fn ($s) => $s
+                ->whereHas('developer', $match)
+                ->orWhereHas('compound.developer', $match));
+        }
+
+        if ($compound = trim((string) ($filters['compound'] ?? ''))) {
+            $query->whereHas('compound', fn ($s) => $s
+                ->where('name', $compound)
+                ->orWhere('name_en', $compound)
+                ->orWhere('slug', $compound));
+        }
+
+        if (isset(Property::FINISHING[$filters['finishing'] ?? ''])) {
+            $query->where('finishing', $filters['finishing']);
+        }
+
+        // النطاقات: الوحدة اللي مالهاش رقم مبتظهرش في فلتر رقمي —
+        // أحسن من إنها تظهر في كل نطاق وتضلّل الباحث
+        self::range($query, 'price_amount', $filters['price_min'] ?? null, $filters['price_max'] ?? null);
+        self::range($query, 'size', $filters['area_min'] ?? null, $filters['area_max'] ?? null);
+
+        foreach (['beds', 'baths'] as $column) {
+            if ($min = (int) ($filters[$column] ?? 0)) {
+                // «٣ غرف» معناها ٣ أو أكتر — زي كل بوابات العقارات
+                $query->where($column, '>=', $min);
+            }
+        }
+
+        $atMost = [
+            'down_max' => 'down_payment',
+            'monthly_max' => 'monthly_installment',
+            'years_max' => 'installment_years',
+            'delivery' => 'delivery_year',
+        ];
+
+        foreach ($atMost as $key => $column) {
+            if ($max = (int) ($filters[$key] ?? 0)) {
+                $query->whereNotNull($column)->where($column, '<=', $max);
+            }
+        }
+
+        $flags = [
+            'featured' => 'is_featured',
+            'garden' => 'has_garden',
+            'roof' => 'has_roof',
+            'dressing' => 'has_dressing_room',
+        ];
+
+        foreach ($flags as $key => $column) {
+            if (! empty($filters[$key])) {
+                $query->where($column, true);
+            }
+        }
+    }
+
+    /** نطاق رقمي — بيتجاهل الوحدات اللي العمود ده فاضي عندها */
+    private static function range($query, string $column, mixed $min, mixed $max): void
+    {
+        if ($from = (int) $min) {
+            $query->whereNotNull($column)->where($column, '>=', $from);
+        }
+
+        if ($to = (int) $max) {
+            $query->whereNotNull($column)->where($column, '<=', $to);
+        }
+    }
+
+    /**
+     * المميّز بيتصدّر الترتيب الافتراضي بس. لما المستخدم يختار ترتيب صريح
+     * («السعر من الأقل») بيتنفّذ زي ما طلبه — وإلا الترتيب بيبان مكسور.
+     */
+    private static function applyPropertySort($query, string $sort): void
+    {
+        if ($sort === '' || $sort === 'newest') {
+            $query->orderByDesc('is_featured');
+        }
+
+        match ($sort) {
+            'oldest' => $query->orderBy('id'),
+            // الوحدات بلا سعر تحت في الترتيب التصاعدي بدل ما تتصدّر النتايج
+            'price_asc' => $query->orderByRaw('price_amount is null')->orderBy('price_amount'),
+            'price_desc' => $query->orderByDesc('price_amount'),
+            'area_asc' => $query->orderByRaw('size = 0')->orderBy('size'),
+            'area_desc' => $query->orderByDesc('size'),
+            default => $query->orderBy('sort')->orderByDesc('id'),
+        };
     }
 
     /**
@@ -142,7 +274,7 @@ class Catalog
         $ar = $locale !== 'en';
 
         $counts = [
-            [Property::where('is_active', true)->count(), $ar ? 'عقار' : 'properties'],
+            [Property::published()->count(), $ar ? 'عقار' : 'properties'],
             [Compound::where('is_active', true)->count(), $ar ? 'كمبوند' : 'compounds'],
             [Developer::count(), $ar ? 'مطوّر' : 'developers'],
         ];
@@ -152,18 +284,26 @@ class Catalog
             ->all();
     }
 
-    /** الفلاتر المسموحة من الـ query string، منضّفة */
+    /** الفلاتر المسموحة من الـ query string، منضّفة حسب السكيما */
     public static function filters(Request $request): array
     {
-        return [
-            'q' => Str::limit(trim((string) $request->query('q', '')), 80, ''),
-            'type' => trim((string) $request->query('type', '')),
-            'location' => trim((string) $request->query('location', '')),
-            'purpose' => in_array($request->query('purpose'), ['sale', 'rent'], true) ? $request->query('purpose') : '',
-            'category' => in_array($request->query('category'), array_keys(Property::CATEGORIES), true)
-                ? $request->query('category')
-                : '',
-        ];
+        $out = [];
+
+        foreach (self::FILTER_SCHEMA as $key => $kind) {
+            $raw = $request->query($key);
+
+            $out[$key] = match ($kind) {
+                'int' => ($n = (int) $raw) > 0 ? $n : '',
+                'bool' => in_array($raw, ['1', 'true', 'on'], true) ? '1' : '',
+                'purpose' => in_array($raw, ['sale', 'rent'], true) ? $raw : '',
+                'category' => in_array($raw, array_keys(Property::CATEGORIES), true) ? $raw : '',
+                'finishing' => isset(Property::FINISHING[$raw]) ? $raw : '',
+                'sort' => isset(self::SORTS[$raw]) ? $raw : '',
+                default => Str::limit(trim((string) $raw), 80, ''),
+            };
+        }
+
+        return $out;
     }
 
     /** بطاقات المناطق في الرئيسية — بعدد العقارات الحقيقي */
@@ -171,7 +311,7 @@ class Catalog
     {
         $rows = Location::query()
             ->where('is_active', true)
-            ->withCount(['properties' => fn ($q) => $q->where('is_active', true)])
+            ->withCount(['properties' => fn ($q) => $q->published()])
             ->orderBy('sort')->orderBy('id')
             ->when($limit, fn ($q) => $q->limit($limit))
             ->get();
@@ -199,7 +339,7 @@ class Catalog
             ->where('is_active', true)
             ->withCount([
                 'compounds' => fn ($q) => $q->where('is_active', true),
-                'properties' => fn ($q) => $q->where('is_active', true),
+                'properties' => fn ($q) => $q->published(),
             ])
             ->orderByDesc('compounds_count')
             ->orderBy('sort')->orderBy('id')
@@ -218,7 +358,7 @@ class Catalog
             ->where('slug', $slug)
             ->withCount([
                 'compounds' => fn ($q) => $q->where('is_active', true),
-                'properties' => fn ($q) => $q->where('is_active', true),
+                'properties' => fn ($q) => $q->published(),
             ])
             ->first();
 
@@ -234,8 +374,7 @@ class Catalog
             ->get();
 
         // وحدات المطوّر: المربوطة بيه مباشرة + اللي جوه مشاريعه
-        $units = Property::query()
-            ->where('is_active', true)
+        $units = Property::published()
             ->where(fn ($q) => $q
                 ->where('developer_id', $developer->id)
                 ->orWhereIn('compound_id', $compounds->pluck('id')))
@@ -261,7 +400,7 @@ class Catalog
             ->where('is_active', true)
             ->where('slug', $slug)
             ->withCount([
-                'properties' => fn ($q) => $q->where('is_active', true),
+                'properties' => fn ($q) => $q->published(),
                 'compounds' => fn ($q) => $q->where('is_active', true),
             ])
             ->first();
@@ -277,8 +416,7 @@ class Catalog
             ->orderBy('sort')->orderByDesc('id')
             ->get();
 
-        $properties = Property::query()
-            ->where('is_active', true)
+        $properties = Property::published()
             ->where('location_id', $location->id)
             ->with('location')
             ->orderBy('sort')->orderByDesc('id')
@@ -302,7 +440,7 @@ class Catalog
         $rows = Location::query()
             ->where('is_active', true)
             ->withCount([
-                'properties' => fn ($q) => $q->where('is_active', true),
+                'properties' => fn ($q) => $q->published(),
                 'compounds' => fn ($q) => $q->where('is_active', true),
             ])
             ->orderByDesc('is_featured')
@@ -347,8 +485,7 @@ class Catalog
             return $hit ? $hit + ['description' => '', 'features' => [], 'gallery' => [$hit['image']], 'compound' => null] : null;
         }
 
-        return Property::query()
-            ->where('is_active', true)
+        return Property::published()
             ->where('slug', $slug)
             ->with(['location', 'developer', 'compound.developer', 'compound.location'])
             ->first()
@@ -380,8 +517,7 @@ class Catalog
             return [];
         }
 
-        $rows = Property::query()
-            ->where('is_active', true)
+        $rows = Property::published()
             ->where('id', '!=', $property['id'])
             ->with(['location', 'developer', 'compound.developer', 'compound.location'])
             ->where(fn ($q) => $q
@@ -397,8 +533,7 @@ class Catalog
     /** الوحدات المتاحة جوّه كمبوند */
     public static function compoundUnits(string $locale, int $compoundId, ?int $limit = null): array
     {
-        $rows = Property::query()
-            ->where('is_active', true)
+        $rows = Property::published()
             ->where('compound_id', $compoundId)
             ->with(['location', 'developer', 'compound.developer', 'compound.location'])
             ->orderBy('sort')->orderByDesc('id')
@@ -445,6 +580,39 @@ class Catalog
         if ($locations->isNotEmpty()) {
             $base['locations'] = $locations->map(fn (Location $l) => $l->t('name', $locale))->all();
         }
+
+        // خيارات لوحة الفلاتر المتقدمة
+        $en = $locale === 'en';
+
+        $base['finishing'] = collect(Property::FINISHING)
+            ->map(fn ($labels, $key) => ['value' => $key, 'label' => $labels[$en ? 'en' : 'ar']])
+            ->values()->all();
+
+        $base['sorts'] = collect(self::SORTS)
+            ->map(fn ($labels, $key) => ['value' => $key, 'label' => $labels[$en ? 'en' : 'ar']])
+            ->values()->all();
+
+        $base['developers'] = Developer::where('is_active', true)
+            ->orderBy('sort')->orderBy('id')->get()
+            ->map(fn (Developer $d) => ['value' => $d->name, 'label' => $d->t('name', $locale)])
+            ->all();
+
+        $base['compounds'] = Compound::where('is_active', true)
+            ->orderBy('sort')->orderBy('id')->get()
+            ->map(fn (Compound $c) => ['value' => $c->name, 'label' => $c->t('name', $locale)])
+            ->all();
+
+        // حدود المنزلقات — من المعروض فعلًا مش أرقام مكتوبة بالإيد
+        $bounds = Property::published()->selectRaw(
+            'min(price_amount) as price_min, max(price_amount) as price_max, min(nullif(size, 0)) as area_min, max(size) as area_max'
+        )->first();
+
+        $base['bounds'] = [
+            'priceMin' => (int) ($bounds->price_min ?? 0),
+            'priceMax' => (int) ($bounds->price_max ?? 0),
+            'areaMin' => (int) ($bounds->area_min ?? 0),
+            'areaMax' => (int) ($bounds->area_max ?? 0),
+        ];
 
         return $base;
     }

@@ -28,9 +28,12 @@ const isChip = (v: unknown): v is Chip =>
 export default function ResourceIndex({
     resource,
     rows,
+    activeFilters = {},
 }: {
     resource: ResourceSchema;
     rows: Paginated<Row>;
+    /** قيم الفلاتر الشغّالة دلوقتي — جاية من الراوت */
+    activeFilters?: Record<string, string>;
 }) {
     const columns: Column<Row>[] = Object.entries(resource.columns).map(([key, label], i) => ({
         key,
@@ -88,6 +91,14 @@ export default function ResourceIndex({
         },
     }));
 
+    // الفلتر بيمشي في الرابط عشان الصفحة تفضل قابلة للمشاركة والرجوع
+    const filterBy = (name: string, value: string) => {
+        const next = { ...activeFilters, [name]: value };
+        const params = Object.fromEntries(Object.entries(next).filter(([, v]) => v));
+
+        router.get(`/admin/${resource.key}`, params, { preserveScroll: true, preserveState: true });
+    };
+
     const remove = (row: Row) => {
         if (!confirm(`متأكد من حذف "${row.name ?? row.title ?? row.id}"؟`)) return;
         router.delete(`/admin/${resource.key}/${row.id}`, { preserveScroll: true });
@@ -95,10 +106,30 @@ export default function ResourceIndex({
 
     return (
         <AdminLayout title={resource.labels.plural}>
-            <div className="mb-5 flex items-center justify-between">
-                <p className="text-sm text-gray-500">
-                    إجمالي <span className="font-extrabold text-gray-800">{rows.total}</span> {resource.labels.singular}
-                </p>
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-3">
+                    <p className="text-sm text-gray-500">
+                        إجمالي <span className="font-extrabold text-gray-800">{rows.total}</span> {resource.labels.singular}
+                    </p>
+
+                    {(resource.filters ?? []).map((f) => (
+                        <label key={f.name} className="flex items-center gap-2 text-xs font-bold text-gray-500">
+                            {f.label}
+                            <select
+                                value={activeFilters[f.name] ?? ""}
+                                onChange={(e) => filterBy(f.name, e.target.value)}
+                                className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-bold text-gray-800 outline-none transition focus:border-primary"
+                            >
+                                <option value="">الكل</option>
+                                {f.options.map((o) => (
+                                    <option key={o.value} value={o.value}>
+                                        {o.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                    ))}
+                </div>
                 <Link href={`/admin/${resource.key}/create`}>
                     <Button>
                         <span className="flex items-center gap-2">

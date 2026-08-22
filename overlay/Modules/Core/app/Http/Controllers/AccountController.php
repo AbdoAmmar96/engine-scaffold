@@ -42,7 +42,8 @@ class AccountController extends Controller
     {
         /** @var Collection<int, Property> $rows */
         $rows = $request->user()->favorites()
-            ->where('is_active', true)
+            ->where('properties.is_active', true)
+            ->where('properties.status', 'published')
             ->with('location')
             ->orderByDesc('favorites.created_at')
             ->get();

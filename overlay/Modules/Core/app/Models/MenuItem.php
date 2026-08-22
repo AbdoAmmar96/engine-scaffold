@@ -10,11 +10,22 @@ use Illuminate\Support\Facades\Cache;
  * لينكات قوايم الموقع (الهيدر والفوتر) — بدل ما تكون مكتوبة في SiteLayout.
  * القراءة cached للأبد وبتتمسح تلقائيًا عند أي حفظ أو حذف.
  */
+/**
+ * @property int $id
+ * @property string $location
+ * @property int|null $parent_id
+ * @property string $label
+ * @property string|null $label_en
+ * @property string|null $url
+ * @property bool $new_tab
+ * @property int $sort
+ * @property bool $is_active
+ */
 class MenuItem extends Model
 {
     use Bilingual;
 
-    protected $fillable = ['location', 'label', 'label_en', 'url', 'new_tab', 'sort', 'is_active'];
+    protected $fillable = ['location', 'parent_id', 'label', 'label_en', 'url', 'new_tab', 'sort', 'is_active'];
 
     protected $casts = ['new_tab' => 'boolean', 'is_active' => 'boolean', 'sort' => 'integer'];
 
@@ -34,7 +45,10 @@ class MenuItem extends Model
         Cache::forget('menu.items');
     }
 
-    /** كل اللينكات المفعّلة مجمّعة بالمكان — الشكل اللي الفرونت متوقعه */
+    /**
+     * كل اللينكات المفعّلة مجمّعة بالمكان، والأبناء تحت أبوهم.
+     * العنصر الأب من غير url بيبقى عنوان قايمة منسدلة بس.
+     */
     public static function nav(string $locale): array
     {
         $rows = Cache::rememberForever(
@@ -42,17 +56,27 @@ class MenuItem extends Model
             fn () => static::query()->where('is_active', true)->orderBy('sort')->orderBy('id')->get(),
         );
 
+        $link = fn (self $i, array $children = []) => [
+            'label' => $i->t('label', $locale),
+            'url' => $i->url ?? '',
+            'external' => str_starts_with((string) $i->url, 'http'),
+            'newTab' => (bool) $i->new_tab,
+            'children' => $children,
+        ];
+
         $nav = [];
 
         foreach (array_keys(self::LOCATIONS) as $location) {
-            $nav[$location] = $rows
-                ->where('location', $location)
-                ->map(fn (self $i) => [
-                    'label' => $i->t('label', $locale),
-                    'url' => $i->url,
-                    'external' => str_starts_with($i->url, 'http'),
-                    'newTab' => $i->new_tab,
-                ])
+            $inPlace = $rows->where('location', $location);
+
+            $nav[$location] = $inPlace
+                ->whereNull('parent_id')
+                ->map(fn (self $i) => $link(
+                    $i,
+                    $inPlace->where('parent_id', $i->id)->map(fn (self $c) => $link($c))->values()->all(),
+                ))
+                // عنصر أب من غير رابط ولا أبناء مالوش لازمة
+                ->filter(fn (array $item) => $item['url'] !== '' || $item['children'] !== [])
                 ->values()
                 ->all();
         }

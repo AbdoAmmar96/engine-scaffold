@@ -293,3 +293,58 @@ test('the commercial section only lists commercial types', async ({ page }) => {
     expect(types.length).toBeGreaterThan(0);
     expect([...new Set(types)]).toEqual(['commercial']);
 });
+
+/** لوحة الفلاتر والقائمة المنسدلة — منطق الفلترة نفسه متغطّى في ListingFiltersTest */
+test('applying a filter puts it in the URL and narrows the results', async ({ page }) => {
+    await page.goto('/ar/properties', { waitUntil: 'networkidle' });
+
+    const before = await page.locator('article').count();
+    expect(before).toBeGreaterThan(1);
+
+    await page.getByRole('button', { name: /فلاتر متقدمة/ }).click();
+    await page.locator('select').filter({ hasText: 'تشطيب كامل' }).first().selectOption('furnished');
+    await page.getByRole('button', { name: /طبّق الفلاتر/ }).click();
+
+    await page.waitForURL(/finishing=furnished/, { timeout: 20_000 });
+    await expect(page.locator('article')).not.toHaveCount(before);
+});
+
+test('the services dropdown opens and links to the sections', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/ar', { waitUntil: 'networkidle' });
+
+    const trigger = page.getByRole('button', { name: /خدماتنا/ });
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    await trigger.click();
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+    // نفس الأسماء موجودة في الفوتر كمان، فبنحصر البحث في الهيدر
+    const header = page.locator('header');
+
+    for (const [name, href] of [['العقارات', '/ar/properties'], ['عقارات تجارية', '/ar/properties/commercial'], ['الكمبوندات', '/ar/compounds']] as const) {
+        await expect(header.getByRole('link', { name, exact: true })).toHaveAttribute('href', href);
+    }
+});
+
+const noOverflow = (page: import('@playwright/test').Page) =>
+    page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
+
+test('the page does not scroll sideways on this device', async ({ page }) => {
+    for (const path of ['/ar', '/ar/properties']) {
+        await page.goto(path, { waitUntil: 'networkidle' });
+        expect(await noOverflow(page), `horizontal overflow on ${path}`).toBe(true);
+    }
+});
+
+test('the header fits at every desktop width', async ({ page, isMobile }) => {
+    // تكبير جهاز موبايل لعرض ديسكتوب مش حالة حقيقية — بيدي طفح وهمي
+    test.skip(isMobile, 'desktop-only widths');
+
+    for (const width of [1024, 1280, 1440, 1920]) {
+        await page.setViewportSize({ width, height: 800 });
+        await page.goto('/ar', { waitUntil: 'networkidle' });
+
+        expect(await noOverflow(page), `horizontal overflow at ${width}px`).toBe(true);
+    }
+});

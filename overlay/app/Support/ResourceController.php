@@ -34,6 +34,16 @@ abstract class ResourceController extends Controller
     /** حقول الفورم */
     abstract protected function fields(): array;
 
+    /**
+     * فلاتر منسدلة فوق الجدول:
+     * [['name' => 'status', 'label' => 'الحالة', 'options' => [['value'=>..,'label'=>..]]]]
+     * القيمة بتتطبّق كـ where على نفس العمود، وأي قيمة مش في options بتتجاهل.
+     */
+    protected function listFilters(): array
+    {
+        return [];
+    }
+
     /** الأعمدة اللي البحث بيدوّر فيها */
     protected function searchable(): array
     {
@@ -104,6 +114,18 @@ abstract class ResourceController extends Controller
             });
         }
 
+        $active = [];
+
+        foreach ($this->listFilters() as $filter) {
+            $value = (string) $request->get($filter['name'], '');
+            $allowed = array_column($filter['options'], 'value');
+
+            if ($value !== '' && in_array($value, $allowed, true)) {
+                $query->where($filter['name'], $value);
+                $active[$filter['name']] = $value;
+            }
+        }
+
         if ($order = $this->orderColumn()) {
             $query->orderBy($order);
         }
@@ -116,6 +138,7 @@ abstract class ResourceController extends Controller
         return Inertia::render('Admin/Resource/Index', [
             'resource' => $this->schema(),
             'rows' => $rows,
+            'activeFilters' => $active,
         ]);
     }
 
@@ -186,6 +209,7 @@ abstract class ResourceController extends Controller
             'labels' => $this->labels(),
             'columns' => $this->columns(),
             'fields' => $this->fields(),
+            'filters' => $this->listFilters(),
         ];
     }
 

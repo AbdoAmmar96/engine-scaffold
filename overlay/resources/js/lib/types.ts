@@ -26,9 +26,12 @@ export interface AccountRequest {
 /** لينك في قائمة الهيدر أو الفوتر — بيتدار من /admin/menus */
 export interface MenuLink {
     label: string;
+    /** فاضي = عنصر قائمة منسدلة، مش رابط */
     url: string;
     external: boolean;
     newTab: boolean;
+    /** مستوى واحد بس — الأعمق بيبوظ التنقّل على الموبايل */
+    children: MenuLink[];
 }
 
 export interface SharedProps {
@@ -61,6 +64,12 @@ export interface Property {
     type: string;
     /** residential | commercial — مشتق من النوع */
     category: string;
+    /** السعر كرقم — للفرز والفلترة */
+    priceAmount: number;
+    /** إعلان مميّز — بيتصدّر النتايج */
+    featured: boolean;
+    /** مستوى التشطيب باللغة المعروضة — فاضي لو مش محدّد */
+    finishing: string;
     price: string;
     beds: number;
     baths: number;
@@ -74,6 +83,13 @@ export interface Property {
 /** العقار كامل في صفحة التفاصيل */
 export interface PropertyDetail extends Property {
     description: string;
+    floor: string;
+    /** سنة التسليم */
+    delivery: string;
+    /** خطة السداد — المفاتيح الفاضية بتتشال من السيرفر */
+    payment: { down?: string; monthly?: string; years?: string };
+    /** garden · roof · dressing */
+    amenities: string[];
     features: string[];
     /** الصورة الرئيسية أول عنصر دايمًا */
     gallery: string[];
@@ -179,11 +195,22 @@ export interface BlogArticle extends BlogPost {
     body: string;
 }
 
-/** خيارات البحث في الهيرو */
+export interface Option {
+    value: string;
+    label: string;
+}
+
+/** خيارات البحث في الهيرو ولوحة الفلاتر */
 export interface SearchOptions {
     types: string[];
     locations: string[];
     stats: { value: string; suffix: string; label: string }[];
+    finishing: Option[];
+    sorts: Option[];
+    developers: Option[];
+    compounds: Option[];
+    /** حدود المنزلقات — محسوبة من المعروض فعلًا */
+    bounds: { priceMin: number; priceMax: number; areaMin: number; areaMax: number };
 }
 
 /** محطة في الخط الزمني بصفحة "من نحن" */
@@ -225,4 +252,6 @@ export interface ResourceSchema {
     labels: { plural: string; singular: string };
     columns: Record<string, string>;
     fields: ResourceField[];
+    /** فلاتر منسدلة فوق الجدول */
+    filters?: { name: string; label: string; options: { value: string; label: string }[] }[];
 }

@@ -11,7 +11,9 @@ import {
     MessageCircle,
     Phone,
     Ruler,
+    Sparkles,
     Tag,
+    Wallet,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import FavoriteButton from "@/Components/site/FavoriteButton";
@@ -49,6 +51,17 @@ const copy = {
         note: "الأسعار والمساحات مذكورة كما وردت من المطوّر/المالك، وبتتأكّد وقت المعاينة.",
         projectCta: "شوف المشروع كامل",
         meter: "م²",
+        floor: "الدور",
+        finishing: "التشطيب",
+        deliveryYear: "سنة التسليم",
+        plan: "نظام السداد",
+        down: "المقدم",
+        monthly: "القسط الشهري",
+        years: "سنوات التقسيط",
+        extras: "إضافات",
+        garden: "حديقة خاصة",
+        roof: "روف خاص",
+        dressing: "غرفة ملابس",
     },
     en: {
         crumb: "Properties",
@@ -75,6 +88,17 @@ const copy = {
         note: "Prices and sizes are stated as provided by the developer/owner, and confirmed at viewing.",
         projectCta: "See the full project",
         meter: "m²",
+        floor: "Floor",
+        finishing: "Finishing",
+        deliveryYear: "Delivery year",
+        plan: "Payment plan",
+        down: "Down payment",
+        monthly: "Monthly instalment",
+        years: "Instalment years",
+        extras: "Extras",
+        garden: "Private garden",
+        roof: "Private roof",
+        dressing: "Dressing room",
     },
 };
 
@@ -166,6 +190,10 @@ export default function PropertyPage({
                                         spec(<Hash size={17} />, t.ref, <span dir="ltr">{property.ref}</span>)}
                                     {property.compound &&
                                         spec(<Building2 size={17} />, t.project, property.compound.name)}
+                                    {property.finishing && spec(<Sparkles size={17} />, t.finishing, property.finishing)}
+                                    {property.floor && spec(<Tag size={17} />, t.floor, property.floor)}
+                                    {property.delivery &&
+                                        spec(<CalendarCheck size={17} />, t.deliveryYear, <span dir="ltr">{property.delivery}</span>)}
                                     {property.compound?.delivery &&
                                         spec(
                                             <CalendarCheck size={17} />,
@@ -175,6 +203,41 @@ export default function PropertyPage({
                                 </div>
                             </div>
                         </Reveal>
+
+                        {(property.payment.down || property.payment.monthly || property.payment.years) && (
+                            <Reveal>
+                                <div>
+                                    <h2 className="mb-4 flex items-center gap-2 text-xl font-extrabold text-secondary">
+                                        <Wallet size={19} className="text-primary" />
+                                        {t.plan}
+                                    </h2>
+                                    <div className="grid gap-3 sm:grid-cols-3">
+                                        {property.payment.down && spec(<Wallet size={17} />, t.down, <span dir="ltr">{property.payment.down}</span>)}
+                                        {property.payment.monthly && spec(<Wallet size={17} />, t.monthly, <span dir="ltr">{property.payment.monthly}</span>)}
+                                        {property.payment.years && spec(<CalendarCheck size={17} />, t.years, <span dir="ltr">{property.payment.years}</span>)}
+                                    </div>
+                                </div>
+                            </Reveal>
+                        )}
+
+                        {property.amenities.length > 0 && (
+                            <Reveal>
+                                <div>
+                                    <h2 className="mb-4 text-xl font-extrabold text-secondary">{t.extras}</h2>
+                                    <div className="flex flex-wrap gap-2.5">
+                                        {property.amenities.map((a) => (
+                                            <span
+                                                key={a}
+                                                className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-[13px] font-extrabold text-primary"
+                                            >
+                                                <Check size={13} />
+                                                {t[a as "garden" | "roof" | "dressing"]}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </Reveal>
+                        )}
 
                         {property.description && (
                             <Reveal>

@@ -1,5 +1,5 @@
 import { Link, usePage } from "@inertiajs/react";
-import { ArrowLeft, Bath, BedDouble, Building2, MapPin, Ruler } from "lucide-react";
+import { ArrowLeft, Bath, BedDouble, Building2, MapPin, Ruler, Star } from "lucide-react";
 import FavoriteButton from "@/Components/site/FavoriteButton";
 import type { ReactNode } from "react";
 import type { Property, SharedProps } from "@/lib/types";
@@ -20,12 +20,20 @@ export default function PropertyCard({ p, ar, wa }: { p: Property; ar: boolean; 
                     loading="lazy"
                     className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                 />
-                <span
-                    className={`absolute start-3 top-3 rounded-full px-3 py-2 text-[11px] font-extrabold ${
-                        isRent ? "bg-secondary text-white" : "bg-primary text-primary-fg"
-                    }`}
-                >
-                    {p.purpose}
+                <span className="absolute start-3 top-3 flex flex-wrap items-center gap-2">
+                    <span
+                        className={`rounded-full px-3 py-2 text-[11px] font-extrabold ${
+                            isRent ? "bg-secondary text-white" : "bg-primary text-primary-fg"
+                        }`}
+                    >
+                        {p.purpose}
+                    </span>
+                    {p.featured && (
+                        <span className="flex items-center gap-1 rounded-full bg-bg-dark px-2.5 py-2 text-[11px] font-extrabold text-primary">
+                            <Star size={11} fill="currentColor" />
+                            {ar ? "مميّز" : "Featured"}
+                        </span>
+                    )}
                 </span>
 
                 {href && (

@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from "@inertiajs/react";
 import { LayoutDashboard, Mail, Menu, MessageCircle, Phone, UserRound, X as Close } from "lucide-react";
 import { Facebook, Instagram, Linkedin, Snapchat, Tiktok, X, Youtube } from "@/Components/site/SocialIcons";
+import NavMenu from "@/Components/site/NavMenu";
 import { useState, type ReactNode } from "react";
 import type { MenuLink, SharedProps } from "@/lib/types";
 
@@ -120,28 +121,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
                         </span>
                     </Link>
 
-                    <nav className="hidden items-center gap-1 lg:flex">
-                        {menu.header.map((item) => {
-                            const active = !item.external && isActive(item.url);
-
-                            return (
-                                <span key={item.url} className="relative">
-                                    {navLink(
-                                        item,
-                                        `relative block px-4 py-3 text-sm font-extrabold transition ${
-                                            active ? "text-secondary" : "text-secondary/70 hover:text-primary"
-                                        }`,
-                                    )}
-                                    {/* أندرلاين دهبي للصفحة الحالية */}
-                                    <span
-                                        className={`pointer-events-none absolute inset-x-4 bottom-1.5 h-0.5 rounded-full bg-primary transition-opacity ${
-                                            active ? "opacity-100" : "opacity-0"
-                                        }`}
-                                    />
-                                </span>
-                            );
-                        })}
-                    </nav>
+                    <NavMenu items={menu.header} />
 
                     <div className="flex items-center gap-2.5">
                         <button
@@ -156,7 +136,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
                                 href={`https://wa.me/${contact.whatsapp}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="hidden items-center gap-2 rounded-brand border-2 border-primary px-4 py-2 text-sm font-extrabold text-secondary transition hover:bg-primary hover:text-primary-fg md:flex"
+                                className="hidden items-center gap-2 whitespace-nowrap rounded-brand border-2 border-primary px-4 py-2 text-sm font-extrabold text-secondary transition hover:bg-primary hover:text-primary-fg md:flex"
                             >
                                 <MessageCircle size={15} />
                                 {ar ? "واتساب" : "WhatsApp"}
@@ -167,7 +147,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
                         {auth.user ? (
                             <Link
                                 href={auth.user.staff ? "/admin" : `/${locale}/account`}
-                                className="hidden items-center gap-2 rounded-brand border border-gray-200 px-4 py-2 text-sm font-extrabold text-secondary transition hover:border-primary hover:text-primary sm:flex"
+                                className="hidden items-center gap-2 whitespace-nowrap rounded-brand border border-gray-200 px-4 py-2 text-sm font-extrabold text-secondary transition hover:border-primary hover:text-primary sm:flex"
                             >
                                 {auth.user.staff ? <LayoutDashboard size={15} /> : <UserRound size={15} />}
                                 {auth.user.staff ? (ar ? "لوحة التحكم" : "Dashboard") : ar ? "حسابي" : "My account"}
@@ -175,7 +155,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
                         ) : (
                             <Link
                                 href={`/${locale}/login`}
-                                className="hidden items-center gap-2 rounded-brand border border-gray-200 px-4 py-2 text-sm font-extrabold text-secondary transition hover:border-primary hover:text-primary sm:flex"
+                                className="hidden items-center gap-2 whitespace-nowrap rounded-brand border border-gray-200 px-4 py-2 text-sm font-extrabold text-secondary transition hover:border-primary hover:text-primary sm:flex"
                             >
                                 <UserRound size={15} />
                                 {ar ? "دخول" : "Sign in"}
@@ -184,14 +164,14 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
 
                         <Link
                             href={`/${locale}/contact`}
-                            className="hidden rounded-brand bg-primary px-5 py-2.5 text-sm font-extrabold text-primary-fg transition hover:bg-primary-hover sm:block"
+                            className="hidden whitespace-nowrap rounded-brand bg-primary px-5 py-2.5 text-sm font-extrabold text-primary-fg transition hover:bg-primary-hover sm:block"
                         >
                             {ar ? "احجز معاينة" : "Book a viewing"}
                         </Link>
 
                         <button
                             onClick={() => setOpen(!open)}
-                            className="text-secondary lg:hidden"
+                            className="text-secondary xl:hidden"
                             aria-label={ar ? "القائمة" : "Menu"}
                         >
                             {open ? <Close size={22} /> : <Menu size={22} />}
@@ -200,16 +180,36 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
                 </div>
 
                 {open && (
-                    <nav className="border-t border-gray-100 bg-bg px-4 py-3 lg:hidden">
+                    <nav className="border-t border-gray-100 bg-bg px-4 py-3 xl:hidden">
                         {menu.header.map((item) =>
-                            navLink(
-                                item,
-                                `block rounded-xl px-4 py-3 text-sm font-extrabold transition ${
-                                    !item.external && isActive(item.url)
-                                        ? "bg-primary/10 text-secondary"
-                                        : "text-secondary/70 hover:bg-surface hover:text-primary"
-                                }`,
-                                () => setOpen(false),
+                            item.children.length > 0 ? (
+                                // العنصر الأب على الموبايل بيتفتح كمجموعة، مش قايمة منسدلة
+                                <div key={item.label} className="py-1">
+                                    <span className="block px-4 py-2 text-[11px] font-extrabold tracking-wide text-muted">
+                                        {item.label}
+                                    </span>
+                                    {item.children.map((child) =>
+                                        navLink(
+                                            child,
+                                            `block rounded-xl px-4 py-3 text-sm font-extrabold transition ps-8 ${
+                                                !child.external && isActive(child.url)
+                                                    ? "bg-primary/10 text-secondary"
+                                                    : "text-secondary/70 hover:bg-surface hover:text-primary"
+                                            }`,
+                                            () => setOpen(false),
+                                        ),
+                                    )}
+                                </div>
+                            ) : (
+                                navLink(
+                                    item,
+                                    `block rounded-xl px-4 py-3 text-sm font-extrabold transition ${
+                                        !item.external && isActive(item.url)
+                                            ? "bg-primary/10 text-secondary"
+                                            : "text-secondary/70 hover:bg-surface hover:text-primary"
+                                    }`,
+                                    () => setOpen(false),
+                                )
                             ),
                         )}
 

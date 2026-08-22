@@ -34,6 +34,7 @@ class CatalogSeeder extends Seeder
         $enComps = DemoContent::compounds('en');
         $arAreas = DemoContent::areas('ar');
         $enAreas = DemoContent::areas('en');
+        $specs = DemoContent::propertySpecs();
         $arPropDetails = DemoContent::propertyDetails('ar');
         $enPropDetails = DemoContent::propertyDetails('en');
         $arCompDetails = DemoContent::compoundDetails('ar');
@@ -156,6 +157,8 @@ class CatalogSeeder extends Seeder
                     'title' => $p['title'],
                     'title_en' => $en['title'] ?? null,
                     'slug' => $existing?->slug ?: Property::buildSlug($p['title'], $en['title'] ?? null, $existing?->id),
+                    // السعر الرقمي هو مصدر الفلترة والترتيب — النص للعرض بس
+                    'price_amount' => (int) (preg_replace('/\D+/', '', $p['price']) ?: 0) ?: null,
                     'description' => $detail['desc'] ?? null,
                     'description_en' => $detailEn['desc'] ?? null,
                     'features' => $detail['features'] ?? null,
@@ -172,7 +175,7 @@ class CatalogSeeder extends Seeder
                     'size' => $p['size'],
                     'image' => $p['image'],
                     'sort' => $i,
-                ],
+                ] + self::specColumns($specs[$p['ref']] ?? null),
             );
         }
 
@@ -180,6 +183,30 @@ class CatalogSeeder extends Seeder
             '  مناطق: %d · مطوّرون: %d · كمبوندات: %d · عقارات: %d',
             Location::count(), Developer::count(), Compound::count(), Property::count(),
         ));
+    }
+
+    /** صف المواصفات الرقمية → أعمدة الجدول */
+    private static function specColumns(?array $spec): array
+    {
+        if (! $spec) {
+            return [];
+        }
+
+        [$finishing, $floor, $delivery, $down, $monthly, $years, $garden, $roof, $dressing, $featured] = $spec;
+
+        return [
+            'finishing' => $finishing,
+            'floor' => $floor,
+            'delivery_year' => $delivery,
+            'down_payment' => $down ?: null,
+            'monthly_installment' => $monthly ?: null,
+            'installment_years' => $years ?: null,
+            'has_garden' => $garden,
+            'has_roof' => $roof,
+            'has_dressing_room' => $dressing,
+            'is_featured' => $featured,
+            'status' => 'published',
+        ];
     }
 
     /** نوع العقار من عنوانه — الأنواع مصدرها Property::TYPES */

@@ -6,40 +6,69 @@ use Illuminate\Database\Seeder;
 use Modules\Core\Models\MenuItem;
 
 /**
- * القائمة الافتراضية — نفس اللينكات اللي كانت مكتوبة في SiteLayout.
- * idempotent: المفتاح هو (المكان + الرابط).
+ * القائمة الافتراضية.
+ * idempotent: المفتاح هو (المكان + الاسم) — مش الرابط، لأن عنصر القائمة
+ * المنسدلة نفسه مالوش رابط.
  */
 class MenuSeeder extends Seeder
 {
+    /** الهيدر: عنصر ممكن يجيب معاه children */
+    private const HEADER = [
+        ['label' => 'الرئيسية', 'label_en' => 'Home', 'url' => '/'],
+        ['label' => 'خدماتنا', 'label_en' => 'Our services', 'url' => null, 'children' => [
+            ['label' => 'العقارات', 'label_en' => 'Properties', 'url' => '/properties'],
+            ['label' => 'عقارات تجارية', 'label_en' => 'Commercial', 'url' => '/properties/commercial'],
+            ['label' => 'الكمبوندات', 'label_en' => 'Compounds', 'url' => '/compounds'],
+        ]],
+        ['label' => 'المطوّرون', 'label_en' => 'Developers', 'url' => '/developers'],
+        ['label' => 'المناطق', 'label_en' => 'Areas', 'url' => '/areas'],
+        ['label' => 'المدونة', 'label_en' => 'Blog', 'url' => '/blog'],
+        ['label' => 'من نحن', 'label_en' => 'About', 'url' => '/about'],
+        ['label' => 'اتصل بنا', 'label_en' => 'Contact', 'url' => '/contact'],
+    ];
+
+    /** الفوتر مسطّح — القوايم المنسدلة مالهاش لازمة هناك */
+    private const FOOTER = [
+        ['label' => 'العقارات', 'label_en' => 'Properties', 'url' => '/properties'],
+        ['label' => 'عقارات تجارية', 'label_en' => 'Commercial', 'url' => '/properties/commercial'],
+        ['label' => 'الكمبوندات', 'label_en' => 'Compounds', 'url' => '/compounds'],
+        ['label' => 'المطوّرون', 'label_en' => 'Developers', 'url' => '/developers'],
+        ['label' => 'المناطق', 'label_en' => 'Areas', 'url' => '/areas'],
+        ['label' => 'المدونة', 'label_en' => 'Blog', 'url' => '/blog'],
+        ['label' => 'من نحن', 'label_en' => 'About', 'url' => '/about'],
+        ['label' => 'اتصل بنا', 'label_en' => 'Contact', 'url' => '/contact'],
+    ];
+
     public function run(): void
     {
-        $header = [
-            ['label' => 'الرئيسية',     'label_en' => 'Home',       'url' => '/'],
-            ['label' => 'العقارات',     'label_en' => 'Properties', 'url' => '/properties'],
-            ['label' => 'عقارات تجارية', 'label_en' => 'Commercial', 'url' => '/properties/commercial'],
-            ['label' => 'الكمبوندات',   'label_en' => 'Compounds',  'url' => '/compounds'],
-            ['label' => 'المطوّرون',     'label_en' => 'Developers', 'url' => '/developers'],
-            ['label' => 'المناطق',      'label_en' => 'Areas',      'url' => '/areas'],
-            ['label' => 'المدونة',      'label_en' => 'Blog',       'url' => '/blog'],
-            ['label' => 'من نحن',       'label_en' => 'About',      'url' => '/about'],
-            ['label' => 'اتصل بنا',     'label_en' => 'Contact',    'url' => '/contact'],
-        ];
+        foreach (self::HEADER as $i => $item) {
+            $parent = $this->put('header', $item, $i, null);
 
-        foreach ($header as $i => $item) {
-            MenuItem::updateOrCreate(
-                ['location' => 'header', 'url' => $item['url']],
-                $item + ['location' => 'header', 'sort' => $i, 'is_active' => true],
-            );
+            foreach ($item['children'] ?? [] as $j => $child) {
+                $this->put('header', $child, $j, $parent->id);
+            }
         }
 
-        // الفوتر بياخد نفس اللينكات ما عدا الرئيسية
-        foreach (array_slice($header, 1) as $i => $item) {
-            MenuItem::updateOrCreate(
-                ['location' => 'footer', 'url' => $item['url']],
-                $item + ['location' => 'footer', 'sort' => $i, 'is_active' => true],
-            );
+        foreach (self::FOOTER as $i => $item) {
+            $this->put('footer', $item, $i, null);
         }
+
+        MenuItem::flush();
 
         $this->command?->info(sprintf('  لينكات القوائم: %d', MenuItem::count()));
+    }
+
+    private function put(string $location, array $item, int $sort, ?int $parentId): MenuItem
+    {
+        return MenuItem::updateOrCreate(
+            ['location' => $location, 'label' => $item['label']],
+            [
+                'label_en' => $item['label_en'],
+                'url' => $item['url'],
+                'parent_id' => $parentId,
+                'sort' => $sort,
+                'is_active' => true,
+            ],
+        );
     }
 }
