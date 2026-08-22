@@ -53,6 +53,7 @@ class Lead extends Model
         'compound' => 'صفحة مشروع',
         'whatsapp' => 'واتساب',
         'phone' => 'مكالمة',
+        'listing' => 'أضف عقارك',
         'manual' => 'إضافة يدوية',
     ];
 

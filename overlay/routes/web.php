@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Modules\Developers\Http\Controllers\DeveloperPageController;
 use Modules\Locations\Http\Controllers\LocationPageController;
+use Modules\Properties\Http\Controllers\AddPropertyController;
 use Modules\Properties\Http\Controllers\PropertyPageController;
 
 // الجذر → العربية (اللغة الافتراضية)
@@ -34,6 +35,13 @@ Route::prefix('{locale}')
             ->name('properties.category');
 
         Route::get('/properties/{slug}', [PropertyPageController::class, 'show'])->name('properties.show');
+
+        /* ---------- أضف عقارك ---------- */
+        // فوق راوت /properties/{slug} مش تحته: ده مسار ثابت مالوش علاقة بالوحدات
+        Route::get('/add-property', [AddPropertyController::class, 'create'])->name('add-property');
+        Route::post('/add-property', [AddPropertyController::class, 'store'])
+            ->middleware('throttle:5,60')
+            ->name('add-property.store');
 
         /* ---------- المطوّرون ---------- */
         Route::get('/developers', [DeveloperPageController::class, 'index'])->name('developers');

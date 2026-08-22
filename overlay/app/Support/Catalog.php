@@ -119,10 +119,18 @@ class Catalog
             $query->where('purpose', $filters['purpose']);
         }
 
+        // زي المطوّر: الوحدة جوه مشروع بتورّث منطقته لو مش متكتبة عليها،
+        // والكارت بيعرض المنطقة الموروثة — فالفلتر لازم يلاقيها برضه
         if ($location = trim((string) ($filters['location'] ?? ''))) {
-            $query->whereHas('location', fn ($s) => $s
-                ->where('name', $location)
-                ->orWhere('name_en', $location));
+            $match = fn ($s) => $s->where('name', $location)
+                ->orWhere('name_en', $location)
+                ->orWhere('slug', $location);
+
+            $query->where(fn ($s) => $s
+                ->whereHas('location', $match)
+                ->orWhere(fn ($inner) => $inner
+                    ->whereNull('location_id')
+                    ->whereHas('compound.location', $match)));
         }
 
         // المطوّر ممكن يكون على الوحدة نفسها أو على مشروعها
@@ -184,6 +192,18 @@ class Catalog
                 $query->where($column, true);
             }
         }
+    }
+
+    /**
+     * عدد الوحدات المطابقة لفلاتر — بنفس منطق صفحة النتايج بالظبط.
+     * صفحات الهبوط بتعتمد عليها: العدد اللي الأمر بيخزّنه لازم يكون هو
+     * اللي الزائر هيشوفه، وإلا الصفحة بتوعد بوحدات مش موجودة.
+     */
+    public static function countProperties(array $filters): int
+    {
+        return Property::published()
+            ->tap(fn ($q) => self::applyPropertyFilters($q, $filters))
+            ->count();
     }
 
     /** نطاق رقمي — بيتجاهل الوحدات اللي العمود ده فاضي عندها */

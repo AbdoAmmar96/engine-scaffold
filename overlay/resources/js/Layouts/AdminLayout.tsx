@@ -48,6 +48,7 @@ const settingsNav: NavItem[] = [
 const contentNav: NavItem[] = [
     { href: "/admin/media", label: "مكتبة الميديا", icon: Images, perm: [CONTENT] },
     { href: "/admin/menus", label: "القوائم", icon: ListTree, perm: [CONTENT] },
+    { href: "/admin/landing-pages", label: "صفحات الهبوط", icon: Search, perm: [CONTENT] },
 ];
 
 // موديولات الدومين

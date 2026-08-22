@@ -53,13 +53,23 @@ trait Sluggable
         $slug = $root;
         $i = 2;
 
-        while (static::query()->where('slug', $slug)
-            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
-            ->exists()
-        ) {
+        while (static::slugTaken($slug, $ignoreId)) {
             $slug = $root.'-'.$i++;
         }
 
         return $slug;
+    }
+
+    /**
+     * هل الرابط محجوز؟ الافتراضي: جدول الموديل نفسه.
+     * الموديلات اللي بتتشارك مسار مع غيرها بتوسّع الفحص —
+     * زي Property و LandingPage تحت /properties/.
+     */
+    protected static function slugTaken(string $slug, ?int $ignoreId): bool
+    {
+        return static::query()
+            ->where('slug', $slug)
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->exists();
     }
 }

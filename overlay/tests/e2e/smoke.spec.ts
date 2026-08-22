@@ -348,3 +348,53 @@ test('the header fits at every desktop width', async ({ page, isMobile }) => {
         expect(await noOverflow(page), `horizontal overflow at ${width}px`).toBe(true);
     }
 });
+
+/* ---------------------------------------------------------------------------
+ | صفحات الهبوط البرمجية + أضف عقارك
+ | التوليد والفلترة متغطّيين في LandingPageTest — هنا الشكل والتفاعل بس.
+ ---------------------------------------------------------------------------- */
+
+test('a landing page opens with its own heading and keeps its subject', async ({ page }) => {
+    await page.goto('/ar/properties/apartments-for-sale-in-new-cairo', { waitUntil: 'networkidle' });
+
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('شقق للبيع في القاهرة الجديدة');
+
+    // أبعاد الصفحة مقفولة: مفيش منتقي نوع ولا غرض ولا منطقة يغيّر موضوعها
+    await expect(page.locator('form select')).toHaveCount(1);
+    await expect(page.getByText('القسم', { exact: true })).toHaveCount(0);
+
+    const cards = await page.locator('article').count();
+    expect(cards).toBeGreaterThan(0);
+});
+
+test('a landing page links to its neighbours', async ({ page }) => {
+    await page.goto('/ar/properties/apartments-for-sale-in-new-cairo', { waitUntil: 'networkidle' });
+
+    const related = page.getByRole('navigation').filter({ hasText: 'صفحات قريبة' }).getByRole('link');
+    expect(await related.count()).toBeGreaterThan(0);
+
+    await related.first().click();
+    await page.waitForURL(/\/ar\/properties\/[a-z-]+/, { timeout: 20_000 });
+    await expect(page.locator('#app')).not.toBeEmpty();
+});
+
+test('narrowing a landing page keeps it on the same page', async ({ page }) => {
+    await page.goto('/ar/properties/apartments-for-sale-in-new-cairo', { waitUntil: 'networkidle' });
+
+    await page.getByRole('button', { name: /فلاتر متقدمة/ }).click();
+    await page.getByRole('button', { name: /طبّق الفلاتر/ }).click();
+
+    await expect(page).toHaveURL(/\/ar\/properties\/apartments-for-sale-in-new-cairo/);
+});
+
+test('the add-property form shows its steps and refuses an empty submit', async ({ page }) => {
+    await page.goto('/ar/add-property', { waitUntil: 'networkidle' });
+
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('أضف عقارك');
+    await expect(page.locator('fieldset')).toHaveCount(4);
+
+    // الحقول المطلوبة بتتفحص في السيرفر — الفورم مالوش required عشان الرسالة تبقى عربية
+    await page.getByRole('button', { name: /ابعت العقار للمراجعة/ }).click();
+
+    await expect(page.getByText('حقل الاسم مطلوب.').first()).toBeVisible({ timeout: 20_000 });
+});

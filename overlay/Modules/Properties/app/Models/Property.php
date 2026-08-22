@@ -4,6 +4,7 @@ namespace Modules\Properties\Models;
 
 use App\Models\User;
 use App\Support\Bilingual;
+use App\Support\SharedSlugSpace;
 use App\Support\Sluggable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -80,6 +81,25 @@ class Property extends Model
         'مكتب إداري' => 'Office',
         'محل تجاري' => 'Retail',
         'عيادة' => 'Clinic',
+    ];
+
+    /**
+     * صيغة الجمع لكل نوع — بتغذّي صفحات الهبوط البرمجية:
+     * slug = كلمة الرابط (/properties/apartments-for-sale)، و ar/en = العنوان.
+     * مصدر واحد عشان الرابط والعنوان مايختلفوش.
+     */
+    public const TYPE_PLURALS = [
+        'شقة' => ['slug' => 'apartments', 'ar' => 'شقق', 'en' => 'Apartments'],
+        'دوبلكس' => ['slug' => 'duplexes', 'ar' => 'دوبلكس', 'en' => 'Duplexes'],
+        'بنتهاوس' => ['slug' => 'penthouses', 'ar' => 'بنتهاوس', 'en' => 'Penthouses'],
+        'استوديو' => ['slug' => 'studios', 'ar' => 'استوديوهات', 'en' => 'Studios'],
+        'فيلا' => ['slug' => 'villas', 'ar' => 'فيلات', 'en' => 'Villas'],
+        'تاون هاوس' => ['slug' => 'townhouses', 'ar' => 'تاون هاوس', 'en' => 'Townhouses'],
+        'توين هاوس' => ['slug' => 'twin-houses', 'ar' => 'توين هاوس', 'en' => 'Twin houses'],
+        'شاليه' => ['slug' => 'chalets', 'ar' => 'شاليهات', 'en' => 'Chalets'],
+        'مكتب إداري' => ['slug' => 'offices', 'ar' => 'مكاتب إدارية', 'en' => 'Offices'],
+        'محل تجاري' => ['slug' => 'shops', 'ar' => 'محلات تجارية', 'en' => 'Shops'],
+        'عيادة' => ['slug' => 'clinics', 'ar' => 'عيادات', 'en' => 'Clinics'],
     ];
 
     /**
@@ -162,6 +182,15 @@ class Property extends Model
     protected static function slugFallback(): string
     {
         return 'property';
+    }
+
+    /**
+     * الوحدة وصفحة الهبوط بيتشاركوا /properties/{slug}، فالرابط لازم
+     * يبقى فريد على الاتنين — راجع SharedSlugSpace.
+     */
+    protected static function slugTaken(string $slug, ?int $ignoreId): bool
+    {
+        return SharedSlugSpace::taken($slug, 'properties', $ignoreId);
     }
 
     /**

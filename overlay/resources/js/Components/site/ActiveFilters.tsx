@@ -43,11 +43,23 @@ const FLAGS = ["featured", "garden", "roof", "dressing"];
  * شريط الفلاتر الشغّالة — بيبان بس لما يكون في فلتر، وكل واحد بيتشال لوحده
  * من غير ما يمسح الباقي.
  */
-export default function ActiveFilters({ filters, path }: { filters: SearchFilters; path: string }) {
+export default function ActiveFilters({
+    filters,
+    path,
+    locked = [],
+}: {
+    filters: SearchFilters;
+    path: string;
+    /** فلاتر مثبّتة من الصفحة نفسها (صفحة هبوط) — بتتعرض من غير زرار شيل */
+    locked?: string[];
+}) {
     const { locale } = usePage<SharedProps>().props;
     const t = labels[locale] ?? labels.ar;
 
-    const active = Object.entries(filters).filter(([key, v]) => v !== "" && v !== 0 && t.keys[key]);
+    // المقفولة مش بتتعرض: شيلها مش هيعمل حاجة — السيرفر بيرجّعها في كل الأحوال
+    const active = Object.entries(filters).filter(
+        ([key, v]) => v !== "" && v !== 0 && t.keys[key] && !locked.includes(key),
+    );
 
     if (active.length === 0) return null;
 

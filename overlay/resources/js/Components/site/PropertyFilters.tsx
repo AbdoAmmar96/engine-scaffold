@@ -80,11 +80,17 @@ export default function PropertyFilters({
     filters,
     options,
     path,
+    locked = [],
 }: {
     filters: Filters;
     options: SearchOptions;
     /** مسار الصفحة من غير اللغة — /properties أو /properties/commercial */
     path: string;
+    /**
+     * فلاتر الصفحة الثابتة (صفحة هبوط): بتتخفي من اللوحة عشان الزائر
+     * يضيّق النتيجة مش يغيّر موضوع الصفحة. السيرفر بيفرضها برضه.
+     */
+    locked?: string[];
 }) {
     const { locale } = usePage<SharedProps>().props;
     const t = copy[locale] ?? copy.ar;
@@ -98,6 +104,8 @@ export default function PropertyFilters({
     );
 
     const set = (key: string, value: string | number) => setDraft((d) => ({ ...d, [key]: value }));
+
+    const shown = (key: string) => !locked.includes(key);
 
     const go = (next: Filters) => {
         const clean = Object.fromEntries(Object.entries(next).filter(([, v]) => v !== "" && v !== 0));
@@ -161,21 +169,27 @@ export default function PropertyFilters({
                     <span className={label}>{t.search}</span>
                     {text("q", t.search)}
                 </div>
-                <div>
-                    <span className={label}>{t.area}</span>
-                    {select("location", plain(options.locations), t.all)}
-                </div>
-                <div>
-                    <span className={label}>{t.type}</span>
-                    {select("type", plain(options.types), t.all)}
-                </div>
+                {shown("location") && (
+                    <div>
+                        <span className={label}>{t.area}</span>
+                        {select("location", plain(options.locations), t.all)}
+                    </div>
+                )}
+                {shown("type") && (
+                    <div>
+                        <span className={label}>{t.type}</span>
+                        {select("type", plain(options.types), t.all)}
+                    </div>
+                )}
             </div>
 
             <div className="mt-3 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-                <div>
-                    <span className={label}>{t.purpose}</span>
-                    {select("purpose", [{ value: "sale", label: t.sale }, { value: "rent", label: t.rent }], t.all)}
-                </div>
+                {shown("purpose") && (
+                    <div>
+                        <span className={label}>{t.purpose}</span>
+                        {select("purpose", [{ value: "sale", label: t.sale }, { value: "rent", label: t.rent }], t.all)}
+                    </div>
+                )}
                 <div>
                     <span className={label}>{t.sort}</span>
                     {select("sort", options.sorts, options.sorts[0]?.label ?? t.all)}
@@ -272,8 +286,10 @@ export default function PropertyFilters({
                 <button
                     type="button"
                     onClick={() => {
-                        setDraft({});
-                        go({});
+                        // الأبعاد المقفولة بتفضل — «امسح الكل» بيمسح تضييق الزائر بس
+                        const base = Object.fromEntries(locked.map((k) => [k, filters[k] ?? ""]));
+                        setDraft(base);
+                        go(base);
                     }}
                     className="ms-auto flex items-center gap-2 text-[12px] font-extrabold text-muted transition hover:text-danger"
                 >

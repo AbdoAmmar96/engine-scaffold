@@ -22,7 +22,9 @@ class SeoServiceProvider extends ModuleServiceProvider
      *
      * @var string[]
      */
-    // protected array $commands = [];
+    protected array $commands = [
+        \Modules\Seo\Console\GenerateLandingPages::class,
+    ];
 
     /**
      * Provider classes to register.

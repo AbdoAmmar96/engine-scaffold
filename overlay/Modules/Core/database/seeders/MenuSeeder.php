@@ -9,6 +9,10 @@ use Modules\Core\Models\MenuItem;
  * القائمة الافتراضية.
  * idempotent: المفتاح هو (المكان + الاسم) — مش الرابط، لأن عنصر القائمة
  * المنسدلة نفسه مالوش رابط.
+ *
+ * firstOrCreate مش updateOrCreate: الديبلوي بيشغّل db:seed كل مرة، والتاني
+ * كان بيرجّع أي تعديل العميل عمله من /admin/menus — يعني الشاشة بلا فايدة.
+ * الناقص بس هو اللي بيتزرع.
  */
 class MenuSeeder extends Seeder
 {
@@ -19,6 +23,7 @@ class MenuSeeder extends Seeder
             ['label' => 'العقارات', 'label_en' => 'Properties', 'url' => '/properties'],
             ['label' => 'عقارات تجارية', 'label_en' => 'Commercial', 'url' => '/properties/commercial'],
             ['label' => 'الكمبوندات', 'label_en' => 'Compounds', 'url' => '/compounds'],
+            ['label' => 'أضف عقارك', 'label_en' => 'Add your property', 'url' => '/add-property'],
         ]],
         ['label' => 'المطوّرون', 'label_en' => 'Developers', 'url' => '/developers'],
         ['label' => 'المناطق', 'label_en' => 'Areas', 'url' => '/areas'],
@@ -35,6 +40,7 @@ class MenuSeeder extends Seeder
         ['label' => 'المطوّرون', 'label_en' => 'Developers', 'url' => '/developers'],
         ['label' => 'المناطق', 'label_en' => 'Areas', 'url' => '/areas'],
         ['label' => 'المدونة', 'label_en' => 'Blog', 'url' => '/blog'],
+        ['label' => 'أضف عقارك', 'label_en' => 'Add your property', 'url' => '/add-property'],
         ['label' => 'من نحن', 'label_en' => 'About', 'url' => '/about'],
         ['label' => 'اتصل بنا', 'label_en' => 'Contact', 'url' => '/contact'],
     ];
@@ -60,7 +66,7 @@ class MenuSeeder extends Seeder
 
     private function put(string $location, array $item, int $sort, ?int $parentId): MenuItem
     {
-        return MenuItem::updateOrCreate(
+        return MenuItem::firstOrCreate(
             ['location' => $location, 'label' => $item['label']],
             [
                 'label_en' => $item['label_en'],
