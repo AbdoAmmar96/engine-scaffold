@@ -65,6 +65,8 @@ export interface Property {
     size: number;
     ref: string;
     image: string;
+    /** مطوّر الوحدة، وإلا مطوّر الكمبوند — فاضي لو الاتنين مش متحددين */
+    developer: string;
 }
 
 /** العقار كامل في صفحة التفاصيل */

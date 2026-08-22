@@ -1,0 +1,19 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 5
+
+    paths:
+        - app
+        - Modules
+        - database
+        - routes
+
+    excludePaths:
+        - Modules/*/vendor/*
+
+    reportUnmatchedIgnoredErrors: false
+
+    ignoreErrors:
+        - identifier: missingType.generics

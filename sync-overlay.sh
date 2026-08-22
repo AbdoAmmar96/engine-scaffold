@@ -32,10 +32,15 @@ PATHS=(
     "lang"
     "resources/css"
     "resources/js"
+    "resources/og"
     "resources/views/app.blade.php"
     "routes/web.php"
     # اختبارات الأدوار والصلاحيات جزء من المنتج مش من بيئة التطوير
     "tests/Feature"
+    # سويت الـ e2e بتحرس السيو ومعاينة اللينك — حاجات بتتكسر بصمت
+    "tests/e2e"
+    "playwright.config.ts"
+    "phpstan.neon"
     "tsconfig.json"
     "vite.config.ts"
     "public/images"

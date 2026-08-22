@@ -1,5 +1,5 @@
 import { Link, usePage } from "@inertiajs/react";
-import { ArrowLeft, Bath, BedDouble, MapPin, Ruler } from "lucide-react";
+import { ArrowLeft, Bath, BedDouble, Building2, MapPin, Ruler } from "lucide-react";
 import FavoriteButton from "@/Components/site/FavoriteButton";
 import type { ReactNode } from "react";
 import type { Property, SharedProps } from "@/lib/types";
@@ -45,7 +45,14 @@ export default function PropertyCard({ p, ar, wa }: { p: Property; ar: boolean; 
 
                 <div className="flex items-center gap-2 text-xs font-bold text-muted">
                     <MapPin size={13} className="shrink-0 text-primary" />
-                    {p.area}
+                    <span className="truncate">{p.area}</span>
+                    {p.developer && (
+                        <>
+                            <span className="text-gray-300">·</span>
+                            <Building2 size={13} className="shrink-0 text-primary" />
+                            <span className="truncate">{p.developer}</span>
+                        </>
+                    )}
                 </div>
 
                 <div className="text-lg font-extrabold text-primary" dir="ltr">

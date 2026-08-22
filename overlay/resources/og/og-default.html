@@ -1,0 +1,69 @@
+<!doctype html>
+<!--
+  مصدر صورة معاينة اللينك (public/images/og-default.png · 1200×630).
+  دي الصورة اللي بتظهر لما حد يبعت لينك الموقع في واتساب/تليجرام/تويتر.
+
+  لإعادة توليدها بعد ما تغيّر اللوجو أو اسم الموقع أو ألوان الهوية:
+
+      chromium --headless --hide-scrollbars --window-size=1200,630 \
+        --virtual-time-budget=6000 \
+        --screenshot=public/images/og-default.png resources/og/og-default.html
+
+  الألوان تحت مأخوذة من مجموعة theme الافتراضية — لو غيّرت الهوية غيّرها هنا كمان.
+  والعميل يقدر يرفع صورته بدلها من: الداشبورد ← الإعدادات ← السيو ← «صورة معاينة اللينك».
+-->
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:1200px; height:630px; overflow:hidden; }
+  body { font-family:'Cairo', sans-serif; background:#0B1220; color:#F1F5F9; }
+
+  /* كل حاجة جوه لوحة مثبتة — عشان الزخارف السالبة ما توسّعش الصفحة وتزحلق اللقطة */
+  .canvas { position:fixed; top:0; left:0; width:1200px; height:630px; overflow:hidden; }
+
+  .glow-a { position:absolute; width:820px; height:820px; border-radius:50%;
+    background:radial-gradient(circle, rgba(201,162,39,.30) 0%, rgba(201,162,39,0) 68%);
+    top:-330px; right:-240px; }
+  .glow-b { position:absolute; width:880px; height:880px; border-radius:50%;
+    background:radial-gradient(circle, rgba(30,58,95,.90) 0%, rgba(30,58,95,0) 70%);
+    bottom:-400px; left:-280px; }
+  .grid { position:absolute; inset:0;
+    background-image:linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+                     linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:64px 64px;
+    -webkit-mask-image:radial-gradient(ellipse at center, #000 32%, transparent 76%); }
+
+  .inner { position:absolute; inset:0; z-index:2;
+    display:flex; flex-direction:column; justify-content:center; align-items:center;
+    text-align:center; padding:0 80px; }
+
+  .logo { width:196px; height:196px; object-fit:contain; margin-bottom:28px;
+    filter:drop-shadow(0 16px 44px rgba(0,0,0,.6)); }
+  h1 { font-size:76px; font-weight:900; letter-spacing:-1.5px; line-height:1.1; }
+  .accent { color:#C9A227; }
+  p { margin-top:18px; font-size:32px; font-weight:600; color:#9FB0C4; }
+  .rule { width:150px; height:6px; border-radius:99px; margin-top:32px;
+    background:linear-gradient(90deg,#C9A227,#1E3A5F); }
+
+  .bar { position:absolute; bottom:0; left:0; width:1200px; height:12px;
+    background:linear-gradient(90deg,#1E3A5F 0%,#C9A227 62%,#C9A227 100%); }
+</style>
+</head>
+<body>
+  <div class="canvas">
+    <div class="glow-a"></div>
+    <div class="glow-b"></div>
+    <div class="grid"></div>
+    <div class="inner">
+      <img class="logo" src="../../public/images/logo.png" alt="">
+      <h1>المنصة <span class="accent">العقارية</span></h1>
+      <p>بوابتك الذكية لعقارات مصر</p>
+      <div class="rule"></div>
+    </div>
+    <div class="bar"></div>
+  </div>
+</body>
+</html>

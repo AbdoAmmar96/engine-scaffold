@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Modules\Blog\Models\Post;
 use Modules\Compounds\Models\Compound;
 use Modules\Developers\Models\Developer;
@@ -30,7 +32,7 @@ class Catalog
 
         $rows = Property::query()
             ->where('is_active', true)
-            ->with('location')
+            ->with(['location', 'developer', 'compound.developer', 'compound.location'])
             ->tap(fn ($q) => self::applyPropertyFilters($q, $filters))
             ->orderBy('sort')->orderByDesc('id')
             ->when($limit, fn ($q) => $q->limit($limit))
@@ -42,10 +44,22 @@ class Catalog
     private static function applyPropertyFilters($query, array $filters): void
     {
         if ($q = trim((string) ($filters['q'] ?? ''))) {
+            // الـ placeholder في الهيرو بيوعد بالمنطقة والكمبوند والمطوّر — فلازم
+            // البحث يغطيهم كلهم، مش العنوان والكود بس.
+            // المطوّر بيتدوّر عليه في العمود المباشر وفي مطوّر الكمبوند سوا،
+            // عشان الوحدة المستقلة والوحدة اللي جوه مشروع يطلعوا في نفس النتيجة.
+            $like = fn ($s) => $s->where('name', 'like', "%{$q}%")->orWhere('name_en', 'like', "%{$q}%");
+
             $query->where(fn ($s) => $s
                 ->where('title', 'like', "%{$q}%")
                 ->orWhere('title_en', 'like', "%{$q}%")
-                ->orWhere('ref', 'like', "%{$q}%"));
+                ->orWhere('ref', 'like', "%{$q}%")
+                ->orWhereHas('location', $like)
+                ->orWhereHas('compound', $like)
+                ->orWhereHas('developer', $like)
+                // الوحدة جوه مشروع بتورّث منطقته ومطوّره لو مش متكتبين عليها
+                ->orWhereHas('compound.location', $like)
+                ->orWhereHas('compound.developer', $like));
         }
 
         if ($type = trim((string) ($filters['type'] ?? ''))) {
@@ -113,10 +127,10 @@ class Catalog
     }
 
     /** الفلاتر المسموحة من الـ query string، منضّفة */
-    public static function filters(\Illuminate\Http\Request $request): array
+    public static function filters(Request $request): array
     {
         return [
-            'q' => \Illuminate\Support\Str::limit(trim((string) $request->query('q', '')), 80, ''),
+            'q' => Str::limit(trim((string) $request->query('q', '')), 80, ''),
             'type' => trim((string) $request->query('type', '')),
             'location' => trim((string) $request->query('location', '')),
             'purpose' => in_array($request->query('purpose'), ['sale', 'rent'], true) ? $request->query('purpose') : '',
@@ -178,7 +192,7 @@ class Catalog
         return Property::query()
             ->where('is_active', true)
             ->where('slug', $slug)
-            ->with(['location', 'compound.developer'])
+            ->with(['location', 'developer', 'compound.developer', 'compound.location'])
             ->first()
             ?->toDetail($locale);
     }
@@ -211,7 +225,7 @@ class Catalog
         $rows = Property::query()
             ->where('is_active', true)
             ->where('id', '!=', $property['id'])
-            ->with('location')
+            ->with(['location', 'developer', 'compound.developer', 'compound.location'])
             ->where(fn ($q) => $q
                 ->whereHas('location', fn ($l) => $l->where('name', $property['area'])->orWhere('name_en', $property['area']))
                 ->when($property['type'] ?? '', fn ($s, $type) => $s->orWhere('type', $type)))
@@ -228,7 +242,7 @@ class Catalog
         $rows = Property::query()
             ->where('is_active', true)
             ->where('compound_id', $compoundId)
-            ->with('location')
+            ->with(['location', 'developer', 'compound.developer', 'compound.location'])
             ->orderBy('sort')->orderByDesc('id')
             ->when($limit, fn ($q) => $q->limit($limit))
             ->get();
@@ -244,7 +258,7 @@ class Catalog
     {
         return array_map(function (array $row) use ($kind) {
             $row['slug'] = $kind === 'property'
-                ? \Illuminate\Support\Str::slug((string) ($row['ref'] ?? ''))
+                ? Str::slug((string) ($row['ref'] ?? ''))
                 : $kind.'-'.$row['id'];
 
             $row['type'] ??= '';

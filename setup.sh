@@ -58,6 +58,11 @@ npm install react react-dom @inertiajs/react@^2.0 lucide-react
 # plugin-react متثبّتة على ^5.2 — الـ 6.x بتطلب vite ^8 و Laravel 12 شايل vite ^7
 npm install -D typescript @types/react @types/react-dom @vitejs/plugin-react@^5.2.0 tailwindcss @tailwindcss/vite
 
+# طبقة الجودة: من غيرها الـ overlay بيجيب playwright.config.ts و phpstan.neon
+# وسويت الاختبارات من غير الحزم اللي بتشغّلهم.
+npm install -D @playwright/test
+composer require --dev larastan/larastan laravel/boost --no-interaction
+
 echo "==> [5/7] تركيب ملفات الإنجن (overlay)"
 cp -Rf "$SCRIPT_DIR/overlay/." .
 rm -f vite.config.js   # نسختنا vite.config.ts هي المعتمدة

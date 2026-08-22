@@ -40,11 +40,55 @@ class Seo
                 'ar' => url("/ar{$path}"),
                 'en' => url("/en{$path}"),
             ],
-            'image' => $image ? url($image) : url($settings->get('branding', 'logo_path', '/images/logo.png')),
+            // ترتيب المعاينة: صورة الصفحة نفسها ← صورة المعاينة العامة (1200×630) ← اللوجو.
+            // اللوجو آخر حاجة عن قصد: مربع، وواتساب/تويتر بيرندروه كأيقونة صغيرة مش كارت كبير.
+            ...self::image(
+                $image
+                    ?: (($seo['og_image'] ?? '') ?: $settings->get('branding', 'logo_path', '/images/logo.png'))
+            ),
+            'locale' => ($seo['og_locale'] ?? '') ?: ($locale === 'en' ? 'en_US' : 'ar_EG'),
             'type' => $type,
             'siteName' => $siteName,
             'jsonLd' => array_values(array_filter([self::organization(), ...$jsonLd])),
         ];
+    }
+
+    /**
+     * بيانات صورة المعاينة: الرابط المطلق + الأبعاد الحقيقية.
+     *
+     * الأبعاد بتتقاس من الملف نفسه مش بتتفترض: واتساب وفيسبوك بيثقوا في
+     * og:image:width/height ومبينزّلوش الصورة عشان يقيسوها، فلو كتبنا 1200×630
+     * على صورة عقار 620×440 الكارت بيطلع مقصوص أو مترفوض.
+     *
+     * @return array{image:string, imageWidth:?int, imageHeight:?int, imageIsWide:bool}
+     */
+    public static function image(string $path): array
+    {
+        $url = url($path);
+        [$width, $height] = self::dimensions($path);
+
+        return [
+            'image' => $url,
+            'imageWidth' => $width,
+            'imageHeight' => $height,
+            // تحت 600 بكسل عرض، تويتر بيرجع لكارت صغير برضه — فمش بندّعي العكس.
+            'imageIsWide' => $width !== null && $width >= 600 && $width > $height,
+        ];
+    }
+
+    /** @return array{0:?int, 1:?int} */
+    private static function dimensions(string $path): array
+    {
+        // الصور بتتقرا من القرص مش عبر HTTP — الملفات كلها تحت public/.
+        $file = public_path(parse_url($path, PHP_URL_PATH) ?? $path);
+
+        if (! is_file($file)) {
+            return [null, null];
+        }
+
+        $size = @getimagesize($file);
+
+        return $size ? [$size[0], $size[1]] : [null, null];
     }
 
     /** مسار الصفحة من غير بادئة اللغة — عشان hreflang و canonical */

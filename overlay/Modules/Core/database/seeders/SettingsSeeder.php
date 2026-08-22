@@ -14,72 +14,76 @@ class SettingsSeeder extends Seeder
 
             'general' => [
                 'site_name' => 'المنصة العقارية', // ← الاسم النهائي بيتغير من الداشبورد
-                'tagline'   => 'بوابتك الذكية لعقارات مصر',
+                'tagline' => 'بوابتك الذكية لعقارات مصر',
                 // أرقام الشركة — بتفضل فاضية لحد ما العميل يدخّل أرقامه الحقيقية،
                 // والأقسام اللي بتستخدمها بتختفي وهي فاضية.
                 // (قبل كده كانت مكتوبة في الكود: 12 سنة · 4780 عميل · 46 فرد)
-                'founded_year'   => '',
+                'founded_year' => '',
                 'clients_served' => '',
-                'team_size'      => '',
+                'team_size' => '',
             ],
 
             // 🎨 Palette A — "Midnight & Gold" (نسخة فاتحة: الموقع أبيض) + خط Cairo
             'theme' => [
-                'primary'       => '#C9A227',
-                'primary_fg'    => '#0B1220',
+                'primary' => '#C9A227',
+                'primary_fg' => '#0B1220',
                 'primary_hover' => '#B8921F',
-                'secondary'     => '#1E3A5F',
-                'bg'            => '#FFFFFF',
-                'bg_dark'       => '#0B1220',
-                'surface'       => '#FFFFFF',
-                'surface_dark'  => '#111A2E',
-                'text'          => '#0F172A',
-                'text_dark'     => '#F1F5F9',
-                'muted'         => '#64748B',
-                'success'       => '#16A34A',
-                'danger'        => '#DC2626',
-                'radius'        => '14px',
-                'font_heading'  => 'Cairo',
-                'font_body'     => 'Cairo',
-                'hero_variant'  => 'video',
+                'secondary' => '#1E3A5F',
+                'bg' => '#FFFFFF',
+                'bg_dark' => '#0B1220',
+                'surface' => '#FFFFFF',
+                'surface_dark' => '#111A2E',
+                'text' => '#0F172A',
+                'text_dark' => '#F1F5F9',
+                'muted' => '#64748B',
+                'success' => '#16A34A',
+                'danger' => '#DC2626',
+                'radius' => '14px',
+                'font_heading' => 'Cairo',
+                'font_body' => 'Cairo',
+                'hero_variant' => 'video',
             ],
 
             // اللوجو الحقيقي متركّب في public/images — والفيديو بيتضاف برابط من الداشبورد
             'branding' => [
-                'logo_path'    => '/images/logo.png',
-                'video_url'    => '',
+                'logo_path' => '/images/logo.png',
+                'video_url' => '',
                 'video_poster' => '',
                 // فيديو أو صورة — FrameMedia بيكتشف الامتداد ويرندر video أو img
                 'hero_bg_video' => '/videos/skyline-dawn.mp4',
-                'hero_media'    => '/images/demo/hero.jpg',
+                'hero_media' => '/images/demo/hero.jpg',
                 'process_media' => '/videos/open-door.mp4',
             ],
 
             'contact' => [
                 'whatsapp' => '',
-                'phone'    => '',
-                'email'    => '',
-                'address'  => '',
+                'phone' => '',
+                'email' => '',
+                'address' => '',
             ],
 
             'social' => [
-                'facebook'  => '',
+                'facebook' => '',
                 'instagram' => '',
-                'tiktok'    => '',
-                'linkedin'  => '',
-                'x'         => '',
-                'youtube'   => '',
-                'snapchat'  => '',
+                'tiktok' => '',
+                'linkedin' => '',
+                'x' => '',
+                'youtube' => '',
+                'snapchat' => '',
             ],
 
             'seo' => [
-                'meta_title'       => '',
+                'meta_title' => '',
                 'meta_description' => '',
+                // صورة معاينة اللينك في واتساب/تليجرام/تويتر — لازم 1200×630.
+                // المصدر اللي اتولّدت منه: resources/og/og-default.html
+                'og_image' => '/images/og-default.png',
+                'og_locale' => 'ar_EG',
             ],
 
             'integrations' => [
-                'gtm_id'          => '',
-                'meta_pixel_id'   => '',
+                'gtm_id' => '',
+                'meta_pixel_id' => '',
                 'google_place_id' => '',
             ],
         ];

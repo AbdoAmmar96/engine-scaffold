@@ -22,7 +22,15 @@
     $title       = $meta['title'] ?? (($seo['meta_title'] ?? '') ?: ($general['site_name'] ?? config('app.name')));
     $description = $meta['description'] ?? (($seo['meta_description'] ?? '') ?: ($general['tagline'] ?? ''));
     $canonical   = $meta['canonical'] ?? url()->current();
-    $ogImage     = $meta['image'] ?? url($settings->get('branding', 'logo_path', '/images/logo.png'));
+    // شاشات اللوحة مالهاش prop اسمه meta، فبتقع على نفس حساب App\Support\Seo::image
+    $ogFallback  = \App\Support\Seo::image(($seo['og_image'] ?? '') ?: $settings->get('branding', 'logo_path', '/images/logo.png'));
+    $ogImage     = $meta['image'] ?? $ogFallback['image'];
+    $ogWidth     = $meta['imageWidth'] ?? $ogFallback['imageWidth'];
+    $ogHeight    = $meta['imageHeight'] ?? $ogFallback['imageHeight'];
+    // اللوجو مربع 512×512، فبيوقع في summary — الكارت الكبير بيتفعّل لما الأدمن
+    // يحط صورة عريضة في «صورة معاينة اللينك».
+    $ogWide      = $meta['imageIsWide'] ?? $ogFallback['imageIsWide'];
+    $ogLocale    = $meta['locale'] ?? (($seo['og_locale'] ?? '') ?: ($isRtl ? 'ar_EG' : 'en_US'));
 @endphp
 <html lang="{{ app()->getLocale() }}" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
 <head>
@@ -47,17 +55,26 @@
     <meta property="og:title" content="{{ $title }}">
     <meta property="og:type" content="{{ $meta['type'] ?? 'website' }}">
     <meta property="og:url" content="{{ $canonical }}">
-    <meta property="og:locale" content="{{ $isRtl ? 'ar_EG' : 'en_US' }}">
+    <meta property="og:locale" content="{{ $ogLocale }}">
     <meta property="og:image" content="{{ $ogImage }}">
+    <meta property="og:image:secure_url" content="{{ $ogImage }}">
+    <meta property="og:image:alt" content="{{ $general['site_name'] ?? $title }}">
+    {{-- واتساب بيتخطى الكارت الكبير لو الأبعاد مش مكتوبة، لأنه مبينزّلش الصورة عشان يقيسها.
+         الأرقام دي مقيسة من الملف في Seo::image — متتكتبش يدوي. --}}
+    @if ($ogWidth && $ogHeight)
+        <meta property="og:image:width" content="{{ $ogWidth }}">
+        <meta property="og:image:height" content="{{ $ogHeight }}">
+    @endif
     @if (! empty($general['site_name']))
         <meta property="og:site_name" content="{{ $general['site_name'] }}">
     @endif
-    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:card" content="{{ $ogWide ? 'summary_large_image' : 'summary' }}">
     <meta name="twitter:title" content="{{ $title }}">
     @if ($description)
         <meta name="twitter:description" content="{{ $description }}">
     @endif
     <meta name="twitter:image" content="{{ $ogImage }}">
+    <meta name="twitter:image:alt" content="{{ $general['site_name'] ?? $title }}">
 
     @foreach (($meta['jsonLd'] ?? []) as $schema)
         <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>

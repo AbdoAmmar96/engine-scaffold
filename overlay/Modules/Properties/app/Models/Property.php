@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use Modules\Compounds\Models\Compound;
+use Modules\Developers\Models\Developer;
 use Modules\Locations\Models\Location;
 
 /**
@@ -18,6 +19,7 @@ use Modules\Locations\Models\Location;
  * @property string|null $slug
  * @property int|null $location_id
  * @property int|null $compound_id
+ * @property int|null $developer_id
  * @property int|null $owner_id
  * @property string $purpose
  * @property string|null $type
@@ -39,6 +41,7 @@ use Modules\Locations\Models\Location;
  * @property Carbon|null $updated_at
  * @property-read Location|null $location
  * @property-read Compound|null $compound
+ * @property-read Developer|null $developer
  * @property-read User|null $owner
  */
 class Property extends Model
@@ -64,7 +67,7 @@ class Property extends Model
     ];
 
     protected $fillable = [
-        'title', 'title_en', 'slug', 'location_id', 'compound_id', 'owner_id', 'purpose', 'type',
+        'title', 'title_en', 'slug', 'location_id', 'compound_id', 'developer_id', 'owner_id', 'purpose', 'type',
         'description', 'description_en', 'features', 'features_en',
         'price', 'price_en', 'beds', 'baths', 'size', 'ref', 'image', 'gallery', 'sort', 'is_active',
     ];
@@ -89,6 +92,23 @@ class Property extends Model
         return $this->belongsTo(Compound::class);
     }
 
+    public function developer(): BelongsTo
+    {
+        return $this->belongsTo(Developer::class);
+    }
+
+    /**
+     * المطوّر الفعلي: بتاع الوحدة، وإلا بتاع الكمبوند.
+     *
+     * الوحدة جوه مشروع مش لازم تتكتب مطوّرها تاني — بتورّثه من الكمبوند،
+     * ولو الكمبوند غيّر مطوّره الوحدات بتمشي وراه لوحدها. و developer_id
+     * الصريح بيغلب دايمًا، عشان إعادة البيع والوحدات المستقلة.
+     */
+    public function resolvedDeveloper(): ?Developer
+    {
+        return $this->developer ?? $this->compound?->developer;
+    }
+
     /** الوسيط أو الشركة صاحبة الوحدة — null يعني وحدة المنصّة */
     public function owner(): BelongsTo
     {
@@ -111,7 +131,9 @@ class Property extends Model
             'id' => $this->id,
             'slug' => $this->slug ?? '',
             'title' => $this->t('title', $locale),
-            'area' => $this->location?->t('name', $locale) ?? '',
+            // نفس fallback المطوّر: الوحدة جوه مشروع بتورّث منطقته لو مش متكتبة عليها،
+            // عشان اللي البحث بيلاقيه يبان على الكارت
+            'area' => ($this->location ?? $this->compound?->location)?->t('name', $locale) ?? '',
             'purpose' => $this->purpose === 'rent' ? ($ar ? 'إيجار' : 'Rent') : ($ar ? 'بيع' : 'Sale'),
             'type' => $this->typeLabel($locale),
             'price' => $this->t('price', $locale) ?? '',
@@ -120,6 +142,7 @@ class Property extends Model
             'size' => (int) $this->size,
             'ref' => $this->ref ?? '',
             'image' => $this->image ?: '/images/demo/property-1.jpg',
+            'developer' => $this->resolvedDeveloper()?->t('name', $locale) ?? '',
         ];
     }
 
@@ -136,7 +159,8 @@ class Property extends Model
             'compound' => $this->compound && $this->compound->is_active ? [
                 'name' => $this->compound->t('name', $locale),
                 'slug' => $this->compound->slug ?? '',
-                'developer' => $this->compound->developer?->t('name', $locale) ?? '',
+                // نفس مصدر الكارت — الوحدة المستقلة برضه بيبان مطوّرها
+                'developer' => $this->resolvedDeveloper()?->t('name', $locale) ?? '',
                 'delivery' => $this->compound->delivery ?? '',
             ] : null,
         ];
