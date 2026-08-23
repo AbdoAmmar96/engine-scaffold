@@ -41,7 +41,7 @@ class AdminUserSeeder extends Seeder
                 $admin->syncRoles(['super_admin']);
             }
 
-            $this->command?->info("  المدير موجود ({$email}) — الدور وكلمة المرور مالهمش دعوة.");
+            $this->command?->info("  المدير موجود ({$email}) — لم يتغيّر الدور ولا كلمة المرور.");
 
             return;
         }
@@ -49,8 +49,8 @@ class AdminUserSeeder extends Seeder
         // أول حساب على تثبيت جديد لازم يقدر يعمل باقي الفريق كمان
         $admin->syncRoles(['super_admin']);
 
-        $this->command?->warn("  اتعمل سوبر أدمن: {$email}");
+        $this->command?->warn("  أُنشئ سوبر أدمن: {$email}");
         $this->command?->warn("  كلمة المرور: {$password}");
-        $this->command?->warn('  احفظها دلوقتي — مش هتتعرض تاني.');
+        $this->command?->warn('  احفظها الآن — لن تُعرض مرة أخرى.');
     }
 }

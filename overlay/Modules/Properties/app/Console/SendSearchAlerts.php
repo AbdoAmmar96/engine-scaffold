@@ -60,7 +60,7 @@ class SendSearchAlerts extends Command
                 }
             });
 
-        $this->info("  تنبيهات اتبعتت: {$sent}".($skipped ? " · حسابات اتخطّت: {$skipped}" : ''));
+        $this->info("  تنبيهات مُرسَلة: {$sent}".($skipped ? " · حسابات متخطّاة: {$skipped}" : ''));
 
         return self::SUCCESS;
     }

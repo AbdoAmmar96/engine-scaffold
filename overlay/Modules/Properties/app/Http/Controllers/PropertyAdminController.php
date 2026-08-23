@@ -73,12 +73,12 @@ class PropertyAdminController extends ResourceController
             ...$this->ownerField(),
             ['name' => 'title',       'label' => 'العنوان (عربي)',    'type' => 'text', 'required' => true],
             ['name' => 'title_en',    'label' => 'العنوان (إنجليزي)', 'type' => 'text'],
-            ['name' => 'slug',        'label' => 'رابط الصفحة',       'type' => 'text', 'hint' => 'سيبه فاضي يتولّد من العنوان — /ar/properties/<الرابط>'],
+            ['name' => 'slug',        'label' => 'رابط الصفحة',       'type' => 'text', 'hint' => 'اتركه فارغًا ليتولّد من العنوان — /ar/properties/<الرابط>'],
             ['name' => 'ref',         'label' => 'الكود',             'type' => 'text', 'hint' => 'مثال: XH-1001'],
             ['name' => 'location_id', 'label' => 'المنطقة',           'type' => 'select', 'options' => $this->options(Location::class, 'name')],
             ['name' => 'compound_id', 'label' => 'الكمبوند',          'type' => 'select', 'options' => $this->compoundOptions()],
             ['name' => 'developer_id', 'label' => 'المطوّر',          'type' => 'select', 'options' => $this->options(Developer::class, 'name'),
-                'hint' => 'سيبه فاضي لو الوحدة جوه كمبوند — بتاخد مطوّر الكمبوند تلقائيًا. املاه لإعادة البيع والوحدات المستقلة.'],
+                'hint' => 'اتركه فارغًا إن كانت الوحدة داخل كمبوند — فتأخذ مطوّر الكمبوند تلقائيًا. املأه لإعادة البيع والوحدات المستقلة.'],
             ['name' => 'purpose',     'label' => 'الغرض',             'type' => 'select', 'options' => [
                 ['value' => 'sale', 'label' => 'بيع'],
                 ['value' => 'rent', 'label' => 'إيجار'],
@@ -92,9 +92,9 @@ class PropertyAdminController extends ResourceController
             ['name' => 'features',       'label' => 'المميزات (عربي)',   'type' => 'textarea', 'hint' => 'ميزة في كل سطر'],
             ['name' => 'features_en',    'label' => 'المميزات (إنجليزي)', 'type' => 'textarea', 'hint' => 'ميزة في كل سطر'],
             ['name' => 'price_amount', 'label' => 'السعر (رقم)',      'type' => 'number',
-                'hint' => 'الرقم من غير فواصل — الفلاتر والترتيب بيشتغلوا عليه'],
+                'hint' => 'الرقم دون فواصل — تعمل عليه الفلاتر والترتيب'],
             ['name' => 'price',       'label' => 'نص السعر (عربي)',   'type' => 'text',
-                'hint' => 'اختياري — بيغلب الرقم في العرض بس. مثال: السعر عند الاستعلام'],
+                'hint' => 'اختياري — يغلب الرقم في العرض فقط. مثال: السعر عند الاستعلام'],
             ['name' => 'price_en',    'label' => 'نص السعر (إنجليزي)', 'type' => 'text'],
             ['name' => 'down_payment', 'label' => 'المقدم (رقم)',      'type' => 'number'],
             ['name' => 'monthly_installment', 'label' => 'القسط الشهري (رقم)', 'type' => 'number'],
@@ -133,18 +133,18 @@ class PropertyAdminController extends ResourceController
 
         if (self::actorCan('publish listings')) {
             $fields[] = ['name' => 'status', 'label' => 'حالة المراجعة', 'type' => 'select', 'required' => true,
-                'hint' => 'النشر بيولّد كود مرجعي للوحدة لو مالهاش واحد',
+                'hint' => 'النشر يولّد كودًا مرجعيًا للوحدة إن لم يكن لها واحد',
                 'options' => collect(Property::STATUSES)
                     ->map(fn (array $s, string $key) => ['value' => $key, 'label' => $s['label']])
                     ->values()->all()];
 
             $fields[] = ['name' => 'rejection_reason', 'label' => 'سبب الرفض', 'type' => 'textarea',
-                'hint' => 'بيتعرض لصاحب الوحدة عشان يعرف يصلّح إيه'];
+                'hint' => 'يُعرض لصاحب الوحدة ليعرف ما يصلحه'];
         }
 
         if (self::actorCan('feature listings')) {
             $fields[] = ['name' => 'is_featured', 'label' => 'إعلان مميّز', 'type' => 'toggle',
-                'hint' => 'بيتصدّر نتايج البحث'];
+                'hint' => 'تتصدّر نتائج البحث'];
         }
 
         return $fields;

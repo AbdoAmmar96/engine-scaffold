@@ -26,9 +26,9 @@ class RolePermissionSeeder extends Seeder
     public const PERMISSIONS = [
         'manage catalog' => 'كل العقارات والكمبوندات والمطوّرين والمناطق (بدون عزل)',
         'publish listings' => 'اعتماد العقارات ونشرها وحذفها',
-        'feature listings' => 'تمييز الإعلانات في نتايج البحث',
-        'manage listings' => 'إضافة وتعديل وحداته هو بس',
-        'manage projects' => 'إضافة وتعديل مشاريعه هو بس',
+        'feature listings' => 'تمييز الإعلانات في نتائج البحث',
+        'manage listings' => 'إضافة وتعديل وحداته هو فقط',
+        'manage projects' => 'إضافة وتعديل مشاريعه هو فقط',
         'manage content' => 'المدونة والقوائم وصفحات الهبوط',
         'manage media' => 'مكتبة الميديا',
         'manage leads' => 'صندوق الطلبات',
@@ -46,7 +46,7 @@ class RolePermissionSeeder extends Seeder
     public const ROLES = [
         'super_admin' => [
             'label' => 'سوبر أدمن',
-            'note' => 'كل حاجة + الأدوار والصلاحيات',
+            'note' => 'كل شيء + الأدوار والصلاحيات',
             'staff' => true,
             'permissions' => [
                 'manage catalog', 'publish listings', 'feature listings',
@@ -56,7 +56,7 @@ class RolePermissionSeeder extends Seeder
         ],
         'admin' => [
             'label' => 'مدير المنصّة',
-            'note' => 'كل حاجة ماعدا توزيع أدوار الفريق',
+            'note' => 'كل شيء عدا توزيع أدوار الفريق',
             'staff' => true,
             'permissions' => [
                 'manage catalog', 'publish listings', 'feature listings',
@@ -66,7 +66,7 @@ class RolePermissionSeeder extends Seeder
         ],
         'data_entry' => [
             'label' => 'مدخل بيانات',
-            'note' => 'يدخل ويعدّل العقارات والمشاريع — من غير نشر ولا حذف',
+            'note' => 'يدخل ويعدّل العقارات والمشاريع — دون نشر ولا حذف',
             'staff' => true,
             'permissions' => ['manage catalog', 'manage media'],
         ],
@@ -84,31 +84,31 @@ class RolePermissionSeeder extends Seeder
         ],
         'consultant' => [
             'label' => 'مستشار عقاري',
-            'note' => 'الطلبات المسنودة له هو بس',
+            'note' => 'الطلبات المسنودة إليه هو فقط',
             'staff' => true,
             'permissions' => ['manage leads'],
         ],
         'company' => [
             'label' => 'شركة / مطوّر عقاري',
-            'note' => 'مشاريعها ووحداتها والطلبات الجاية عليها',
+            'note' => 'مشاريعها ووحداتها والطلبات الواردة عليها',
             'staff' => true,
             'permissions' => ['manage listings', 'manage projects', 'manage leads'],
         ],
         'broker' => [
             'label' => 'وسيط عقاري',
-            'note' => 'وحداته هو والطلبات الجاية عليها',
+            'note' => 'وحداته والطلبات الواردة عليها',
             'staff' => true,
             'permissions' => ['manage listings', 'manage leads'],
         ],
         'lister' => [
             'label' => 'معلن / مالك عقار',
-            'note' => 'وحداته من «حسابي» على الموقع — مفيش دخول للوحة',
+            'note' => 'وحداته من «حسابي» على الموقع — لا دخول للوحة',
             'staff' => false,
             'permissions' => ['manage listings'],
         ],
         'customer' => [
             'label' => 'عميل',
-            'note' => 'مفيش دخول للوحة — مساحته على الموقع نفسه',
+            'note' => 'لا دخول للوحة — مساحته على الموقع نفسه',
             'staff' => false,
             'permissions' => [],
         ],
@@ -190,6 +190,6 @@ class RolePermissionSeeder extends Seeder
 
         $first?->syncRoles(['super_admin']);
 
-        $first && $this->command->info("  {$first->email} اترقّى لسوبر أدمن (أول واحد بس)");
+        $first && $this->command->info("  {$first->email} تمت ترقيته إلى سوبر أدمن (الأول فقط)");
     }
 }

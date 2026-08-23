@@ -50,7 +50,7 @@ class LeadAdminController extends ResourceController
     {
         return array_filter([
             'name' => 'الاسم',
-            'phone' => 'الموبايل',
+            'phone' => 'رقم الهاتف',
             'subject' => 'الطلب على',
             'area' => 'المنطقة',
             'budget' => 'الميزانية',
@@ -67,8 +67,8 @@ class LeadAdminController extends ResourceController
         return [
             ...$this->ownerField('موجّه لـ'),
             ['name' => 'name', 'label' => 'الاسم', 'type' => 'text', 'required' => true],
-            ['name' => 'phone', 'label' => 'الموبايل', 'type' => 'text', 'required' => true],
-            ['name' => 'email', 'label' => 'الإيميل', 'type' => 'text'],
+            ['name' => 'phone', 'label' => 'رقم الهاتف', 'type' => 'text', 'required' => true],
+            ['name' => 'email', 'label' => 'البريد الإلكتروني', 'type' => 'text'],
             ['name' => 'area', 'label' => 'المنطقة المطلوبة', 'type' => 'text'],
             ['name' => 'budget', 'label' => 'الميزانية', 'type' => 'text'],
             ['name' => 'status', 'label' => 'الحالة', 'type' => 'select', 'required' => true, 'options' => array_map(
@@ -82,9 +82,9 @@ class LeadAdminController extends ResourceController
                 array_keys(Lead::SOURCES),
             )],
             ['name' => 'message', 'label' => 'رسالة العميل', 'type' => 'textarea',
-                'hint' => 'اللي كتبه العميل في الفورم'],
+                'hint' => 'ما كتبه العميل في النموذج'],
             ['name' => 'notes', 'label' => 'ملاحظات المتابعة', 'type' => 'textarea',
-                'hint' => 'للفريق بس — مش بيظهر للعميل'],
+                'hint' => 'للفريق فقط — لا يظهر للعميل'],
         ];
     }
 

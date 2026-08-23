@@ -9,7 +9,7 @@ const KEY = "bp.recently-viewed";
 const LIMIT = 8;
 
 const copy = {
-    ar: { title: "شوهدت مؤخرًا", desc: "الوحدات اللي فتحتها آخر مرة — كمّل من حيث ما وقفت." },
+    ar: { title: "شوهدت مؤخرًا", desc: "الوحدات التي فتحتها آخر مرة — أكمل من حيث توقّفت." },
     en: { title: "Recently viewed", desc: "The units you opened last — pick up where you left off." },
 };
 

@@ -16,9 +16,9 @@ const labels = {
         } as Record<string, string>,
         sale: "بيع",
         rent: "إيجار",
-        yes: "أيوه",
+        yes: "نعم",
         clear: "امسح الكل",
-        title: "نتايج البحث عن",
+        title: "نتائج البحث عن",
     },
     en: {
         keys: {

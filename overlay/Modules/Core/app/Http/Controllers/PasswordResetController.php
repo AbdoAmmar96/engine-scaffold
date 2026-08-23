@@ -35,12 +35,12 @@ class PasswordResetController extends Controller
         $data = $request->validate(
             ['email' => ['required', 'email', 'max:190']],
             [],
-            ['email' => 'الإيميل'],
+            ['email' => 'البريد الإلكتروني'],
         );
 
         $done = $locale === 'en'
             ? 'If that email has an account, a reset link is on its way ✅'
-            : 'لو الإيميل ده عليه حساب، لينك التغيير في طريقه ليه ✅';
+            : 'إن كان لهذا البريد حساب، فرابط التغيير في طريقه إليه ✅';
 
         // الحساب الموقوف مبياخدش لينك — تغيير الكلمة مش بيرجّعه
         $user = User::where('email', $data['email'])->first();
@@ -56,7 +56,7 @@ class PasswordResetController extends Controller
             throw ValidationException::withMessages([
                 'email' => $locale === 'en'
                     ? 'A link was just sent — check your inbox before asking for another.'
-                    : 'اتبعت لينك لسه — بص في بريدك قبل ما تطلب واحد تاني.',
+                    : 'أُرسل رابط منذ قليل — تفقّد بريدك قبل طلب رابط آخر.',
             ]);
         }
 
@@ -79,7 +79,7 @@ class PasswordResetController extends Controller
             'email' => ['required', 'email', 'max:190'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [], [
-            'email' => 'الإيميل',
+            'email' => 'البريد الإلكتروني',
             'password' => 'كلمة المرور',
         ]);
 
@@ -92,7 +92,7 @@ class PasswordResetController extends Controller
             throw ValidationException::withMessages([
                 'email' => $locale === 'en'
                     ? 'This link is invalid or has expired — ask for a new one.'
-                    : 'اللينك ده مش صالح أو انتهت صلاحيته — اطلب واحد جديد.',
+                    : 'هذا الرابط غير صالح أو انتهت صلاحيته — اطلب رابطًا جديدًا.',
             ]);
         }
 
@@ -100,6 +100,6 @@ class PasswordResetController extends Controller
             ->route('account.login', ['locale' => $locale])
             ->with('success', $locale === 'en'
                 ? 'Password changed ✅ — sign in with the new one.'
-                : 'اتغيّرت كلمة المرور ✅ — سجّل دخولك بيها.');
+                : 'تم تغيير كلمة المرور ✅ — سجّل دخولك بها.');
     }
 }

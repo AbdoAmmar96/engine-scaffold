@@ -66,7 +66,7 @@ class AccountReviewController extends Controller
 
         return back()->with('success', $locale === 'en'
             ? 'Thanks ✅ — we review it before it goes on the site.'
-            : 'شكرًا ✅ — بنراجعه قبل ما ينزل على الموقع.');
+            : 'شكرًا ✅ — نراجعه قبل نشره على الموقع.');
     }
 
     private function mine(Request $request): ?Review

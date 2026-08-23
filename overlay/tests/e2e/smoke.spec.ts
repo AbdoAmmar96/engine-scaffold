@@ -394,7 +394,7 @@ test('the add-property form shows its steps and refuses an empty submit', async 
     await expect(page.locator('fieldset')).toHaveCount(4);
 
     // الحقول المطلوبة بتتفحص في السيرفر — الفورم مالوش required عشان الرسالة تبقى عربية
-    await page.getByRole('button', { name: /ابعت العقار للمراجعة/ }).click();
+    await page.getByRole('button', { name: /أرسل العقار للمراجعة/ }).click();
 
     await expect(page.getByText('حقل الاسم مطلوب.').first()).toBeVisible({ timeout: 20_000 });
 });
@@ -418,10 +418,10 @@ test('asking for a reset link answers the same way for any address', async ({ pa
     await page.goto('/ar/forgot-password', { waitUntil: 'networkidle' });
 
     await page.getByRole('textbox').fill('nobody-at-all@example.com');
-    await page.getByRole('button', { name: /ابعتلي اللينك/ }).click();
+    await page.getByRole('button', { name: /أرسل الرابط/ }).click();
 
     // نفس الرد للإيميل الموجود والمش موجود — الصفحة مش أداة تعداد حسابات
-    await expect(page.getByText(/لينك التغيير في طريقه/)).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(/رابط التغيير في طريقه/)).toBeVisible({ timeout: 20_000 });
 });
 
 test('the listings area is behind the site login, not the admin one', async ({ page }) => {
@@ -458,7 +458,7 @@ test('a sponsored slot is labelled as one', async ({ page }) => {
 test('saving a search asks a guest to sign in first', async ({ page }) => {
     await page.goto('/ar/properties?purpose=sale', { waitUntil: 'networkidle' });
 
-    const cta = page.getByRole('link', { name: /سجّل دخولك عشان تحفظ البحث/ });
+    const cta = page.getByRole('link', { name: /سجّل دخولك لحفظ البحث/ });
 
     await expect(cta).toHaveAttribute('href', '/ar/login');
 });
@@ -466,7 +466,7 @@ test('saving a search asks a guest to sign in first', async ({ page }) => {
 test('the save-search button only appears once something is filtered', async ({ page }) => {
     await page.goto('/ar/properties', { waitUntil: 'networkidle' });
 
-    await expect(page.getByText(/احفظ البحث ده|سجّل دخولك عشان تحفظ البحث/)).toHaveCount(0);
+    await expect(page.getByText(/احفظ هذا البحث|سجّل دخولك لحفظ البحث/)).toHaveCount(0);
 });
 
 test('opening a unit remembers it in the browser', async ({ page }) => {

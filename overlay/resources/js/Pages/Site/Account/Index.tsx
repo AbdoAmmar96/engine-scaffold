@@ -10,13 +10,13 @@ const copy = {
         saved: "عقار محفوظ",
         listings: "وحدة معروضة",
         requests: "طلب مبعوت",
-        open: "طلب لسه مفتوح",
+        open: "طلب ما زال مفتوحًا",
         profile: "بياناتي",
         name: "الاسم",
-        email: "الإيميل",
-        phone: "الموبايل",
+        email: "البريد الإلكتروني",
+        phone: "رقم الهاتف",
         password: "كلمة مرور جديدة",
-        passwordHint: "سيبها فاضية لو مش عايز تغيّرها",
+        passwordHint: "اتركها فارغة إن لم ترغب في تغييرها",
         confirm: "تأكيد كلمة المرور",
         save: "حفظ",
         saving: "جارٍ الحفظ…",
@@ -94,7 +94,7 @@ export default function AccountIndex({
                     <p className="text-sm font-bold text-white/75">
                         {locale === "en"
                             ? "Nothing here yet — save a property and it shows up in your list."
-                            : "لسه مفيش حاجة — احفظ أي عقار وهتلاقيه هنا."}
+                            : "لا يوجد شيء بعد — احفظ أي عقار وستجده هنا."}
                     </p>
                     <Link
                         href={`/${locale}/properties`}

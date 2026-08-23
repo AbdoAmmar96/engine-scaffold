@@ -61,7 +61,7 @@ trait OwnedResource
             'name' => $this->ownerColumn(),
             'label' => $label,
             'type' => 'select',
-            'hint' => 'سيبه فاضي لو الصف تبع المنصّة نفسها',
+            'hint' => 'اتركه فارغًا إن كان الصف تابعًا للمنصّة نفسها',
             'options' => self::ownerOptions(),
         ]];
     }

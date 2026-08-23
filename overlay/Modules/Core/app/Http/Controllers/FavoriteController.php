@@ -22,7 +22,7 @@ class FavoriteController extends Controller
         $added = $result['attached'] !== [];
 
         return back()->with('success', $added
-            ? ($locale === 'en' ? 'Saved to your list ✅' : 'اتحفظت في قائمتك ✅')
-            : ($locale === 'en' ? 'Removed from your list' : 'اتشالت من قائمتك'));
+            ? ($locale === 'en' ? 'Saved to your list ✅' : 'أُضيفت إلى قائمتك ✅')
+            : ($locale === 'en' ? 'Removed from your list' : 'أُزيلت من قائمتك'));
     }
 }

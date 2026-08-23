@@ -259,7 +259,7 @@ class Catalog
                 'roof' => 'روف', 'dressing' => 'غرفة ملابس'];
 
         $shown = match (self::FILTER_SCHEMA[$key]) {
-            'bool' => $en ? 'yes' : 'أيوه',
+            'bool' => $en ? 'yes' : 'نعم',
             'purpose' => $value === 'rent' ? ($en ? 'Rent' : 'إيجار') : ($en ? 'Sale' : 'بيع'),
             'category' => Property::CATEGORIES[$value][$en ? 'en' : 'ar'] ?? $value,
             'finishing' => Property::FINISHING[$value][$en ? 'en' : 'ar'] ?? $value,

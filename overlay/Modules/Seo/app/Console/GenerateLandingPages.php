@@ -20,8 +20,8 @@ use Modules\Seo\Models\LandingPage;
 class GenerateLandingPages extends Command
 {
     protected $signature = 'seo:landing-pages
-        {--min=1 : أقل عدد وحدات عشان التركيبة تستاهل صفحة}
-        {--prune : امسح الصفحات الفاضية اللي محدش كتب فيها نص}';
+        {--min=1 : أقل عدد وحدات لتستحق التركيبة صفحة}
+        {--prune : امسح الصفحات الفارغة التي لم يكتب فيها أحد نصًا}';
 
     protected $description = 'توليد صفحات الهبوط (نوع × غرض × منطقة) من الوحدات المنشورة';
 
@@ -68,11 +68,11 @@ class GenerateLandingPages extends Command
         [$off, $pruned] = $this->retire($kept, $min);
 
         $this->info(sprintf(
-            '  صفحات هبوط: %d جديدة · %d محدّثة · %d اتوقفت%s',
+            '  صفحات هبوط: %d جديدة · %d محدّثة · %d موقوفة%s',
             $created,
             $updated,
             $off,
-            $pruned ? " · {$pruned} اتمسحت" : '',
+            $pruned ? " · {$pruned} محذوفة" : '',
         ));
 
         return self::SUCCESS;

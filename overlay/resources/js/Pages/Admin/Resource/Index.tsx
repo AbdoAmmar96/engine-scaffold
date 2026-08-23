@@ -144,7 +144,7 @@ export default function ResourceIndex({
                 columns={columns}
                 paginator={rows}
                 searchPlaceholder={`ابحث في ${resource.labels.plural}…`}
-                empty={`مفيش ${resource.labels.plural} لسه — ابدأ بإضافة ${resource.labels.singular}.`}
+                empty={`القائمة فارغة — ابدأ بإضافة ${resource.labels.singular}.`}
                 actions={(row) => (
                     <div className="flex items-center justify-end gap-1">
                         <Link

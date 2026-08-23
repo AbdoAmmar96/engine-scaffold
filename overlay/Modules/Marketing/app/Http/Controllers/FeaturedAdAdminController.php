@@ -91,28 +91,28 @@ class FeaturedAdAdminController extends ResourceController
                     ->values()->all()],
 
             ['name' => 'property_id', 'label' => 'الوحدة', 'type' => 'select',
-                'hint' => 'اختار وحدة أو مشروع — مش الاتنين',
+                'hint' => 'اختر وحدة أو مشروعًا — لا الاثنين',
                 'options' => $this->propertyOptions()],
             ['name' => 'compound_id', 'label' => 'المشروع', 'type' => 'select',
                 'options' => $this->compoundOptions()],
 
             ['name' => 'starts_at', 'label' => 'يبدأ في', 'type' => 'date',
-                'hint' => 'سيبه فاضي يشتغل من دلوقتي'],
+                'hint' => 'اتركه فارغًا ليبدأ من الآن'],
             ['name' => 'ends_at', 'label' => 'ينتهي في', 'type' => 'date',
-                'hint' => 'سيبه فاضي يفضل شغّال لحد ما توقفه بإيدك'],
+                'hint' => 'اتركه فارغًا ليظل نشطًا حتى توقفه يدويًا'],
 
             ['name' => 'priority', 'label' => 'الأولوية', 'type' => 'number',
-                'hint' => 'الأعلى بيتعرض الأول لما يكون فيه أكتر من إعلان في نفس الموضع'],
+                'hint' => 'الأعلى يُعرض أولًا عند وجود أكثر من إعلان في نفس الموضع'],
 
             ['name' => 'status', 'label' => 'الحالة', 'type' => 'select', 'required' => true,
                 'options' => collect(FeaturedAd::STATUSES)
                     ->map(fn (array $s, string $key) => ['value' => $key, 'label' => $s['label']])
                     ->values()->all()],
             ['name' => 'rejection_reason', 'label' => 'سبب الرفض', 'type' => 'text',
-                'hint' => 'بيتعرض لصاحب الطلب'],
+                'hint' => 'يُعرض لصاحب الطلب'],
 
             ['name' => 'is_active', 'label' => 'مفعّلة', 'type' => 'toggle',
-                'hint' => 'إيقاف مؤقت من غير ما تغيّر التواريخ'],
+                'hint' => 'إيقاف مؤقت دون تغيير التواريخ'],
         ];
     }
 
@@ -143,8 +143,8 @@ class FeaturedAdAdminController extends ResourceController
         if ($property === $compound) {
             throw ValidationException::withMessages([
                 'property_id' => $property
-                    ? 'اختار وحدة أو مشروع — مش الاتنين.'
-                    : 'لازم تختار وحدة أو مشروع.',
+                    ? 'اختر وحدة أو مشروعًا — لا الاثنين.'
+                    : 'يجب اختيار وحدة أو مشروع.',
             ]);
         }
 
@@ -173,7 +173,7 @@ class FeaturedAdAdminController extends ResourceController
 
     private function window(FeaturedAd $ad): string
     {
-        $from = $ad->starts_at?->format('Y/m/d') ?: 'من دلوقتي';
+        $from = $ad->starts_at?->format('Y/m/d') ?: 'من الآن';
         $to = $ad->ends_at?->format('Y/m/d') ?: 'مفتوح';
 
         return "{$from} ← {$to}";

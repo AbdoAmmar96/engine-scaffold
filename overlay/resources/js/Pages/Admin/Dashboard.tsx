@@ -11,12 +11,12 @@ type QuickLink = { href: string; label: string; desc: string; icon: typeof Users
 const quickLinks: QuickLink[] = [
     { href: "/admin/settings/theme", label: "الهوية والألوان", desc: "غيّر ألوان وخطوط الموقع كله لحظيًا", icon: Palette, perm: ["manage settings"] },
     { href: "/admin/settings/general", label: "الإعدادات العامة", desc: "اسم المنصة والوصف التعريفي", icon: Settings, perm: ["manage settings"] },
-    { href: "/admin/settings/contact", label: "بيانات التواصل", desc: "الواتساب والتليفون والإيميل", icon: Users, perm: ["manage settings"] },
+    { href: "/admin/settings/contact", label: "بيانات التواصل", desc: "الواتساب والهاتف والبريد الإلكتروني", icon: Users, perm: ["manage settings"] },
     { href: "/admin/settings/social", label: "السوشيال ميديا", desc: "روابط منصات التواصل", icon: Share2, perm: ["manage settings"] },
     { href: "/admin/properties", label: "العقارات", desc: "أضف وحدة أو عدّل بياناتها", icon: Building2, perm: ["manage catalog", "manage listings"] },
     { href: "/admin/compounds", label: "الكمبوندات", desc: "المشاريع وأنظمة السداد", icon: Building2, perm: ["manage catalog", "manage projects"] },
     { href: "/admin/posts", label: "المدونة", desc: "اكتب مقال جديد أو عدّل مقال", icon: Newspaper, perm: ["manage content"] },
-    { href: "/admin/leads", label: "الطلبات", desc: "الطلبات الجاية من فورم الموقع", icon: Inbox, perm: ["manage leads"] },
+    { href: "/admin/leads", label: "الطلبات", desc: "الطلبات الواردة من نموذج الموقع", icon: Inbox, perm: ["manage leads"] },
     { href: "/admin/users", label: "المستخدمون", desc: "الحسابات والأدوار والصلاحيات", icon: ShieldCheck, perm: ["manage users"] },
 ];
 
@@ -28,11 +28,11 @@ type Phase = { name: string; status: "done" | "partial" | "todo"; note?: string 
 
 const phases: Phase[] = [
     { name: "المرحلة 1 — التأسيس + Theme Engine", status: "done" },
-    { name: "المرحلة 2 — Media Manager + المنيوهات + الأدوار", status: "done" },
+    { name: "المرحلة 2 — Media Manager + القوائم + الأدوار", status: "done" },
     {
         name: "المرحلة 3 — Block Builder + أنماط الهيرو",
         status: "partial",
-        note: "أنماط الهيرو خلصت · فاضل الـ Block Builder",
+        note: "أنماط الهيرو اكتملت · تبقّى الـ Block Builder",
     },
     { name: "المرحلة 4 — العقارات والكمبوندات والمطوّرون والمناطق", status: "done" },
     { name: "المرحلة 5 — المستخدمون والطلبات والمدونة", status: "done" },
@@ -81,16 +81,16 @@ function SchedulerAlert({ status }: { status: SchedulerStatus }) {
                 <AlarmClockOff size={20} className="mt-0.5 shrink-0 text-amber-700" />
                 <div className="min-w-0 flex-1">
                     <p className="font-extrabold text-amber-900">
-                        {status.ever_ran ? "الجدولة واقفة" : "الجدولة لسه ما اشتغلتش"}
+                        {status.ever_ran ? "الجدولة متوقّفة" : "الجدولة لم تعمل بعد"}
                     </p>
                     <p className="mt-1 text-sm text-amber-800">
                         {status.ever_ran && status.minutes !== null
                             ? `آخر تشغيل من ${sinceLabel(status.minutes)}. `
-                            : "مفيش cron متضاف على السيرفر. "}
-                        تنبيهات البحث المحفوظ مش بتوصل، وصفحات الهبوط مش بتتحدّث.
+                            : "لا يوجد cron مُضاف على الخادم. "}
+                        تنبيهات البحث المحفوظ لا تصل، وصفحات الهبوط لا تتحدّث.
                     </p>
                     <p className="mt-3 text-xs font-bold text-amber-900">
-                        من لوحة الاستضافة ← Cron Jobs ← كل دقيقة، وحطّ السطر ده:
+                        من لوحة الاستضافة ← Cron Jobs ← كل دقيقة، وضع هذا السطر:
                     </p>
                     <div className="mt-2 flex items-center gap-2">
                         <code
@@ -105,7 +105,7 @@ function SchedulerAlert({ status }: { status: SchedulerStatus }) {
                             className="flex shrink-0 items-center gap-1.5 rounded-xl border border-amber-300 bg-white px-3 py-2 text-xs font-bold text-amber-900 transition hover:bg-amber-100"
                         >
                             {copied ? <Check size={14} /> : <Copy size={14} />}
-                            {copied ? "اتنسخ" : "انسخ"}
+                            {copied ? "تم النسخ" : "انسخ"}
                         </button>
                     </div>
                 </div>
@@ -139,13 +139,13 @@ export default function Dashboard({ role, stats, scheduler }: { role: Role; stat
                 <span className="text-xs text-gray-500">{role.note}</span>
                 {role.scoped && (
                     <span className="rounded-full bg-amber-100 px-3 py-1 text-[11px] font-extrabold text-amber-700">
-                        بتشوف بياناتك بس
+                        تظهر لك بياناتك فقط
                     </span>
                 )}
                 {scheduler?.healthy && (
                     <span className="ms-auto flex items-center gap-1.5 text-[11px] font-bold text-gray-400">
                         <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                        الجدولة شغّالة
+                        الجدولة تعمل
                     </span>
                 )}
             </div>

@@ -165,7 +165,7 @@ export default function AdminLayout({ title, children }: { title: string; childr
                     <button
                         type="button"
                         onClick={() => setOpen(false)}
-                        aria-label="اقفل القايمة"
+                        aria-label="إغلاق القائمة"
                         className="rounded-lg p-1 text-gray-400 transition hover:bg-white/10 hover:text-white lg:hidden"
                     >
                         <X size={18} />
@@ -205,7 +205,7 @@ export default function AdminLayout({ title, children }: { title: string; childr
                         <button
                             type="button"
                             onClick={() => setOpen(true)}
-                            aria-label="افتح القايمة"
+                            aria-label="فتح القائمة"
                             aria-expanded={open}
                             className="-ms-1 rounded-lg p-2 text-gray-600 transition hover:bg-gray-100 hover:text-secondary lg:hidden"
                         >

@@ -82,7 +82,7 @@ class AccountPropertyController extends Controller
             ->route('account.properties', ['locale' => $locale])
             ->with('success', $locale === 'en'
                 ? 'Added ✅ — it goes live once our team reviews it.'
-                : 'اتضافت ✅ — هتنزل على الموقع بعد ما الفريق يراجعها.');
+                : 'تمت الإضافة ✅ — تُنشر على الموقع بعد مراجعة الفريق لها.');
     }
 
     public function update(Request $request, string $locale, int $id): RedirectResponse
@@ -102,7 +102,7 @@ class AccountPropertyController extends Controller
             ->route('account.properties', ['locale' => $locale])
             ->with('success', $locale === 'en'
                 ? 'Saved ✅ — it returns to review before it goes live again.'
-                : 'اتحفظت ✅ — بترجع للمراجعة قبل ما تنزل تاني.');
+                : 'تم الحفظ ✅ — تعود للمراجعة قبل نشرها مرة أخرى.');
     }
 
     /** إخفاء/إظهار من صاحبها — مستقل عن حالة المراجعة */
@@ -114,7 +114,7 @@ class AccountPropertyController extends Controller
 
         return back()->with('success', $property->is_active
             ? ($locale === 'en' ? 'Listing is showing again ✅' : 'الوحدة رجعت تظهر ✅')
-            : ($locale === 'en' ? 'Listing hidden' : 'الوحدة اتخفت'));
+            : ($locale === 'en' ? 'Listing hidden' : 'تم إخفاء الوحدة'));
     }
 
     /**
@@ -130,7 +130,7 @@ class AccountPropertyController extends Controller
         if ($property->status !== 'published') {
             return back()->with('error', $locale === 'en'
                 ? 'Only a live listing can be promoted.'
-                : 'الترقية للوحدات المنشورة بس.');
+                : 'الترقية متاحة للوحدات المنشورة فقط.');
         }
 
         $open = FeaturedAd::where('property_id', $property->id)
@@ -140,7 +140,7 @@ class AccountPropertyController extends Controller
         if ($open) {
             return back()->with('error', $locale === 'en'
                 ? 'There is already an open request for this listing.'
-                : 'فيه طلب مفتوح على الوحدة دي بالفعل.');
+                : 'يوجد طلب مفتوح على هذه الوحدة بالفعل.');
         }
 
         FeaturedAd::create([
@@ -152,7 +152,7 @@ class AccountPropertyController extends Controller
 
         return back()->with('success', $locale === 'en'
             ? 'Request sent ✅ — our team will get back to you with the slot and the price.'
-            : 'اتبعت الطلب ✅ — الفريق هيرجعلك بالمساحة والسعر.');
+            : 'تم إرسال الطلب ✅ — سيعود إليك الفريق بالمساحة والسعر.');
     }
 
     public function destroy(Request $request, string $locale, int $id): RedirectResponse
@@ -161,7 +161,7 @@ class AccountPropertyController extends Controller
 
         return redirect()
             ->route('account.properties', ['locale' => $locale])
-            ->with('success', $locale === 'en' ? 'Deleted' : 'اتمسحت');
+            ->with('success', $locale === 'en' ? 'Deleted' : 'تم الحذف');
     }
 
     /* ------------------------------------------------------------------ */

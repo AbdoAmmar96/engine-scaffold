@@ -46,8 +46,8 @@ class DeveloperAdminController extends ResourceController
             ['name' => 'name',      'label' => 'الاسم (عربي)',    'type' => 'text', 'required' => true],
             ['name' => 'name_en',   'label' => 'الاسم (إنجليزي)', 'type' => 'text'],
             ['name' => 'slug',      'label' => 'رابط الصفحة',     'type' => 'text',
-                'hint' => 'سيبه فاضي يتولّد من الاسم — /ar/developers/<الرابط>'],
-            ['name' => 'about',     'label' => 'نبذة (عربي)',     'type' => 'textarea', 'hint' => 'فقرة في كل سطر — بتتعرض في صفحة المطوّر'],
+                'hint' => 'اتركه فارغًا ليتولّد من الاسم — /ar/developers/<الرابط>'],
+            ['name' => 'about',     'label' => 'نبذة (عربي)',     'type' => 'textarea', 'hint' => 'فقرة في كل سطر — تُعرض في صفحة المطوّر'],
             ['name' => 'about_en',  'label' => 'نبذة (إنجليزي)',  'type' => 'textarea'],
             ['name' => 'logo',      'label' => 'اللوجو',          'type' => 'image'],
             ['name' => 'cover',     'label' => 'غلاف الصفحة',     'type' => 'image', 'hint' => 'خلفية هيرو صفحة المطوّر'],
@@ -93,7 +93,7 @@ class DeveloperAdminController extends ResourceController
         $projects = $model->compounds()->count();
 
         return $projects > 0
-            ? "المطوّر ده عليه {$projects} مشروع — انقلهم لمطوّر تاني الأول."
+            ? "هذا المطوّر لديه {$projects} مشروع — انقلها إلى مطوّر آخر أولًا."
             : null;
     }
 }

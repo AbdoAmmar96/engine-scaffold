@@ -73,7 +73,7 @@ class LandingPageAdminController extends ResourceController
             ['name' => 'type', 'label' => 'النوع', 'type' => 'select', 'options' => array_map(
                 fn ($t) => ['value' => $t, 'label' => $t],
                 array_keys(Property::TYPE_PLURALS),
-            ), 'hint' => 'سيبه فاضي لصفحة منطقة (كل الأنواع)'],
+            ), 'hint' => 'اتركه فارغًا لصفحة منطقة (كل الأنواع)'],
             ['name' => 'purpose', 'label' => 'الغرض', 'type' => 'select', 'options' => [
                 ['value' => 'sale', 'label' => 'بيع'],
                 ['value' => 'rent', 'label' => 'إيجار'],
@@ -84,20 +84,20 @@ class LandingPageAdminController extends ResourceController
                     'label' => $l->name,
                 ])->all()],
             ['name' => 'slug', 'label' => 'الرابط', 'type' => 'text',
-                'hint' => 'سيبه فاضي يتولّد من التركيبة — /ar/properties/<الرابط>. غيّره وأنت واخد بالك: الرابط القديم بيبقى 404.'],
+                'hint' => 'اتركه فارغًا ليتولّد من التركيبة — /ar/properties/<الرابط>. غيّره بحذر: الرابط القديم يصبح 404.'],
 
-            ['name' => 'h1', 'label' => 'العنوان (عربي)', 'type' => 'text', 'hint' => 'فاضي = يتولّد من التركيبة'],
+            ['name' => 'h1', 'label' => 'العنوان (عربي)', 'type' => 'text', 'hint' => 'فارغ = يتولّد من التركيبة'],
             ['name' => 'h1_en', 'label' => 'العنوان (إنجليزي)', 'type' => 'text'],
-            ['name' => 'intro', 'label' => 'المقدمة (عربي)', 'type' => 'textarea', 'hint' => 'الفقرة اللي تحت العنوان'],
+            ['name' => 'intro', 'label' => 'المقدمة (عربي)', 'type' => 'textarea', 'hint' => 'الفقرة التي تحت العنوان'],
             ['name' => 'intro_en', 'label' => 'المقدمة (إنجليزي)', 'type' => 'textarea'],
-            ['name' => 'meta_title', 'label' => 'عنوان الميتا (عربي)', 'type' => 'text', 'hint' => 'فاضي = نفس العنوان'],
+            ['name' => 'meta_title', 'label' => 'عنوان الميتا (عربي)', 'type' => 'text', 'hint' => 'فارغ = نفس العنوان'],
             ['name' => 'meta_title_en', 'label' => 'عنوان الميتا (إنجليزي)', 'type' => 'text'],
-            ['name' => 'meta_description', 'label' => 'وصف الميتا (عربي)', 'type' => 'textarea', 'hint' => 'جوجل بيعرض أول ١٦٠ حرف تقريبًا'],
+            ['name' => 'meta_description', 'label' => 'وصف الميتا (عربي)', 'type' => 'textarea', 'hint' => 'جوجل يعرض أول ١٦٠ حرفًا تقريبًا'],
             ['name' => 'meta_description_en', 'label' => 'وصف الميتا (إنجليزي)', 'type' => 'textarea'],
 
             ['name' => 'sort', 'label' => 'الترتيب', 'type' => 'number'],
             ['name' => 'is_active', 'label' => 'مفعّلة', 'type' => 'toggle',
-                'hint' => 'المقفولة بترجع 404 وبتختفي من خريطة الموقع'],
+                'hint' => 'المغلقة تُرجع 404 وتختفي من خريطة الموقع'],
         ];
     }
 
@@ -110,7 +110,7 @@ class LandingPageAdminController extends ResourceController
             'slug' => ['nullable', 'string', 'max:180', 'regex:/^[\p{L}\p{N}-]+$/u', function (string $attribute, mixed $value, callable $fail) use ($id) {
                 // التفرّد على الوحدات وصفحات الهبوط سوا — بيتشاركوا /properties/
                 if (SharedSlugSpace::taken((string) $value, 'seo_landing_pages', $id)) {
-                    $fail('الرابط ده مستخدم في وحدة أو صفحة تانية.');
+                    $fail('هذا الرابط مستخدم في وحدة أو صفحة أخرى.');
                 }
             }],
             'intro' => ['nullable', 'string', 'max:5000'],
@@ -152,7 +152,7 @@ class LandingPageAdminController extends ResourceController
 
         if ($exists) {
             throw ValidationException::withMessages([
-                'type' => 'فيه صفحة بنفس التركيبة (نوع + غرض + منطقة) موجودة أصلًا.',
+                'type' => 'توجد صفحة بنفس التركيبة (نوع + غرض + منطقة) بالفعل.',
             ]);
         }
     }

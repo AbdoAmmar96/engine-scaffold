@@ -70,7 +70,7 @@ export default function Reports({
         const max = Math.max(1, ...rows.map((r) => r.value));
 
         if (rows.length === 0) {
-            return <p className="py-6 text-center text-sm text-gray-400">لسه مفيش بيانات كفاية</p>;
+            return <p className="py-6 text-center text-sm text-gray-400">لا توجد بيانات كافية بعد</p>;
         }
 
         return (
@@ -121,7 +121,7 @@ export default function Reports({
 
                 <Card title={`الطلبات — آخر ${days} يوم`}>
                     {daily.every((d) => d.value === 0) ? (
-                        <p className="py-6 text-center text-sm text-gray-400">مفيش طلبات في الفترة دي</p>
+                        <p className="py-6 text-center text-sm text-gray-400">لا توجد طلبات في هذه الفترة</p>
                     ) : (
                         <div className="relative">
                             <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="h-40 w-full" role="img"
@@ -182,11 +182,11 @@ export default function Reports({
                 <div className="grid gap-6 lg:grid-cols-2">
                     <Card title="مصادر الطلبات">{bars(leadsBySource)}</Card>
                     <Card title="مراحل المتابعة">{bars(leadsByStatus, true)}</Card>
-                    <Card title="أكتر المناطق طلبًا">{bars(topAreas)}</Card>
+                    <Card title="أكثر المناطق طلبًا">{bars(topAreas)}</Card>
 
-                    <Card title="أكتر الوحدات مشاهدة">
+                    <Card title="أكثر الوحدات مشاهدة">
                         {topProperties.length === 0 ? (
-                            <p className="py-6 text-center text-sm text-gray-400">لسه مفيش وحدات منشورة</p>
+                            <p className="py-6 text-center text-sm text-gray-400">لا توجد وحدات منشورة بعد</p>
                         ) : (
                             <div className="overflow-x-auto">
                             <table className="w-full text-[12px]">
@@ -217,7 +217,7 @@ export default function Reports({
 
                 <Card title="أداء المساحات الإعلانية">
                     {ads.length === 0 ? (
-                        <p className="py-6 text-center text-sm text-gray-400">مفيش مساحات إعلانية لسه</p>
+                        <p className="py-6 text-center text-sm text-gray-400">لا توجد مساحات إعلانية بعد</p>
                     ) : (
                         <div className="overflow-x-auto">
                         <table className="w-full text-[12px]">

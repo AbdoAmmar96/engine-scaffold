@@ -6,14 +6,14 @@ import type { SharedProps } from "@/lib/types";
 const copy = {
     ar: {
         title: "تسجيل الدخول",
-        desc: "ادخل على حسابك عشان تشوف العقارات اللي حفظتها وتتابع طلباتك.",
-        email: "الإيميل",
+        desc: "ادخل إلى حسابك لعرض العقارات التي حفظتها ومتابعة طلباتك.",
+        email: "البريد الإلكتروني",
         password: "كلمة المرور",
-        remember: "فضّلني مسجّل",
+        remember: "تذكّرني",
         submit: "دخول",
         sending: "جارٍ الدخول…",
-        noAccount: "لسه معندكش حساب؟",
-        register: "اعمل حساب",
+        noAccount: "ليس لديك حساب بعد؟",
+        register: "أنشئ حسابًا",
         forgot: "نسيت كلمة المرور؟",
     },
     en: {

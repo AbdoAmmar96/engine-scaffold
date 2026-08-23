@@ -78,17 +78,17 @@ export default function Activity({
                 </div>
 
                 {rows.data.length === 0 ? (
-                    <p className="py-10 text-center text-sm text-gray-400">مفيش نشاط مسجّل بالفلاتر دي</p>
+                    <p className="py-10 text-center text-sm text-gray-400">لا يوجد نشاط مسجّل بهذه الفلاتر</p>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full min-w-[46rem] text-[13px]">
                             <thead>
                                 <tr className="text-gray-500">
-                                    <th className="pb-2 text-start font-bold">مين</th>
-                                    <th className="pb-2 text-start font-bold">عمل إيه</th>
-                                    <th className="pb-2 text-start font-bold">على إيه</th>
+                                    <th className="pb-2 text-start font-bold">المستخدم</th>
+                                    <th className="pb-2 text-start font-bold">الإجراء</th>
+                                    <th className="pb-2 text-start font-bold">العنصر</th>
                                     <th className="pb-2 text-start font-bold">الحقول</th>
-                                    <th className="pb-2 text-start font-bold">إمتى</th>
+                                    <th className="pb-2 text-start font-bold">التاريخ</th>
                                 </tr>
                             </thead>
                             <tbody>

@@ -145,8 +145,8 @@ export default function Edit({ group, groupLabel, groups, values, labels, types,
 
                     {group === "theme" && (
                         <p className="mt-6 rounded-xl bg-primary/10 p-4 text-xs font-bold leading-relaxed text-secondary">
-                            ⚡ أي تغيير هنا بينطبق على الموقع كله فور الحفظ — من غير أي build. افتح الموقع في تاب تاني
-                            واعمل ريفريش بعد الحفظ وشوف بنفسك.
+                            ⚡ أي تغيير هنا يُطبَّق على الموقع كله فور الحفظ — دون أي build. افتح الموقع في تبويب آخر
+                            وحدِّث الصفحة بعد الحفظ لترى بنفسك.
                         </p>
                     )}
                 </Card>

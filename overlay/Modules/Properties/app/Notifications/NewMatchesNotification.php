@@ -38,7 +38,7 @@ class NewMatchesNotification extends Notification
         $mail = (new MailMessage)
             ->subject("{$count} وحدة جديدة في «{$this->search->name}» — {$site}")
             ->greeting('أهلًا،')
-            ->line("نزل {$count} عرض جديد مطابق للبحث اللي حافظه باسم «{$this->search->name}».");
+            ->line("توفّر {$count} عرض جديد مطابق للبحث الذي حفظته باسم «{$this->search->name}».");
 
         foreach ($this->matches as $property) {
             $mail->line(sprintf(
@@ -51,8 +51,8 @@ class NewMatchesNotification extends Notification
         }
 
         return $mail
-            ->action('شوف النتايج كلها', url($this->search->url($this->lang)))
-            ->line('لو مش عايز التنبيه ده، تقدر توقفه من «البحث المحفوظ» في حسابك.')
+            ->action('اعرض كل النتائج', url($this->search->url($this->lang)))
+            ->line('إن لم ترغب في هذا التنبيه، يمكنك إيقافه من «البحث المحفوظ» في حسابك.')
             ->salutation("تحياتنا، {$site}");
     }
 }

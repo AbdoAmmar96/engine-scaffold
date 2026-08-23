@@ -24,7 +24,7 @@ class MenuAdminController extends ResourceController
 
     protected function labels(): array
     {
-        return ['plural' => 'القوائم', 'singular' => 'لينك'];
+        return ['plural' => 'القوائم', 'singular' => 'رابط'];
     }
 
     protected function searchable(): array
@@ -50,17 +50,17 @@ class MenuAdminController extends ResourceController
             ['name' => 'label', 'label' => 'الاسم (عربي)', 'type' => 'text', 'required' => true],
             ['name' => 'label_en', 'label' => 'الاسم (إنجليزي)', 'type' => 'text'],
             ['name' => 'url', 'label' => 'الرابط', 'type' => 'text',
-                'hint' => 'مسار داخلي زي /properties (اللغة بتتحط لوحدها)، أو رابط كامل يبدأ بـ https://. سيبه فاضي لو ده عنوان قائمة منسدلة.'],
-            ['name' => 'parent_id', 'label' => 'تحت لينك', 'type' => 'select',
-                'hint' => 'سيبه فاضي للينك رئيسي — اختيار أب بيحطّه جوه قايمة منسدلة',
+                'hint' => 'مسار داخلي مثل /properties (تُضاف اللغة تلقائيًا)، أو رابط كامل يبدأ بـ https://. اتركه فارغًا إن كان هذا عنوان قائمة منسدلة.'],
+            ['name' => 'parent_id', 'label' => 'تحت رابط', 'type' => 'select',
+                'hint' => 'اتركه فارغًا للرابط الرئيسي — اختيار أب يضعه داخل قائمة منسدلة',
                 'options' => $this->parentOptions()],
             ['name' => 'location', 'label' => 'المكان', 'type' => 'select', 'required' => true, 'options' => array_map(
                 fn ($label, $value) => ['value' => $value, 'label' => $label],
                 array_values(MenuItem::LOCATIONS),
                 array_keys(MenuItem::LOCATIONS),
             )],
-            ['name' => 'new_tab', 'label' => 'يفتح في تاب جديد', 'type' => 'toggle'],
-            ['name' => 'sort', 'label' => 'الترتيب', 'type' => 'number', 'hint' => 'الأقل بيظهر الأول'],
+            ['name' => 'new_tab', 'label' => 'يفتح في تبويب جديد', 'type' => 'toggle'],
+            ['name' => 'sort', 'label' => 'الترتيب', 'type' => 'number', 'hint' => 'الأقل يظهر أولًا'],
             ['name' => 'is_active', 'label' => 'ظاهر', 'type' => 'toggle'],
         ];
     }

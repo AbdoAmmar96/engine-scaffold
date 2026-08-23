@@ -52,7 +52,7 @@ export function MediaGrid({
     };
 
     const remove = async (file: MediaFile) => {
-        if (!confirm(`متأكد من حذف "${file.name}"؟ أي مكان بيستخدم الملف ده هيفضى.`)) return;
+        if (!confirm(`متأكد من حذف "${file.name}"؟ أي مكان يستخدم هذا الملف سيصبح فارغًا.`)) return;
 
         setBusy(true);
 
@@ -111,7 +111,7 @@ export function MediaGrid({
                 <p className="py-10 text-center text-sm text-gray-400">جارٍ التحميل…</p>
             ) : files.length === 0 ? (
                 <p className="rounded-2xl border border-dashed border-gray-200 py-10 text-center text-sm text-gray-400">
-                    المكتبة فاضية — ارفع أول ملف.
+                    المكتبة فارغة — ارفع أول ملف.
                 </p>
             ) : (
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -197,7 +197,7 @@ export default function MediaPicker({
             <div className="w-full max-w-4xl rounded-2xl bg-white shadow-xl">
                 <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
                     <h2 className="text-base font-extrabold text-gray-900">
-                        {multiple ? "اختر صور من المكتبة — تقدر تختار أكتر من واحدة" : "اختر من مكتبة الميديا"}
+                        {multiple ? "اختر صورًا من المكتبة — يمكنك اختيار أكثر من واحدة" : "اختر من مكتبة الميديا"}
                     </h2>
                     <button
                         type="button"

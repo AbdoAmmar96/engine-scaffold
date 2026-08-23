@@ -52,7 +52,7 @@ class SavedSearchController extends Controller
         if ($user->savedSearches()->count() >= SavedSearch::LIMIT) {
             return back()->with('error', $locale === 'en'
                 ? 'You reached the saved-search limit — delete one first.'
-                : 'وصلت لأقصى عدد بحوث محفوظة — امسح واحد الأول.');
+                : 'وصلت إلى أقصى عدد للبحوث المحفوظة — احذف واحدًا أولًا.');
         }
 
         $filters = array_filter(Catalog::filters($request), fn ($v) => $v !== '' && $v !== null);
@@ -60,7 +60,7 @@ class SavedSearchController extends Controller
         if ($filters === []) {
             return back()->with('error', $locale === 'en'
                 ? 'Pick at least one filter before saving the search.'
-                : 'اختار فلتر واحد على الأقل قبل ما تحفظ البحث.');
+                : 'اختر فلترًا واحدًا على الأقل قبل حفظ البحث.');
         }
 
         $search = new SavedSearch([
@@ -74,7 +74,7 @@ class SavedSearchController extends Controller
 
         return back()->with('success', $locale === 'en'
             ? 'Search saved ✅ — we\'ll email you when something matches.'
-            : 'اتحفظ البحث ✅ — هنبعتلك إيميل أول ما ينزل اللي يطابقه.');
+            : 'تم حفظ البحث ✅ — سنرسل إليك بريدًا فور توفّر ما يطابقه.');
     }
 
     public function update(Request $request, string $locale, int $id): RedirectResponse
@@ -88,14 +88,14 @@ class SavedSearchController extends Controller
 
         $search->update($data);
 
-        return back()->with('success', $locale === 'en' ? 'Saved ✅' : 'اتحفظ ✅');
+        return back()->with('success', $locale === 'en' ? 'Saved ✅' : 'تم الحفظ ✅');
     }
 
     public function destroy(Request $request, string $locale, int $id): RedirectResponse
     {
         $this->find($request, $id)->delete();
 
-        return back()->with('success', $locale === 'en' ? 'Deleted' : 'اتمسح');
+        return back()->with('success', $locale === 'en' ? 'Deleted' : 'تم الحذف');
     }
 
     /** 404 لو مش بتاعه — البحث المحفوظ بيان شخصي */

@@ -23,7 +23,7 @@ class DeveloperPageController extends Controller
                 $title,
                 $locale === 'en'
                     ? 'Developers we work with, their projects and the areas they build in.'
-                    : 'المطوّرون اللي بنشتغل معاهم، مشاريعهم، والمناطق اللي بيبنوا فيها.',
+                    : 'المطوّرون الذين نعمل معهم، ومشاريعهم، والمناطق التي يبنون فيها.',
                 null,
                 'website',
                 [

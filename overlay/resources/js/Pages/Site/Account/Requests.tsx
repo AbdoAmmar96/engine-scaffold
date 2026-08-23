@@ -63,7 +63,7 @@ export default function Requests({ requests }: { requests: AccountRequest[] }) {
                     </span>
                     <p className="mt-4 text-sm text-muted">
                         {ar
-                            ? "مبعتش أي طلب لسه — اطلب معاينة من صفحة أي وحدة وهتلاقيه هنا."
+                            ? "لم ترسل أي طلب بعد — اطلب معاينة من صفحة أي وحدة وستجده هنا."
                             : "You haven't sent any request yet — ask for a viewing from any unit page."}
                     </p>
                     <Link

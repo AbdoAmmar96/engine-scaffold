@@ -45,7 +45,7 @@ class AboutController extends Controller
                 $title,
                 $locale === 'en'
                     ? 'Who we are, how we work, and why we say no when a unit does not fit.'
-                    : 'مين إحنا، وبنشتغل إزاي، وليه بنقول «لأ» لما الوحدة مش مناسبة.',
+                    : 'من نحن، وكيف نعمل، ولماذا نقول «لا» عندما لا تكون الوحدة مناسبة.',
                 null,
                 'website',
                 [Seo::breadcrumb($locale, [$title => '/about'])],

@@ -144,7 +144,7 @@ Route::prefix('{locale}')
                 $locale === 'en' ? 'Contact us' : 'اتصل بنا',
                 $locale === 'en'
                     ? 'Tell us your budget and area and we will shortlist what actually fits.'
-                    : 'قوللنا ميزانيتك والمنطقة وهنرشّح لك اللي يناسبك فعلًا.',
+                    : 'أخبرنا بميزانيتك والمنطقة وسنرشّح لك ما يناسبك فعلًا.',
                 null,
                 'website',
                 [Seo::breadcrumb($locale, [($locale === 'en' ? 'Contact us' : 'اتصل بنا') => '/contact'])],
@@ -158,7 +158,7 @@ Route::prefix('{locale}')
                 $locale === 'en' ? 'Real-estate blog' : 'المدونة العقارية',
                 $locale === 'en'
                     ? 'Analysis and practical guides on the Egyptian property market.'
-                    : 'تحليلات ودلائل عملية عن السوق العقاري المصري.',
+                    : 'تحليلات وأدلة عملية عن السوق العقاري المصري.',
                 null,
                 'website',
                 [Seo::breadcrumb($locale, [($locale === 'en' ? 'Blog' : 'المدونة') => '/blog'])],

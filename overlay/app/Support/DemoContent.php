@@ -219,7 +219,7 @@ class DemoContent
             ],
             'XH-1005' => [
                 'desc' => $ar
-                    ? "توين هاوس 280م² في العاصمة الإدارية باستلام فوري — من غير انتظار تسليم.\n٤ غرف نوم، حديقة أمامية وخلفية، والتشطيب نص تشطيب مع إمكانية التسليم كامل بفرق سعر."
+                    ? "توين هاوس 280م² في العاصمة الإدارية باستلام فوري — دون انتظار تسليم.\n٤ غرف نوم، حديقة أمامية وخلفية، والتشطيب نص تشطيب مع إمكانية التسليم كامل بفرق سعر."
                     : "A 280m² twin house in the New Capital with immediate handover — no waiting for delivery.\n4 bedrooms, front and back gardens, semi-finished with the option to be fully finished for a price difference.",
                 'features' => $ar
                     ? "استلام فوري\nحديقة أمامية وخلفية\n٤ غرف نوم و٣ حمامات\nنص تشطيب بإمكانية التشطيب الكامل\nجراج خاص\nكمبوند مغلق بأمن ٢٤ ساعة"
@@ -228,7 +228,7 @@ class DemoContent
             ],
             'XH-1006' => [
                 'desc' => $ar
-                    ? "مكتب إداري 65م² في برج مرخّص إداري بالعاصمة الإدارية، الدور الرابع بفيو على المحور.\nمناسب لشركة صغيرة أو مكتب تمثيل، والترخيص الإداري بيسهّل استخراج السجل التجاري على العنوان."
+                    ? "مكتب إداري 65م² في برج مرخّص إداري بالعاصمة الإدارية، الدور الرابع بفيو على المحور.\nمناسب لشركة صغيرة أو مكتب تمثيل، والترخيص الإداري يسهّل استخراج السجل التجاري على العنوان."
                     : "A 65m² office in a licensed administrative tower in the New Capital, fourth floor overlooking the main axis.\nSuitable for a small firm or a representative office; the administrative licence makes registering a company at the address straightforward.",
                 'features' => $ar
                     ? "برج مرخّص إداري\nالدور الرابع بفيو على المحور\nمساحة مفتوحة قابلة للتقسيم\nحمام داخل الوحدة\nأسانسيرات وأمن ٢٤ ساعة\nجراج للزوار"
@@ -255,7 +255,7 @@ class DemoContent
             ],
             'XH-1010' => [
                 'desc' => $ar
-                    ? "محل تجاري 120م² بواجهة 8 متر على المحور الرئيسي في العاصمة الإدارية.\nالوحدة في مبنى تجاري مرخّص، والدور الأرضي بيديها كثافة مشاة عالية طول اليوم."
+                    ? "محل تجاري 120م² بواجهة 8 متر على المحور الرئيسي في العاصمة الإدارية.\nالوحدة في مبنى تجاري مرخّص، والدور الأرضي يمنحها كثافة مشاة عالية طوال اليوم."
                     : "A 120m² retail unit with an 8-metre frontage on the main axis in the New Capital.\nIt sits in a licensed retail building, and the ground floor gives it steady footfall through the day.",
                 'features' => $ar
                     ? "واجهة 8 متر على المحور\nدور أرضي بكثافة مشاة عالية\nمبنى تجاري مرخّص\nحمام داخل الوحدة\nمواقف زوار\nأمن ٢٤ ساعة"
@@ -264,7 +264,7 @@ class DemoContent
             ],
             'XH-1011' => [
                 'desc' => $ar
-                    ? "عيادة 90م² في مبنى طبي مرخّص بالتجمع الخامس، الدور الثاني بأسانسير.\nالمبنى فيه عيادات شغّالة بالفعل، يعني حركة مرضى موجودة من غير ما تبدأ من الصفر."
+                    ? "عيادة 90م² في مبنى طبي مرخّص بالتجمع الخامس، الدور الثاني بأسانسير.\nفي المبنى عيادات عاملة بالفعل، أي أن حركة المرضى موجودة دون أن تبدأ من الصفر."
                     : "A 90m² clinic in a licensed medical building in Fifth Settlement, second floor with a lift.\nThe building already has operating clinics, so patient traffic exists without starting from zero.",
                 'features' => $ar
                     ? "مبنى طبي مرخّص\nالدور الثاني بأسانسير\nتقسيم عيادة جاهز\nغرفة انتظار\nمواقف للمرضى\nقريب من مستشفيات"
@@ -285,7 +285,7 @@ class DemoContent
                     ? "محل 65م² للإيجار في شريط تجاري بالإسكندرية، بواجهة زجاجية على شارع رئيسي.\nالعقد سنوي قابل للتجديد، والمرافق مستقلة على الوحدة."
                     : "A 65m² shop for rent in a retail strip in Alexandria, with a glass frontage on a main street.\nAnnual renewable contract, with utilities metered separately for the unit.",
                 'features' => $ar
-                    ? "واجهة زجاجية على شارع رئيسي\nشريط تجاري شغّال\nمرافق مستقلة\nعقد سنوي قابل للتجديد\nحمام داخل الوحدة\nمخزن صغير"
+                    ? "واجهة زجاجية على شارع رئيسي\nشريط تجاري عامل\nمرافق مستقلة\nعقد سنوي قابل للتجديد\nحمام داخل الوحدة\nمخزن صغير"
                     : "Glass frontage on a main street\nActive retail strip\nSeparately metered utilities\nAnnual renewable contract\nIn-unit bathroom\nSmall storeroom",
                 'gallery' => ['/images/demo/property-4.jpg', '/images/demo/area-3.jpg'],
             ],
@@ -312,7 +312,7 @@ class DemoContent
         return [
             'شركة المروج للتطوير' => [
                 'about' => $ar
-                    ? "شركة تطوير عقاري بتشتغل على السكن المتوسط والفوق متوسط في شرق القاهرة والعاصمة الإدارية.\nالمشاريع بتتسلّم على مراحل معلنة في العقد، وأنظمة السداد بتتحدّد من الشركة نفسها مش من الوسيط."
+                    ? "شركة تطوير عقاري تعمل في السكن المتوسط وفوق المتوسط في شرق القاهرة والعاصمة الإدارية.\nتُسلَّم المشاريع على مراحل معلنة في العقد، وتحدّد الشركة نفسها أنظمة السداد لا الوسيط."
                     : "A developer working on mid and upper-mid residential projects in East Cairo and the New Capital.\nProjects are delivered in phases stated in the contract, and payment plans are set by the developer, not the broker.",
                 'founded' => '2005',
                 'hq' => $ar ? 'القاهرة الجديدة' : 'New Cairo',
@@ -321,7 +321,7 @@ class DemoContent
             ],
             'الوادي القابضة' => [
                 'about' => $ar
-                    ? "مجموعة استثمارية ليها ذراع عقاري متخصص في المشاريع الساحلية على الساحل الشمالي والإسكندرية.\nالوحدات غالبًا بتتباع بنظام إدارة فندقية، يعني الوحدة بتتأجّر لحسابك وإنت مش مقيم فيها."
+                    ? "مجموعة استثمارية لها ذراع عقاري متخصص في المشاريع الساحلية على الساحل الشمالي والإسكندرية.\nتُباع الوحدات غالبًا بنظام إدارة فندقية، أي أن الوحدة تُؤجَّر لحسابك وأنت غير مقيم فيها."
                     : "An investment group with a real-estate arm focused on coastal projects on the North Coast and in Alexandria.\nUnits are often sold under hotel management, meaning the unit is rented on your behalf while you are away.",
                 'founded' => '1998',
                 'hq' => $ar ? 'الإسكندرية' : 'Alexandria',
@@ -330,7 +330,7 @@ class DemoContent
             ],
             'بناة المستقبل' => [
                 'about' => $ar
-                    ? "متخصصة في الأبراج الإدارية والتجارية المرخّصة داخل العاصمة الإدارية الجديدة.\nالترخيص الإداري مهم هنا: هو اللي بيسمح بتسجيل شركة على عنوان الوحدة، وده اللي بيفرق سعر المتر."
+                    ? "متخصصة في الأبراج الإدارية والتجارية المرخّصة داخل العاصمة الإدارية الجديدة.\nالترخيص الإداري مهم هنا: فهو ما يسمح بتسجيل شركة على عنوان الوحدة، وهو ما يصنع فارق سعر المتر."
                     : "Specialised in licensed administrative and retail towers inside the New Administrative Capital.\nThe administrative licence matters here: it is what lets you register a company at the unit's address, and it is what moves the price per metre.",
                 'founded' => '2015',
                 'hq' => $ar ? 'العاصمة الإدارية' : 'New Capital',
@@ -348,21 +348,21 @@ class DemoContent
         return [
             'القاهرة الجديدة' => [
                 'about' => $ar
-                    ? "أكبر تجمّع سكني شرق القاهرة، وبيضم التجمع الخامس والرحاب ومدينتي والشروق.\nالمنطقة مناسبة للأسر اللي بتدوّر على مدارس دولية وخدمات قريبة، والأسعار فيها بتتفاوت بشكل كبير حسب الموقع من محور محمد نجيب والطريق الدائري.\nالوحدات المتاحة غالبًا شقق ودوبلكس داخل كمبوندات مغلقة، مع فيلات مستقلة في المشاريع الأكبر."
+                    ? "أكبر تجمّع سكني شرق القاهرة، ويضم التجمع الخامس والرحاب ومدينتي والشروق.\nالمنطقة مناسبة للأسر التي تبحث عن مدارس دولية وخدمات قريبة، وتتفاوت الأسعار فيها بشكل كبير حسب الموقع من محور محمد نجيب والطريق الدائري.\nالوحدات المتاحة غالبًا شقق ودوبلكس داخل كمبوندات مغلقة، مع فيلات مستقلة في المشاريع الأكبر."
                     : "The largest residential cluster east of Cairo, covering Fifth Settlement, Rehab, Madinaty and Shorouk.\nIt suits families looking for international schools and nearby services; prices vary widely with distance from the Mohamed Naguib axis and the Ring Road.\nAvailable units are mostly apartments and duplexes inside gated compounds, with standalone villas in the larger projects.",
                 'featured' => true,
                 'cover' => '/images/demo/area-1.jpg',
             ],
             'العاصمة الإدارية' => [
                 'about' => $ar
-                    ? "مدينة جديدة بتتبني على مراحل، وأغلب المعروض فيها لسه تحت الإنشاء بتواريخ تسليم بين 2026 و2029.\nفيها الحي الحكومي والحي المالي وأبراج إدارية مرخّصة، فبتناسب اللي بيدوّر على استثمار إداري أو تجاري مش سكن فوري.\nالمقدمات فيها عادة أقل والتقسيط أطول، مقابل إن الاستلام بعيد."
+                    ? "مدينة جديدة تُبنى على مراحل، وأغلب المعروض فيها ما زال تحت الإنشاء بتواريخ تسليم بين 2026 و2029.\nفيها الحي الحكومي والحي المالي وأبراج إدارية مرخّصة، فتناسب من يبحث عن استثمار إداري أو تجاري لا عن سكن فوري.\nالمقدمات فيها عادة أقل والتقسيط أطول، مقابل أن الاستلام بعيد."
                     : "A new city being built in phases; most of what is listed is still under construction with delivery dates between 2026 and 2029.\nIt holds the government and financial districts and licensed administrative towers, so it suits administrative or retail investment rather than immediate housing.\nDown payments are usually lower and instalment terms longer, in exchange for a distant handover.",
                 'featured' => true,
                 'cover' => '/images/demo/area-2.jpg',
             ],
             'الإسكندرية' => [
                 'about' => $ar
-                    ? "المعروض هنا بينقسم لحاجتين: وحدات سكنية داخل المدينة، ومشاريع ساحلية على الطريق الساحلي.\nالوحدات داخل المدينة غالبًا في عمارات مش كمبوندات، والعقار المسجّل فيها أهم من أي حتة تانية لأن الملكيات قديمة ومتشابكة.\nالمشاريع الساحلية بتتباع بنظام مصيف أو إدارة فندقية."
+                    ? "ينقسم المعروض هنا إلى قسمين: وحدات سكنية داخل المدينة، ومشاريع ساحلية على الطريق الساحلي.\nالوحدات داخل المدينة غالبًا في عمارات لا في كمبوندات، والعقار المسجّل فيها أهم من أي شيء آخر لأن الملكيات قديمة ومتشابكة.\nتُباع المشاريع الساحلية بنظام مصيف أو إدارة فندقية."
                     : "What is listed here splits in two: residential units inside the city, and coastal projects along the coastal road.\nIn-city units are mostly in standalone buildings rather than compounds, and registered title matters more here than anywhere else because ownership records are old and entangled.\nCoastal projects are sold as summer homes or under hotel management.",
                 'featured' => false,
                 'cover' => '/images/demo/area-3.jpg',
@@ -571,18 +571,18 @@ class DemoContent
                 : ['Under 3M', '3 – 6M', '6 – 12M', 'Over 12M'],
 
             'steps' => [
-                ['title' => $ar ? 'بنراجع طلبك' : 'We review your request', 'text' => $ar ? 'مستشار بيقرا احتياجك وميزانيتك ويجهّز قائمة مبدئية قبل ما يكلّمك.' : 'An advisor reads your needs and budget and prepares a shortlist before calling.'],
+                ['title' => $ar ? 'نراجع طلبك' : 'We review your request', 'text' => $ar ? 'يقرأ المستشار احتياجك وميزانيتك ويجهّز قائمة مبدئية قبل أن يتصل بك.' : 'An advisor reads your needs and budget and prepares a shortlist before calling.'],
                 ['title' => $ar ? 'مكالمة في ساعتين عمل' : 'A call within two working hours', 'text' => $ar ? 'مكالمة قصيرة نتأكد فيها من التفاصيل ونرشّح 3 وحدات كحد أقصى.' : 'A short call to confirm details and shortlist three units at most.'],
-                ['title' => $ar ? 'معاينة مرتبة' : 'An organised viewing', 'text' => $ar ? 'بنجدول الزيارات في يوم واحد، والمواصلات علينا.' : 'We schedule the visits in one day, with transport on us.'],
+                ['title' => $ar ? 'معاينة مرتبة' : 'An organised viewing', 'text' => $ar ? 'نجدول الزيارات في يوم واحد، والمواصلات علينا.' : 'We schedule the visits in one day, with transport on us.'],
             ],
 
             'faq' => [
-                ['q' => $ar ? 'هل فيه عمولة على الشراء؟' : 'Is there a buying commission?', 'a' => $ar ? 'لأ. عمولتنا بتيجي من المطوّر، والسعر اللي بتشتري بيه هو نفس سعر المطوّر المعلن — من غير أي زيادة عليك.' : 'No. Our commission comes from the developer, and the price you pay is the developer\'s published price — with nothing added on top.'],
-                ['q' => $ar ? 'ممكن أعاين قبل ما أحجز؟' : 'Can I view before booking?', 'a' => $ar ? 'أكيد. بنرتّب معاينة على الأرض لحد ثلاث وحدات في يوم واحد، والمواصلات من عندنا.' : 'Of course. We arrange on-site viewings for up to three units in one day, with transport on us.'],
-                ['q' => $ar ? 'بتشتغلوا في مناطق إيه؟' : 'Which areas do you cover?', 'a' => $ar ? 'القاهرة الجديدة والعاصمة الإدارية والإسكندرية بشكل أساسي، وبنغطي الساحل الشمالي والشيخ زايد كمان.' : 'Mainly New Cairo, the New Capital and Alexandria, and we also cover the North Coast and Sheikh Zayed.'],
-                ['q' => $ar ? 'بتراجعوا الأوراق ولا لأ؟' : 'Do you review the paperwork?', 'a' => $ar ? 'أي وحدة بتدخل قائمتنا بعد مراجعة التسجيل والرخصة، وبعد التعاقد محامي المنصة بيحضر معاك.' : 'Every unit enters our list after registration and licence checks, and our lawyer attends the contract with you.'],
-                ['q' => $ar ? 'لو مغيّرتش رأيي بعد الطلب؟' : 'What if I change my mind after requesting?', 'a' => $ar ? 'مفيش أي التزام. الطلب مجرد بداية محادثة، وتقدر توقفها في أي وقت من غير أي رسوم.' : 'There is no obligation. The request is just the start of a conversation and you can stop it any time at no cost.'],
-                ['q' => $ar ? 'بتتعاملوا مع الإيجار برضه؟' : 'Do you handle rentals too?', 'a' => $ar ? 'أيوه، سكني وإداري. اختار «إيجار» في البحث أو اكتبها في تفاصيل الطلب.' : 'Yes, residential and commercial. Pick «Rent» in the search or mention it in your request details.'],
+                ['q' => $ar ? 'هل توجد عمولة على الشراء؟' : 'Is there a buying commission?', 'a' => $ar ? 'لا. عمولتنا تأتي من المطوّر، والسعر الذي تشتري به هو نفس سعر المطوّر المعلن — دون أي زيادة عليك.' : 'No. Our commission comes from the developer, and the price you pay is the developer\'s published price — with nothing added on top.'],
+                ['q' => $ar ? 'هل يمكنني المعاينة قبل الحجز؟' : 'Can I view before booking?', 'a' => $ar ? 'بالتأكيد. نرتّب معاينة على الأرض لثلاث وحدات كحد أقصى في يوم واحد، والمواصلات من جانبنا.' : 'Of course. We arrange on-site viewings for up to three units in one day, with transport on us.'],
+                ['q' => $ar ? 'ما المناطق التي تعملون فيها؟' : 'Which areas do you cover?', 'a' => $ar ? 'القاهرة الجديدة والعاصمة الإدارية والإسكندرية بشكل أساسي، ونغطي أيضًا الساحل الشمالي والشيخ زايد.' : 'Mainly New Cairo, the New Capital and Alexandria, and we also cover the North Coast and Sheikh Zayed.'],
+                ['q' => $ar ? 'هل تراجعون الأوراق؟' : 'Do you review the paperwork?', 'a' => $ar ? 'لا تدخل أي وحدة قائمتنا إلا بعد مراجعة التسجيل والرخصة، وبعد التعاقد يحضر معك محامي المنصة.' : 'Every unit enters our list after registration and licence checks, and our lawyer attends the contract with you.'],
+                ['q' => $ar ? 'وإن غيّرت رأيي بعد الطلب؟' : 'What if I change my mind after requesting?', 'a' => $ar ? 'لا يوجد أي التزام. الطلب مجرد بداية محادثة، ويمكنك إيقافها في أي وقت دون أي رسوم.' : 'There is no obligation. The request is just the start of a conversation and you can stop it any time at no cost.'],
+                ['q' => $ar ? 'هل تتعاملون مع الإيجار أيضًا؟' : 'Do you handle rentals too?', 'a' => $ar ? 'نعم، سكني وإداري. اختر «إيجار» في البحث أو اذكرها في تفاصيل الطلب.' : 'Yes, residential and commercial. Pick «Rent» in the search or mention it in your request details.'],
             ],
 
             'offices' => [

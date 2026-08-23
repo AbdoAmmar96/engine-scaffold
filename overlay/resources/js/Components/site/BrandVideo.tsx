@@ -37,7 +37,7 @@ export default function BrandVideo() {
                         <PlayCircle size={52} className="text-primary" />
                         <p className="max-w-sm px-4 text-sm leading-relaxed text-muted">
                             {ar
-                                ? "مكان الفيديو التعريفي — أول ما تخلّص إنتاجه، حط الرابط من الداشبورد → اللوجو والميديا، وهيظهر هنا فورًا."
+                                ? "مكان الفيديو التعريفي — بعد الانتهاء من إنتاجه، أضف الرابط من لوحة التحكم → اللوجو والميديا، وسيظهر هنا فورًا."
                                 : "Brand video slot — once produced, paste its link in Dashboard → Logo & media and it appears here instantly."}
                         </p>
                     </div>

@@ -56,12 +56,12 @@ class DemoAccountsSeeder extends Seeder
         }
 
         if ($created === []) {
-            $this->command?->info('  الحسابات التجريبية موجودة — مالمستش كلمات المرور');
+            $this->command?->info('  الحسابات التجريبية موجودة — لم تُمَس كلمات المرور');
 
             return;
         }
 
-        $this->command?->warn('  ⚠ الحسابات التجريبية (اكتبها دلوقتي — مش هتتعرض تاني):');
+        $this->command?->warn('  ⚠ الحسابات التجريبية (دوّنها الآن — لن تُعرض مرة أخرى):');
 
         foreach ($created as [$role, $email, $password]) {
             $this->command?->warn(sprintf('    %-9s %-24s %s', $role, $email, $password));

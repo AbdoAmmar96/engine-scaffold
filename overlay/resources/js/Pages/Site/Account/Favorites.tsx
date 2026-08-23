@@ -24,7 +24,7 @@ export default function Favorites({ properties }: { properties: Property[] }) {
                     </span>
                     <p className="mt-4 text-sm text-muted">
                         {ar
-                            ? "مفيش عقارات محفوظة لسه — اضغط على القلب في أي وحدة عجباك."
+                            ? "لا توجد عقارات محفوظة بعد — اضغط على القلب في أي وحدة تعجبك."
                             : "No saved properties yet — tap the heart on any unit you like."}
                     </p>
                     <Link

@@ -23,7 +23,7 @@ class LocationPageController extends Controller
                 $title,
                 $locale === 'en'
                     ? 'The areas we cover, what each one suits, and what is currently available in it.'
-                    : 'المناطق اللي بنغطيها، كل منطقة مناسبة لمين، وإيه المتاح فيها دلوقتي.',
+                    : 'المناطق التي نغطيها، ولمن تناسب كل منطقة، وما المتاح فيها حاليًا.',
                 null,
                 'website',
                 [
@@ -45,7 +45,7 @@ class LocationPageController extends Controller
 
         $summary = $area['about'] ?: ($area['note'] ?: ($locale === 'en'
             ? "{$area['name']} — {$area['properties']} units and {$area['compounds']} projects currently listed."
-            : "{$area['name']} — {$area['properties']} وحدة و{$area['compounds']} مشروع معروضين دلوقتي."));
+            : "{$area['name']} — {$area['properties']} وحدة و{$area['compounds']} مشروع معروضة حاليًا."));
 
         return Inertia::render('Site/Area', [
             'area' => $area,

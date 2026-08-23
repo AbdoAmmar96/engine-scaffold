@@ -64,19 +64,19 @@ class PageAdminController extends ResourceController
             ['name' => 'title', 'label' => 'العنوان (عربي)', 'type' => 'text', 'required' => true],
             ['name' => 'title_en', 'label' => 'العنوان (إنجليزي)', 'type' => 'text'],
             ['name' => 'slug', 'label' => 'الرابط', 'type' => 'text',
-                'hint' => 'سيبه فاضي وهيتولّد من العنوان · الصفحة بتفتح على ‎/ar/‎ + الرابط'],
+                'hint' => 'اتركه فارغًا وسيتولّد من العنوان · تُفتح الصفحة على ‎/ar/‎ + الرابط'],
             ['name' => 'excerpt', 'label' => 'سطر تحت العنوان (عربي)', 'type' => 'textarea',
-                'hint' => 'بيظهر تحت العنوان وبيتستخدم كوصف في جوجل لو الوصف فاضي'],
+                'hint' => 'يظهر تحت العنوان ويُستخدم كوصف في جوجل إن كان الوصف فارغًا'],
             ['name' => 'excerpt_en', 'label' => 'سطر تحت العنوان (إنجليزي)', 'type' => 'textarea'],
             ['name' => 'body', 'label' => 'المحتوى (عربي)', 'type' => 'textarea',
-                'hint' => 'سطر فاضي بين كل فقرة والتانية · السطر اللي بيبدأ بـ ## بيبقى عنوان فرعي · واللي بيبدأ بـ - بيبقى نقطة'],
+                'hint' => 'سطر فارغ بين كل فقرة والأخرى · السطر الذي يبدأ بـ ## يصبح عنوانًا فرعيًا · والذي يبدأ بـ - يصبح نقطة'],
             ['name' => 'body_en', 'label' => 'المحتوى (إنجليزي)', 'type' => 'textarea'],
             ['name' => 'meta_title', 'label' => 'عنوان جوجل (عربي)', 'type' => 'text',
-                'hint' => 'سيبه فاضي ويستخدم عنوان الصفحة'],
+                'hint' => 'اتركه فارغًا ليُستخدم عنوان الصفحة'],
             ['name' => 'meta_title_en', 'label' => 'عنوان جوجل (إنجليزي)', 'type' => 'text'],
             ['name' => 'meta_description', 'label' => 'وصف جوجل (عربي)', 'type' => 'textarea'],
             ['name' => 'meta_description_en', 'label' => 'وصف جوجل (إنجليزي)', 'type' => 'textarea'],
-            ['name' => 'is_indexable', 'label' => 'تظهر في نتايج البحث', 'type' => 'toggle'],
+            ['name' => 'is_indexable', 'label' => 'تظهر في نتائج البحث', 'type' => 'toggle'],
             ['name' => 'sort', 'label' => 'الترتيب', 'type' => 'number'],
             ['name' => 'is_active', 'label' => 'منشورة', 'type' => 'toggle'],
         ];
@@ -93,7 +93,7 @@ class PageAdminController extends ResourceController
                 // تتحفظ بنجاح وتفتح على حاجة تانية خالص
                 function (string $attribute, mixed $value, callable $fail): void {
                     if (ReservedSlugs::taken((string) $value)) {
-                        $fail('الرابط ده محجوز لصفحة موجودة في الموقع — اختار واحد تاني.');
+                        $fail('هذا الرابط محجوز لصفحة موجودة في الموقع — اختر رابطًا آخر.');
                     }
                 },
             ],

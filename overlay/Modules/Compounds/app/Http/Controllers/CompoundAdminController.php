@@ -58,7 +58,7 @@ class CompoundAdminController extends ResourceController
             ...$this->ownerField('الشركة المالكة'),
             ['name' => 'name',           'label' => 'الاسم (عربي)',      'type' => 'text', 'required' => true],
             ['name' => 'name_en',        'label' => 'الاسم (إنجليزي)',   'type' => 'text'],
-            ['name' => 'slug',           'label' => 'رابط الصفحة',       'type' => 'text', 'hint' => 'سيبه فاضي يتولّد من الاسم — /ar/compounds/<الرابط>'],
+            ['name' => 'slug',           'label' => 'رابط الصفحة',       'type' => 'text', 'hint' => 'اتركه فارغًا ليتولّد من الاسم — /ar/compounds/<الرابط>'],
             ['name' => 'developer_id',   'label' => 'المطوّر',           'type' => 'select', 'options' => $this->options(Developer::class)],
             ['name' => 'location_id',    'label' => 'المنطقة',           'type' => 'select', 'options' => $this->options(Location::class)],
             ['name' => 'description',    'label' => 'الوصف (عربي)',      'type' => 'textarea'],
@@ -110,7 +110,7 @@ class CompoundAdminController extends ResourceController
         $units = $model->properties()->count();
 
         return $units > 0
-            ? "المشروع ده عليه {$units} وحدة — انقلهم أو امسحهم الأول."
+            ? "هذا المشروع عليه {$units} وحدة — انقلها أو احذفها أولًا."
             : null;
     }
 

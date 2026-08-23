@@ -50,7 +50,7 @@ class Lead extends Model
     ];
 
     public const SOURCES = [
-        'contact' => 'فورم اتصل بنا',
+        'contact' => 'نموذج اتصل بنا',
         'hero' => 'بحث الصفحة الرئيسية',
         'property' => 'صفحة وحدة',
         'compound' => 'صفحة مشروع',

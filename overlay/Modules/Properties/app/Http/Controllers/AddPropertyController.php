@@ -44,7 +44,7 @@ class AddPropertyController extends Controller
                 $en ? 'Add your property' : 'أضف عقارك',
                 $en
                     ? 'List your unit for free. We review the details, then publish it with a reference number and get you buyer requests.'
-                    : 'اعرض وحدتك مجانًا. بنراجع البيانات، وبعدها بتتنشر بكود مرجعي وبتوصلك طلبات المشترين.',
+                    : 'اعرض وحدتك مجانًا. نراجع البيانات، ثم تُنشر بكود مرجعي وتصلك طلبات المشترين.',
                 null,
                 'website',
                 [Seo::breadcrumb($locale, [($en ? 'Add your property' : 'أضف عقارك') => '/add-property'])],
@@ -69,8 +69,8 @@ class AddPropertyController extends Controller
             ...$this->listingRules(),
         ], [], [
             'name' => 'الاسم',
-            'phone' => 'الموبايل',
-            'email' => 'الإيميل',
+            'phone' => 'رقم الهاتف',
+            'email' => 'البريد الإلكتروني',
             ...$this->listingAttributes(),
         ]);
 
@@ -116,7 +116,7 @@ class AddPropertyController extends Controller
 
         return back()->with('success', $en
             ? 'Your property was received ✅ — our team reviews it and publishes it within 24 hours. Check your email to follow it from your account.'
-            : 'وصلنا عقارك ✅ — الفريق بيراجعه وبينشره خلال ٢٤ ساعة. بص في بريدك عشان تتابعه من حسابك.');
+            : 'وصلنا عقارك ✅ — يراجعه الفريق وينشره خلال ٢٤ ساعة. تفقّد بريدك لمتابعته من حسابك.');
     }
 
     /**

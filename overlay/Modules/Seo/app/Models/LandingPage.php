@@ -157,7 +157,7 @@ class LandingPage extends Model
 
         return $locale === 'en'
             ? "Looking for {$p['plain']}? This page lists only what is available right now — each unit shows its price, area, room count and payment plan, and you can narrow the results by price, area or finishing until you land on the right one."
-            : "لو بتدوّر على {$p['plain']}، الصفحة دي بتجمع المتاح دلوقتي بس. كل وحدة مكتوب عليها سعرها ومساحتها وعدد غرفها ونظام السداد، وتقدر تفلتر بالسعر أو المساحة أو التشطيب لحد ما توصل للي يناسبك.";
+            : "إن كنت تبحث عن {$p['plain']}، تجمع هذه الصفحة المتاح حاليًا فقط. كل وحدة مكتوب عليها سعرها ومساحتها وعدد غرفها ونظام السداد، ويمكنك الفلترة بالسعر أو المساحة أو التشطيب حتى تصل إلى ما يناسبك.";
     }
 
     public function metaDescription(string $locale): string

@@ -27,7 +27,7 @@ class EnsureStaff
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('admin.login')->with('error', 'الحساب ده موقوف — كلّم إدارة المنصّة.');
+            return redirect()->route('admin.login')->with('error', 'هذا الحساب موقوف — تواصل مع إدارة المنصّة.');
         }
 
         return $next($request);

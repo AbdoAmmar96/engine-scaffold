@@ -61,7 +61,7 @@ class MenuSeeder extends Seeder
 
         MenuItem::flush();
 
-        $this->command?->info(sprintf('  لينكات القوائم: %d', MenuItem::count()));
+        $this->command?->info(sprintf('  روابط القوائم: %d', MenuItem::count()));
     }
 
     private function put(string $location, array $item, int $sort, ?int $parentId): MenuItem

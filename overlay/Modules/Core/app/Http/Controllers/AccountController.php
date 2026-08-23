@@ -89,8 +89,8 @@ class AccountController extends Controller
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ], [], [
             'name' => 'الاسم',
-            'email' => 'الإيميل',
-            'phone' => 'الموبايل',
+            'email' => 'البريد الإلكتروني',
+            'phone' => 'رقم الهاتف',
             'password' => 'كلمة المرور',
         ]);
 
@@ -101,6 +101,6 @@ class AccountController extends Controller
 
         $user->update($data);
 
-        return back()->with('success', $locale === 'en' ? 'Saved ✅' : 'اتحفظ ✅');
+        return back()->with('success', $locale === 'en' ? 'Saved ✅' : 'تم الحفظ ✅');
     }
 }

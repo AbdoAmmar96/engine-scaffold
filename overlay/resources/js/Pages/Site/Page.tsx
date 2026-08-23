@@ -49,7 +49,7 @@ export default function Page({ page }: { page: ContentPage }) {
                                 // صفحة منشورة ومحتواها فاضي: أحسن من صندوق فاضي
                                 // إن الزائر يعرف إنه مش عطل في المتصفح
                                 <p className="text-[15px] leading-[2.1] text-text-muted">
-                                    {locale === "en" ? "This page has no content yet." : "الصفحة دي لسه مالهاش محتوى."}
+                                    {locale === "en" ? "This page has no content yet." : "هذه الصفحة لا تحتوي على محتوى بعد."}
                                 </p>
                             )}
 

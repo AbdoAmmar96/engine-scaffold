@@ -19,8 +19,8 @@ const copy = {
         allSections: "الكل",
         residential: "سكني",
         commercial: "تجاري",
-        emptyTitle: "مفيش نتائج بالفلاتر دي",
-        emptyText: "جرّب توسّع نطاق السعر أو تشيل فلتر أو اتنين.",
+        emptyTitle: "لا توجد نتائج بهذه الفلاتر",
+        emptyText: "جرّب توسيع نطاق السعر أو إزالة فلتر أو اثنين.",
         related: "صفحات قريبة",
     },
     en: {

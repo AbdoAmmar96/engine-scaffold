@@ -31,9 +31,9 @@ export function mediaError(e: unknown): string {
     const err = e as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } };
     const errors = err.response?.data?.errors;
 
-    if (errors) return Object.values(errors)[0]?.[0] ?? "الرفع فشل";
+    if (errors) return Object.values(errors)[0]?.[0] ?? "فشل الرفع";
 
-    return err.response?.data?.message ?? "الرفع فشل — جرّب تاني";
+    return err.response?.data?.message ?? "فشل الرفع — حاول مرة أخرى";
 }
 
 export const isVideo = (path: string) => /\.(mp4|webm|ogg)$/i.test(path);

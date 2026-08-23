@@ -46,14 +46,14 @@ class LocationAdminController extends ResourceController
             ['name' => 'name',      'label' => 'الاسم (عربي)',      'type' => 'text',   'required' => true],
             ['name' => 'name_en',   'label' => 'الاسم (إنجليزي)',   'type' => 'text'],
             ['name' => 'slug',      'label' => 'رابط الصفحة',       'type' => 'text',
-                'hint' => 'سيبه فاضي يتولّد من الاسم — /ar/areas/<الرابط>'],
+                'hint' => 'اتركه فارغًا ليتولّد من الاسم — /ar/areas/<الرابط>'],
             ['name' => 'note',      'label' => 'وصف مختصر (عربي)',  'type' => 'text',   'hint' => 'مثال: التجمع الخامس · الرحاب · مدينتي'],
             ['name' => 'note_en',   'label' => 'وصف مختصر (إنجليزي)', 'type' => 'text'],
             ['name' => 'about',     'label' => 'نبذة الصفحة (عربي)', 'type' => 'textarea', 'hint' => 'فقرة في كل سطر — بتتعرض في صفحة المنطقة'],
             ['name' => 'about_en',  'label' => 'نبذة الصفحة (إنجليزي)', 'type' => 'textarea'],
             ['name' => 'image',     'label' => 'الصورة',            'type' => 'image',  'hint' => 'مسار داخل public — مثال: /images/demo/area-1.jpg'],
-            ['name' => 'cover',     'label' => 'غلاف الصفحة',       'type' => 'image',  'hint' => 'خلفية هيرو صفحة المنطقة — فاضي يستخدم الصورة'],
-            ['name' => 'is_featured', 'label' => 'منطقة مميّزة',    'type' => 'toggle', 'hint' => 'بتظهر الأول في صفحة المناطق'],
+            ['name' => 'cover',     'label' => 'غلاف الصفحة',       'type' => 'image',  'hint' => 'خلفية هيرو صفحة المنطقة — إن كان فارغًا تُستخدم الصورة'],
+            ['name' => 'is_featured', 'label' => 'منطقة مميّزة',    'type' => 'toggle', 'hint' => 'تظهر أولًا في صفحة المناطق'],
             ['name' => 'sort',      'label' => 'الترتيب',           'type' => 'number'],
             ['name' => 'is_active', 'label' => 'مفعّلة',            'type' => 'toggle'],
         ];
@@ -90,7 +90,7 @@ class LocationAdminController extends ResourceController
         $used = $model->properties()->count() + $model->compounds()->count();
 
         return $used > 0
-            ? "المنطقة دي مربوطة بـ {$used} وحدة/مشروع — غيّر منطقتهم الأول."
+            ? "هذه المنطقة مرتبطة بـ {$used} وحدة/مشروع — غيّر منطقتها أولًا."
             : null;
     }
 }

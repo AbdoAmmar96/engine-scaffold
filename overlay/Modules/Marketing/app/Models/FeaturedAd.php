@@ -47,8 +47,8 @@ class FeaturedAd extends Model
     /** المواضع — المفتاح بيتخزّن والوصف بيظهر في اللوحة */
     public const POSITIONS = [
         'hero' => ['label' => 'شريط الرئيسية', 'note' => 'تحت الهيرو مباشرة في الصفحة الرئيسية'],
-        'listing' => ['label' => 'أول النتايج', 'note' => 'مثبّت فوق نتايج البحث'],
-        'sidebar' => ['label' => 'جانب صفحة الوحدة', 'note' => 'في صفحة أي وحدة تانية'],
+        'listing' => ['label' => 'أول النتائج', 'note' => 'مثبّت فوق نتائج البحث'],
+        'sidebar' => ['label' => 'جانب صفحة الوحدة', 'note' => 'في صفحة أي وحدة أخرى'],
     ];
 
     public const STATUSES = [
@@ -144,7 +144,7 @@ class FeaturedAd extends Model
             return ['label' => 'انتهى '.$this->ends_at->format('Y/m/d'), 'tone' => 'muted'];
         }
 
-        return ['label' => 'شغّال دلوقتي', 'tone' => 'success'];
+        return ['label' => 'نشط الآن', 'tone' => 'success'];
     }
 
     /** الوحدة أو المشروع اللي الإعلان عليه */

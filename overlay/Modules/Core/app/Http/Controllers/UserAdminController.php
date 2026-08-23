@@ -21,8 +21,8 @@ class UserAdminController extends ResourceController
 {
     /** صلاحيات لو ضاع آخر حساب معاه واحدة منها، اللوحة بتقفل على نفسها */
     private const CRITICAL = [
-        'manage roles' => 'ده آخر حساب بيقدر يوزّع الأدوار — لازم يفضل واحد على الأقل.',
-        'manage users' => 'ده آخر حساب بيقدر يدير المستخدمين — لازم يفضل واحد على الأقل.',
+        'manage roles' => 'هذا آخر حساب يستطيع توزيع الأدوار — يجب أن يبقى واحد على الأقل.',
+        'manage users' => 'هذا آخر حساب يستطيع إدارة المستخدمين — يجب أن يبقى واحد على الأقل.',
     ];
 
     /**
@@ -98,8 +98,8 @@ class UserAdminController extends ResourceController
     {
         return [
             'name' => 'الاسم',
-            'email' => 'الإيميل',
-            'phone' => 'الموبايل',
+            'email' => 'البريد الإلكتروني',
+            'phone' => 'رقم الهاتف',
             'role_label' => 'الدور',
             'is_active' => 'مفعّل',
             'joined' => 'مضاف في',
@@ -110,11 +110,11 @@ class UserAdminController extends ResourceController
     {
         return [
             ['name' => 'name', 'label' => 'الاسم', 'type' => 'text', 'required' => true],
-            ['name' => 'email', 'label' => 'الإيميل', 'type' => 'text', 'required' => true,
-                'hint' => 'ده اللي بيسجّل بيه الدخول — لازم يكون مش مكرّر'],
-            ['name' => 'phone', 'label' => 'الموبايل', 'type' => 'text'],
+            ['name' => 'email', 'label' => 'البريد الإلكتروني', 'type' => 'text', 'required' => true,
+                'hint' => 'يُستخدم لتسجيل الدخول — يجب ألا يكون مكرّرًا'],
+            ['name' => 'phone', 'label' => 'رقم الهاتف', 'type' => 'text'],
             ['name' => 'company_name', 'label' => 'اسم الشركة', 'type' => 'text',
-                'hint' => 'لحسابات الشركات — بيظهر بدل الاسم الشخصي'],
+                'hint' => 'لحسابات الشركات — يظهر بدل الاسم الشخصي'],
             ['name' => 'role', 'label' => 'الدور', 'type' => 'select', 'required' => true,
                 'hint' => self::rolesHint(),
                 'options' => array_map(
@@ -123,10 +123,10 @@ class UserAdminController extends ResourceController
                     array_keys(self::roles()),
                 )],
             ['name' => 'password', 'label' => 'كلمة المرور', 'type' => 'password',
-                'hint' => '8 حروف على الأقل — سيبها فاضية عند التعديل لو مش عايز تغيّرها'],
+                'hint' => '8 حروف على الأقل — اتركها فارغة عند التعديل إن لم ترغب في تغييرها'],
             ['name' => 'password_confirmation', 'label' => 'تأكيد كلمة المرور', 'type' => 'password'],
             ['name' => 'is_active', 'label' => 'مفعّل', 'type' => 'toggle',
-                'hint' => 'الحساب الموقوف مايقدرش يسجّل دخول'],
+                'hint' => 'الحساب الموقوف لا يستطيع تسجيل الدخول'],
         ];
     }
 
@@ -141,7 +141,7 @@ class UserAdminController extends ResourceController
                 $config['permissions'],
             );
 
-            $lines[] = $config['label'].': '.($perms ? implode(' · ', $perms) : 'مفيش صلاحيات لوحة');
+            $lines[] = $config['label'].': '.($perms ? implode(' · ', $perms) : 'لا توجد صلاحيات لوحة');
         }
 
         return implode(' | ', $lines);
@@ -219,7 +219,7 @@ class UserAdminController extends ResourceController
     protected function guardDelete(Model $model): ?string
     {
         if ($model->id === auth()->id()) {
-            return 'مش هينفع تحذف الحساب اللي انت مسجّل بيه دلوقتي.';
+            return 'لا يمكنك حذف الحساب الذي سجّلت الدخول به حاليًا.';
         }
 
         foreach (self::CRITICAL as $permission => $message) {

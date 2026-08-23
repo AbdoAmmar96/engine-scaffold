@@ -51,7 +51,7 @@ class AccountAuthController extends Controller
             Auth::logout();
 
             throw ValidationException::withMessages([
-                'email' => $locale === 'en' ? 'This account is suspended.' : 'الحساب ده موقوف — كلّم إدارة المنصّة.',
+                'email' => $locale === 'en' ? 'This account is suspended.' : 'هذا الحساب موقوف — تواصل مع إدارة المنصّة.',
             ]);
         }
 
@@ -69,8 +69,8 @@ class AccountAuthController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [], [
             'name' => 'الاسم',
-            'email' => 'الإيميل',
-            'phone' => 'الموبايل',
+            'email' => 'البريد الإلكتروني',
+            'phone' => 'رقم الهاتف',
             'password' => 'كلمة المرور',
         ]);
 
@@ -83,7 +83,7 @@ class AccountAuthController extends Controller
 
         return redirect()
             ->route('account.index', ['locale' => $locale])
-            ->with('success', $locale === 'en' ? 'Welcome 👋' : 'أهلًا بيك 👋');
+            ->with('success', $locale === 'en' ? 'Welcome 👋' : 'أهلًا بك 👋');
     }
 
     public function logout(Request $request, string $locale): RedirectResponse
