@@ -47,6 +47,8 @@ echo "==> [2/7] بناء الأصول محليًا (السيرفر مفيهوش 
 ( cd "$APP" && npm run build )
 
 echo "==> [3/7] رفع كود التطبيق"
+# نبضة الجدولة بتتكتب على السيرفر نفسه — لو رفعنا نسخة الجهاز المحلي
+# فوقها، كرون واقف هيبان شغّال وده أسوأ من مفيش مؤشّر خالص.
 push \
   --exclude='.git' \
   --exclude='node_modules' \
@@ -57,6 +59,7 @@ push \
   --exclude='storage/framework/sessions/*' \
   --exclude='storage/framework/views/*' \
   --exclude='storage/app/public/*' \
+  --exclude='storage/app/schedule-heartbeat' \
   --exclude='database/*.sqlite' \
   --exclude='vendor' \
   --exclude='tests' \
