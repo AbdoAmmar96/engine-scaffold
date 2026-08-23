@@ -49,6 +49,8 @@ echo "==> [2/7] بناء الأصول محليًا (السيرفر مفيهوش 
 echo "==> [3/7] رفع كود التطبيق"
 # نبضة الجدولة بتتكتب على السيرفر نفسه — لو رفعنا نسخة الجهاز المحلي
 # فوقها، كرون واقف هيبان شغّال وده أسوأ من مفيش مؤشّر خالص.
+# و ACCOUNTS.txt عايش على السيرفر بس (مش في git) — من غير الاستثناء
+# ده الـ --delete كان بيمسحه في كل رفعة، وده اللي حصل فعلًا.
 push \
   --exclude='.git' \
   --exclude='node_modules' \
@@ -60,6 +62,7 @@ push \
   --exclude='storage/framework/views/*' \
   --exclude='storage/app/public/*' \
   --exclude='storage/app/schedule-heartbeat' \
+  --exclude='ACCOUNTS.txt' \
   --exclude='database/*.sqlite' \
   --exclude='vendor' \
   --exclude='tests' \
