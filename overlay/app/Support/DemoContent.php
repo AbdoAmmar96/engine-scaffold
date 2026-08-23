@@ -549,31 +549,12 @@ class DemoContent
         ];
     }
 
-    /** محطات الشركة في صفحة "من نحن" */
-    public static function milestones(string $locale): array
-    {
-        $ar = $locale === 'ar';
-
-        return [
-            ['year' => '2014', 'title' => $ar ? 'المكتب الأول' : 'The first office', 'text' => $ar ? 'مكتب تسويق صغير في التجمع الخامس بفريق من أربعة أشخاص.' : 'A small marketing office in the Fifth Settlement with a team of four.'],
-            ['year' => '2018', 'title' => $ar ? 'أول شراكة تطوير' : 'First development partnership', 'text' => $ar ? 'اتفاقية حصرية مع مطوّر في القاهرة الجديدة على ثلاثة مشاريع.' : 'An exclusive agreement with a New Cairo developer covering three projects.'],
-            ['year' => '2021', 'title' => $ar ? 'التوسّع للعاصمة' : 'Expanding to the Capital', 'text' => $ar ? 'فرع في الحي المالي وتغطية كاملة لمشاريع العاصمة الإدارية.' : 'A branch in the financial district and full coverage of New Capital projects.'],
-            ['year' => '2024', 'title' => $ar ? 'المنصة الرقمية' : 'The digital platform', 'text' => $ar ? 'إطلاق المنصة ببيانات سعر وسداد وتسليم موثّقة لكل وحدة.' : 'Launching the platform with verified price, payment and delivery data per unit.'],
-        ];
-    }
-
-    /** فريق العمل في صفحة "من نحن" */
-    public static function team(string $locale): array
-    {
-        $ar = $locale === 'ar';
-
-        return [
-            ['name' => $ar ? 'أحمد شلبي' : 'Ahmed Shalaby', 'role' => $ar ? 'الرئيس التنفيذي' : 'Chief Executive', 'image' => '/images/demo/team-1.jpg'],
-            ['name' => $ar ? 'منى عبد العزيز' : 'Mona Abdelaziz', 'role' => $ar ? 'مدير المبيعات' : 'Head of Sales', 'image' => '/images/demo/team-2.jpg'],
-            ['name' => $ar ? 'كريم فتحي' : 'Karim Fathy', 'role' => $ar ? 'مسؤول علاقات المطوّرين' : 'Developer Relations', 'image' => '/images/demo/team-3.jpg'],
-            ['name' => $ar ? 'سارة منصور' : 'Sara Mansour', 'role' => $ar ? 'ما بعد البيع' : 'After-sales', 'image' => '/images/demo/team-4.jpg'],
-        ];
-    }
+    /*
+     | milestones() و team() اتشالوا من هنا.
+     | كانوا بيولّدوا أربع محطات مخترعة وأربع صور ستوك بأسماء متلفّقة
+     | معروضة في «من نحن» كأنها الفريق الحقيقي. دلوقتي الاتنين بيتكتبوا
+     | من `/admin/settings/about` وفاضيين افتراضيًا، والقسم بيختفي وهو فاضي.
+     */
 
     /** خيارات فورم "اتصل بنا" */
     public static function contactOptions(string $locale): array

@@ -3,6 +3,7 @@ import {
     BarChart3,
     Briefcase,
     Building2,
+    FileText,
     Home,
     Image as ImageIcon,
     Images,
@@ -45,6 +46,7 @@ const settingsNav: NavItem[] = [
     { href: "/admin/settings/general", label: "عام", icon: Settings, perm: [SETTINGS] },
     { href: "/admin/settings/theme", label: "الهوية والألوان", icon: Palette, perm: [SETTINGS] },
     { href: "/admin/settings/branding", label: "اللوجو والميديا", icon: ImageIcon, perm: [SETTINGS] },
+    { href: "/admin/settings/about", label: "صفحة من نحن", icon: FileText, perm: [SETTINGS] },
     { href: "/admin/settings/contact", label: "بيانات التواصل", icon: Phone, perm: [SETTINGS] },
     { href: "/admin/settings/social", label: "السوشيال ميديا", icon: Share2, perm: [SETTINGS] },
     { href: "/admin/settings/seo", label: "السيو", icon: Search, perm: [SETTINGS] },
@@ -55,6 +57,7 @@ const settingsNav: NavItem[] = [
 const contentNav: NavItem[] = [
     { href: "/admin/media", label: "مكتبة الميديا", icon: Images, perm: [MEDIA] },
     { href: "/admin/menus", label: "القوائم", icon: ListTree, perm: [CONTENT] },
+    { href: "/admin/pages", label: "الصفحات", icon: FileText, perm: [CONTENT] },
     { href: "/admin/landing-pages", label: "صفحات الهبوط", icon: Search, perm: [CONTENT] },
 ];
 

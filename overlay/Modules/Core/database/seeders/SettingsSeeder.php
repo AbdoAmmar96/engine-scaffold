@@ -23,6 +23,25 @@ class SettingsSeeder extends Seeder
                 'team_size' => '',
             ],
 
+            // صفحة «من نحن» — كلها فاضية عن قصد.
+            // كان محتواها مكتوب في React: «اثنتا عشرة سنة»، «فريق من 46 شخص»،
+            // أربع محطات، وأربع صور ستوك بأسماء متلفّقة معروضة كأنها الفريق.
+            // القسم اللي مالوش بيانات بيختفي — الادعاء أسوأ من النقص.
+            'about' => [
+                'hero_title' => '',
+                'hero_title_en' => '',
+                'hero_desc' => '',
+                'hero_desc_en' => '',
+                'pledge_title' => '',
+                'pledge_title_en' => '',
+                'pledge_body' => '',
+                'pledge_body_en' => '',
+                'milestones' => '',
+                'milestones_en' => '',
+                'team' => '',
+                'team_en' => '',
+            ],
+
             // 🎨 Palette A — "Midnight & Gold" (نسخة فاتحة: الموقع أبيض) + خط Cairo
             'theme' => [
                 'primary' => '#C9A227',

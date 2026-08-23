@@ -45,6 +45,12 @@
 
     <link rel="canonical" href="{{ $canonical }}">
 
+    {{-- صفحة زي «تم استلام طلبك» مالهاش لازمة في نتايج البحث.
+         follow مقصودة: متتفهرسش، بس عدّي على اللينكات اللي فيها. --}}
+    @if (! empty($meta['robots']))
+        <meta name="robots" content="{{ $meta['robots'] }}">
+    @endif
+
     @foreach (($meta['alternates'] ?? []) as $altLocale => $altUrl)
         <link rel="alternate" hreflang="{{ $altLocale }}" href="{{ $altUrl }}">
     @endforeach

@@ -8,6 +8,7 @@ use Modules\Blog\Models\Post;
 use Modules\Compounds\Models\Compound;
 use Modules\Developers\Models\Developer;
 use Modules\Locations\Models\Location;
+use Modules\Pages\Models\Page;
 use Modules\Properties\Models\Property;
 use Modules\Seo\Models\LandingPage;
 
@@ -32,6 +33,16 @@ class SitemapController extends Controller
                 'path' => $path,
                 'changefreq' => $path === '' ? 'daily' : 'weekly',
                 'priority' => $path === '' ? '1.0' : '0.8',
+            ];
+        }
+
+        // صفحات المحتوى — اللي متعلّم عليها متتفهرسش مبتدخلش الخريطة أصلًا
+        foreach (Page::published()->where('is_indexable', true)->orderBy('sort')->get() as $page) {
+            $urls[] = [
+                'path' => '/'.$page->slug,
+                'lastmod' => $page->updated_at?->toAtomString(),
+                'changefreq' => 'yearly',
+                'priority' => '0.4',
             ];
         }
 

@@ -1,11 +1,22 @@
 <?php
 
+use App\Support\Catalog;
+use App\Support\DemoContent;
+use App\Support\Seo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Modules\Core\Http\Controllers\AccountAuthController;
+use Modules\Core\Http\Controllers\AccountController;
+use Modules\Core\Http\Controllers\FavoriteController;
+use Modules\Core\Http\Controllers\PasswordResetController;
 use Modules\Developers\Http\Controllers\DeveloperPageController;
+use Modules\Leads\Http\Controllers\LeadController;
 use Modules\Locations\Http\Controllers\LocationPageController;
 use Modules\Marketing\Http\Controllers\AdClickController;
+use Modules\Marketing\Support\AdSlot;
+use Modules\Pages\Http\Controllers\AboutController;
+use Modules\Pages\Http\Controllers\PageController;
 use Modules\Properties\Http\Controllers\AccountPropertyController;
 use Modules\Properties\Http\Controllers\AddPropertyController;
 use Modules\Properties\Http\Controllers\PropertyPageController;
@@ -22,13 +33,13 @@ Route::prefix('{locale}')
     ->group(function () {
 
         Route::get('/', fn (string $locale) => Inertia::render('Site/Home', [
-            'latestProperties' => \App\Support\Catalog::properties($locale, 6),
-            'latestCompounds'  => \App\Support\Catalog::compounds($locale, 3),
-            'areas'            => \App\Support\Catalog::areas($locale, 3),
-            'searchOptions'    => \App\Support\Catalog::searchOptions($locale),
-            'ads'              => \Modules\Marketing\Support\AdSlot::at('hero', $locale, 3),
-            'recentlyViewed'   => \App\Support\Catalog::recentlyViewed($locale),
-            'meta'             => \App\Support\Seo::page($locale, ''),
+            'latestProperties' => Catalog::properties($locale, 6),
+            'latestCompounds' => Catalog::compounds($locale, 3),
+            'areas' => Catalog::areas($locale, 3),
+            'searchOptions' => Catalog::searchOptions($locale),
+            'ads' => AdSlot::at('hero', $locale, 3),
+            'recentlyViewed' => Catalog::recentlyViewed($locale),
+            'meta' => Seo::page($locale, ''),
         ]))->name('home');
 
         /* ---------- العقارات ---------- */
@@ -65,16 +76,16 @@ Route::prefix('{locale}')
         Route::get('/areas/{slug}', [LocationPageController::class, 'show'])->name('areas.show');
 
         Route::get('/compounds', function (Request $request, string $locale) {
-            $filters = \App\Support\Catalog::filters($request);
+            $filters = Catalog::filters($request);
 
-            $compounds = \App\Support\Catalog::compounds($locale, null, $filters);
+            $compounds = Catalog::compounds($locale, null, $filters);
             $title = $locale === 'en' ? 'Compounds' : 'الكمبوندات';
 
             return Inertia::render('Site/Compounds', [
                 'compounds' => $compounds,
                 'filters' => $filters,
-                'options' => \App\Support\Catalog::searchOptions($locale),
-                'meta' => \App\Support\Seo::page(
+                'options' => Catalog::searchOptions($locale),
+                'meta' => Seo::page(
                     $locale,
                     $title,
                     $locale === 'en'
@@ -83,15 +94,15 @@ Route::prefix('{locale}')
                     $compounds[0]['image'] ?? null,
                     'website',
                     [
-                        \App\Support\Seo::breadcrumb($locale, [$title => '/compounds']),
-                        \App\Support\Seo::itemList($compounds, $locale, '/compounds'),
+                        Seo::breadcrumb($locale, [$title => '/compounds']),
+                        Seo::itemList($compounds, $locale, '/compounds'),
                     ],
                 ),
             ]);
         })->name('compounds');
 
         Route::get('/compounds/{slug}', function (string $locale, string $slug) {
-            $compound = \App\Support\Catalog::compound($locale, $slug);
+            $compound = Catalog::compound($locale, $slug);
 
             abort_if(! $compound, 404);
 
@@ -103,44 +114,30 @@ Route::prefix('{locale}')
 
             return Inertia::render('Site/Compound', [
                 'compound' => $compound,
-                'units' => \App\Support\Catalog::compoundUnits($locale, $compound['id']),
-                'meta' => \App\Support\Seo::page(
+                'units' => Catalog::compoundUnits($locale, $compound['id']),
+                'meta' => Seo::page(
                     $locale,
                     $compound['name'],
                     $summary,
                     $compound['image'],
                     'article',
                     [
-                        \App\Support\Seo::breadcrumb($locale, [
+                        Seo::breadcrumb($locale, [
                             $crumb => '/compounds',
                             $compound['name'] => '/compounds/'.$compound['slug'],
                         ]),
-                        \App\Support\Seo::project($compound + ['desc' => $summary], $locale),
+                        Seo::project($compound + ['desc' => $summary], $locale),
                     ],
                 ),
             ]);
         })->name('compounds.show');
 
-        Route::get('/about', fn (string $locale) => Inertia::render('Site/About', [
-            'milestones' => \App\Support\DemoContent::milestones($locale),
-            'team'       => \App\Support\DemoContent::team($locale),
-            'stats'      => \App\Support\Catalog::stats($locale),
-            'developers' => \App\Support\Catalog::developers($locale),
-            'meta'       => \App\Support\Seo::page(
-                $locale,
-                $locale === 'en' ? 'About us' : 'من نحن',
-                $locale === 'en'
-                    ? 'Who we are, how we work, and why we say no when a unit does not fit.'
-                    : 'مين إحنا، وبنشتغل إزاي، وليه بنقول «لأ» لما الوحدة مش مناسبة.',
-                null,
-                'website',
-                [\App\Support\Seo::breadcrumb($locale, [($locale === 'en' ? 'About us' : 'من نحن') => '/about'])],
-            ),
-        ]))->name('about');
+        // «من نحن» بقت من الإعدادات — الكنترولر بيقرا مجموعة `about`
+        Route::get('/about', [AboutController::class, 'show'])->name('about');
 
         Route::get('/contact', fn (string $locale) => Inertia::render('Site/Contact', [
-            'options' => \App\Support\DemoContent::contactOptions($locale),
-            'meta'    => \App\Support\Seo::page(
+            'options' => DemoContent::contactOptions($locale),
+            'meta' => Seo::page(
                 $locale,
                 $locale === 'en' ? 'Contact us' : 'اتصل بنا',
                 $locale === 'en'
@@ -148,13 +145,13 @@ Route::prefix('{locale}')
                     : 'قوللنا ميزانيتك والمنطقة وهنرشّح لك اللي يناسبك فعلًا.',
                 null,
                 'website',
-                [\App\Support\Seo::breadcrumb($locale, [($locale === 'en' ? 'Contact us' : 'اتصل بنا') => '/contact'])],
+                [Seo::breadcrumb($locale, [($locale === 'en' ? 'Contact us' : 'اتصل بنا') => '/contact'])],
             ),
         ]))->name('contact');
 
         Route::get('/blog', fn (string $locale) => Inertia::render('Site/Blog', [
-            'posts' => \App\Support\Catalog::posts($locale),
-            'meta'  => \App\Support\Seo::page(
+            'posts' => Catalog::posts($locale),
+            'meta' => Seo::page(
                 $locale,
                 $locale === 'en' ? 'Real-estate blog' : 'المدونة العقارية',
                 $locale === 'en'
@@ -162,35 +159,35 @@ Route::prefix('{locale}')
                     : 'تحليلات ودلائل عملية عن السوق العقاري المصري.',
                 null,
                 'website',
-                [\App\Support\Seo::breadcrumb($locale, [($locale === 'en' ? 'Blog' : 'المدونة') => '/blog'])],
+                [Seo::breadcrumb($locale, [($locale === 'en' ? 'Blog' : 'المدونة') => '/blog'])],
             ),
         ]))->name('blog');
 
         Route::get('/blog/{slug}', function (string $locale, string $slug) {
-            $post = \App\Support\Catalog::post($locale, $slug);
+            $post = Catalog::post($locale, $slug);
 
             abort_if(! $post, 404);
 
             $more = array_filter(
-                \App\Support\Catalog::posts($locale, 4),
+                Catalog::posts($locale, 4),
                 fn ($p) => $p['slug'] !== $slug,
             );
 
             return Inertia::render('Site/Post', [
                 'post' => $post,
                 'more' => array_slice(array_values($more), 0, 3),
-                'meta' => \App\Support\Seo::page(
+                'meta' => Seo::page(
                     $locale,
                     $post['title'],
                     $post['excerpt'],
                     $post['image'],
                     'article',
                     [
-                        \App\Support\Seo::breadcrumb($locale, [
+                        Seo::breadcrumb($locale, [
                             ($locale === 'en' ? 'Blog' : 'المدونة') => '/blog',
                             $post['title'] => '/blog/'.$post['slug'],
                         ]),
-                        \App\Support\Seo::article($post, $locale),
+                        Seo::article($post, $locale),
                     ],
                 ),
             ]);
@@ -199,70 +196,78 @@ Route::prefix('{locale}')
         /* ---------- حساب العميل ---------- */
         // التسجيل العام بيطلّع دور customer بس — الوسطاء والشركات بيتعملوا من اللوحة
         Route::middleware('guest')->group(function () {
-            Route::get('login', [\Modules\Core\Http\Controllers\AccountAuthController::class, 'showLogin'])
+            Route::get('login', [AccountAuthController::class, 'showLogin'])
                 ->name('account.login');
-            Route::post('login', [\Modules\Core\Http\Controllers\AccountAuthController::class, 'login'])
+            Route::post('login', [AccountAuthController::class, 'login'])
                 ->middleware('throttle:5,1')->name('account.login.store');
 
-            Route::get('register', [\Modules\Core\Http\Controllers\AccountAuthController::class, 'showRegister'])
+            Route::get('register', [AccountAuthController::class, 'showRegister'])
                 ->name('account.register');
-            Route::post('register', [\Modules\Core\Http\Controllers\AccountAuthController::class, 'register'])
+            Route::post('register', [AccountAuthController::class, 'register'])
                 ->middleware('throttle:5,1')->name('account.register.store');
 
             /* ---------- نسيت كلمة المرور ---------- */
             // بتخدم اللوحة والموقع سوا — الحساب واحد
-            Route::get('forgot-password', [\Modules\Core\Http\Controllers\PasswordResetController::class, 'showRequest'])
+            Route::get('forgot-password', [PasswordResetController::class, 'showRequest'])
                 ->name('password.request');
-            Route::post('forgot-password', [\Modules\Core\Http\Controllers\PasswordResetController::class, 'sendLink'])
+            Route::post('forgot-password', [PasswordResetController::class, 'sendLink'])
                 ->middleware('throttle:5,10')->name('password.email');
 
-            Route::get('reset-password/{token}', [\Modules\Core\Http\Controllers\PasswordResetController::class, 'showReset'])
+            Route::get('reset-password/{token}', [PasswordResetController::class, 'showReset'])
                 ->name('password.reset');
-            Route::post('reset-password', [\Modules\Core\Http\Controllers\PasswordResetController::class, 'reset'])
+            Route::post('reset-password', [PasswordResetController::class, 'reset'])
                 ->middleware('throttle:5,10')->name('password.update');
         });
 
         Route::middleware('auth')->group(function () {
-            Route::post('logout', [\Modules\Core\Http\Controllers\AccountAuthController::class, 'logout'])
+            Route::post('logout', [AccountAuthController::class, 'logout'])
                 ->name('account.logout');
 
-            Route::get('account', [\Modules\Core\Http\Controllers\AccountController::class, 'index'])
+            Route::get('account', [AccountController::class, 'index'])
                 ->name('account.index');
-            Route::get('account/favorites', [\Modules\Core\Http\Controllers\AccountController::class, 'favorites'])
+            Route::get('account/favorites', [AccountController::class, 'favorites'])
                 ->name('account.favorites');
-            Route::get('account/requests', [\Modules\Core\Http\Controllers\AccountController::class, 'requests'])
+            Route::get('account/requests', [AccountController::class, 'requests'])
                 ->name('account.requests');
-            Route::put('account', [\Modules\Core\Http\Controllers\AccountController::class, 'update'])
+            Route::put('account', [AccountController::class, 'update'])
                 ->name('account.update');
 
-            Route::post('favorites/{property}', [\Modules\Core\Http\Controllers\FavoriteController::class, 'toggle'])
+            Route::post('favorites/{property}', [FavoriteController::class, 'toggle'])
                 ->whereNumber('property')->name('account.favorites.toggle');
 
             /* ---------- البحث المحفوظ ---------- */
-            Route::get('account/saved-searches',       [SavedSearchController::class, 'index'])->name('account.searches');
-            Route::post('account/saved-searches',      [SavedSearchController::class, 'store'])->name('account.searches.store');
-            Route::put('account/saved-searches/{id}',  [SavedSearchController::class, 'update'])->whereNumber('id')->name('account.searches.update');
+            Route::get('account/saved-searches', [SavedSearchController::class, 'index'])->name('account.searches');
+            Route::post('account/saved-searches', [SavedSearchController::class, 'store'])->name('account.searches.store');
+            Route::put('account/saved-searches/{id}', [SavedSearchController::class, 'update'])->whereNumber('id')->name('account.searches.update');
             Route::delete('account/saved-searches/{id}', [SavedSearchController::class, 'destroy'])->whereNumber('id')->name('account.searches.destroy');
 
             /* ---------- وحدات المعلن ---------- */
             // على الصلاحية مش على الدور: الوسيط والشركة والمعلن كلهم
             // بيديروا وحداتهم من هنا، والفرق بينهم إن الأولانيين معاهم لوحة كمان
             Route::middleware('permission:manage listings')->group(function () {
-                Route::get('account/my-properties',             [AccountPropertyController::class, 'index'])->name('account.properties');
-                Route::get('account/my-properties/create',      [AccountPropertyController::class, 'create'])->name('account.properties.create');
-                Route::post('account/my-properties',            [AccountPropertyController::class, 'store'])->name('account.properties.store');
-                Route::get('account/my-properties/{id}/edit',   [AccountPropertyController::class, 'edit'])->whereNumber('id')->name('account.properties.edit');
-                Route::put('account/my-properties/{id}',        [AccountPropertyController::class, 'update'])->whereNumber('id')->name('account.properties.update');
+                Route::get('account/my-properties', [AccountPropertyController::class, 'index'])->name('account.properties');
+                Route::get('account/my-properties/create', [AccountPropertyController::class, 'create'])->name('account.properties.create');
+                Route::post('account/my-properties', [AccountPropertyController::class, 'store'])->name('account.properties.store');
+                Route::get('account/my-properties/{id}/edit', [AccountPropertyController::class, 'edit'])->whereNumber('id')->name('account.properties.edit');
+                Route::put('account/my-properties/{id}', [AccountPropertyController::class, 'update'])->whereNumber('id')->name('account.properties.update');
                 Route::post('account/my-properties/{id}/toggle', [AccountPropertyController::class, 'toggle'])->whereNumber('id')->name('account.properties.toggle');
                 Route::post('account/my-properties/{id}/feature', [AccountPropertyController::class, 'requestFeature'])->whereNumber('id')->name('account.properties.feature');
-                Route::delete('account/my-properties/{id}',     [AccountPropertyController::class, 'destroy'])->whereNumber('id')->name('account.properties.destroy');
+                Route::delete('account/my-properties/{id}', [AccountPropertyController::class, 'destroy'])->whereNumber('id')->name('account.properties.destroy');
             });
         });
 
         // استقبال طلبات فورم "اتصل بنا" → موديول Leads
-        Route::post('/leads', [\Modules\Leads\Http\Controllers\LeadController::class, 'store'])
+        Route::post('/leads', [LeadController::class, 'store'])
             ->middleware('throttle:8,1')
             ->name('leads.store');
 
+        /* ---------- صفحات المحتوى — لازم تفضل آخر حاجة هنا ----------
+         | `/{locale}/{slug}` بيلقط أي مقطع واحد، فأي راوت بيتضاف تحته
+         | مش هيتشاف أبدًا. لارافيل بيطابق بترتيب التسجيل.
+         | و`App\Support\ReservedSlugs` بيمنع الصفحة من الأساس إنها تاخد
+         | اسم مسار موجود، فالحماية من الناحيتين.
+         */
+        Route::get('/{slug}', [PageController::class, 'show'])
+            ->name('pages.show');
 
     });

@@ -2,6 +2,7 @@ import { Link, usePage } from "@inertiajs/react";
 import { ArrowLeft, CalendarDays, Clock, Share2, User } from "lucide-react";
 import PageHero from "@/Components/site/PageHero";
 import Reveal from "@/Components/site/Reveal";
+import RichText from "@/Components/site/RichText";
 import SiteLayout from "@/Layouts/SiteLayout";
 import type { BlogArticle, BlogPost, SharedProps } from "@/lib/types";
 
@@ -29,84 +30,6 @@ const copy = {
         ctaBtn: "Contact us",
     },
 };
-
-/**
- * نص عادي → فقرات وعناوين فرعية ونقاط. السطر اللي بيبدأ بـ ## عنوان، و- نقطة.
- * بيفصل العنوان والنقط لوحدهم حتى لو الكاتب نسي السطر الفاضي.
- */
-function toBlocks(text: string): string[] {
-    const blocks: string[] = [];
-    let buf: string[] = [];
-
-    const flush = () => {
-        const joined = buf.join("\n").trim();
-        if (joined) blocks.push(joined);
-        buf = [];
-    };
-
-    for (const raw of text.split("\n")) {
-        const line = raw.trim();
-
-        if (!line) {
-            flush();
-            continue;
-        }
-
-        if (line.startsWith("## ")) {
-            flush();
-            blocks.push(line);
-            continue;
-        }
-
-        // التبديل بين فقرة ونقط بيبدأ بلوك جديد
-        if (line.startsWith("- ") !== (buf.length > 0 && buf[0].startsWith("- "))) flush();
-
-        buf.push(line);
-    }
-
-    flush();
-
-    return blocks;
-}
-
-function Body({ text }: { text: string }) {
-    const blocks = toBlocks(text);
-
-    return (
-        <div className="flex flex-col gap-5">
-            {blocks.map((block, i) => {
-                if (block.startsWith("## ")) {
-                    return (
-                        <h2 key={i} className="mt-4 text-xl font-extrabold leading-[1.6] text-secondary md:text-2xl">
-                            {block.slice(3)}
-                        </h2>
-                    );
-                }
-
-                const lines = block.split("\n").map((l) => l.trim());
-
-                if (lines.every((l) => l.startsWith("- "))) {
-                    return (
-                        <ul key={i} className="flex flex-col gap-2.5">
-                            {lines.map((l, j) => (
-                                <li key={j} className="flex gap-3 text-[15px] leading-[2] text-text">
-                                    <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                                    {l.slice(2)}
-                                </li>
-                            ))}
-                        </ul>
-                    );
-                }
-
-                return (
-                    <p key={i} className="text-[15px] leading-[2.1] text-text">
-                        {block}
-                    </p>
-                );
-            })}
-        </div>
-    );
-}
 
 export default function Post({ post, more }: { post: BlogArticle; more: BlogPost[] }) {
     const { locale } = usePage<SharedProps>().props;
@@ -147,7 +70,7 @@ export default function Post({ post, more }: { post: BlogArticle; more: BlogPost
                 <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,1fr)_20rem]">
                     <article className="min-w-0">
                         <Reveal>
-                            <Body text={post.body} />
+                            <RichText text={post.body} />
                         </Reveal>
 
                         <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-6">
