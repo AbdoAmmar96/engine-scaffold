@@ -197,6 +197,34 @@ class StaffRolesTest extends TestCase
         $this->actingAs($lister)->get('/admin')->assertRedirect('/ar/account');
     }
 
+    public function test_account_emails_are_hidden_from_everyone_but_user_managers(): void
+    {
+        $broker = $this->userWithRole('broker');
+
+        $owners = function (): array {
+            $field = collect($this->get('/admin/properties/create')->viewData('page')['props']['resource']['fields'])
+                ->firstWhere('name', 'owner_id');
+
+            return array_column($field['options'] ?? [], 'label');
+        };
+
+        // مدخل البيانات والتسويق بيشوفوا القايمة عشان يوزّعوا الوحدات،
+        // بس من غير إيميلات
+        foreach (['data_entry', 'marketing'] as $role) {
+            $this->actingAs($this->userWithRole($role));
+
+            $labels = $owners();
+
+            $this->assertNotEmpty($labels);
+            $this->assertStringNotContainsString($broker->email, implode(' ', $labels));
+            $this->assertContains($broker->name.' #'.$broker->id, $labels);
+        }
+
+        // اللي بيدير المستخدمين أصلًا بيشوف الإيميلات في شاشته
+        $this->actingAs($this->userWithRole('admin'));
+        $this->assertStringContainsString($broker->email, implode(' ', $owners()));
+    }
+
     /* ---------------------------------------------------------------- */
     /* الأدوار: سوبر أدمن بس */
     /* ---------------------------------------------------------------- */

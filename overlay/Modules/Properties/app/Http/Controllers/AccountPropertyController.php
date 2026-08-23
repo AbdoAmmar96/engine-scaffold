@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\Marketing\Models\FeaturedAd;
 use Modules\Properties\Models\Property;
 use Modules\Properties\Support\HandlesListingInput;
 
@@ -28,7 +29,7 @@ class AccountPropertyController extends Controller
     {
         $rows = $this->mine($request)
             ->withCount(['leads', 'favoritedBy'])
-            ->with('location')
+            ->with(['location', 'featuredAds'])
             ->orderByDesc('id')
             ->get();
 
@@ -116,6 +117,44 @@ class AccountPropertyController extends Controller
             : ($locale === 'en' ? 'Listing hidden' : 'الوحدة اتخفت'));
     }
 
+    /**
+     * طلب ترقية لإعلان مميّز.
+     *
+     * بيتعمل «في انتظار الموافقة» — التسويق بيراجعه ويحدد الفترة.
+     * المعلن مبيحددش تواريخ بنفسه عشان مايحجزش المساحة لنفسه.
+     */
+    public function requestFeature(Request $request, string $locale, int $id): RedirectResponse
+    {
+        $property = $this->find($request, $id);
+
+        if ($property->status !== 'published') {
+            return back()->with('error', $locale === 'en'
+                ? 'Only a live listing can be promoted.'
+                : 'الترقية للوحدات المنشورة بس.');
+        }
+
+        $open = FeaturedAd::where('property_id', $property->id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->exists();
+
+        if ($open) {
+            return back()->with('error', $locale === 'en'
+                ? 'There is already an open request for this listing.'
+                : 'فيه طلب مفتوح على الوحدة دي بالفعل.');
+        }
+
+        FeaturedAd::create([
+            'position' => 'listing',
+            'property_id' => $property->id,
+            'requested_by' => $request->user()->id,
+            'status' => 'pending',
+        ]);
+
+        return back()->with('success', $locale === 'en'
+            ? 'Request sent ✅ — our team will get back to you with the slot and the price.'
+            : 'اتبعت الطلب ✅ — الفريق هيرجعلك بالمساحة والسعر.');
+    }
+
     public function destroy(Request $request, string $locale, int $id): RedirectResponse
     {
         $this->find($request, $id)->delete();
@@ -157,6 +196,29 @@ class AccountPropertyController extends Controller
             'views' => (int) $property->views_count,
             'saves' => (int) $property->favorited_by_count,
             'requests' => (int) $property->leads_count,
+            'promotion' => $this->promotion($property),
+        ];
+    }
+
+    /**
+     * حالة الترقية للعرض: null يعني الزرار يظهر، وغير كده بنقول له
+     * هي فين — الزرار بيختفي عشان مايبعتش طلب تاني.
+     */
+    private function promotion(Property $property): ?array
+    {
+        $ad = $property->featuredAds
+            ->whereIn('status', ['pending', 'approved', 'rejected'])
+            ->sortByDesc('id')
+            ->first();
+
+        if (! $ad || ($ad->status === 'approved' && ! $ad->isLive() && $ad->ends_at?->isPast())) {
+            return null;
+        }
+
+        return [
+            'open' => in_array($ad->status, ['pending', 'approved'], true),
+            'state' => $ad->stateLabel(),
+            'reason' => $ad->rejection_reason ?? '',
         ];
     }
 

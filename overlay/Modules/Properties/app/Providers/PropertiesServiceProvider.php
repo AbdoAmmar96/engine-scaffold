@@ -22,7 +22,9 @@ class PropertiesServiceProvider extends ModuleServiceProvider
      *
      * @var string[]
      */
-    // protected array $commands = [];
+    protected array $commands = [
+        \Modules\Properties\Console\SendSearchAlerts::class,
+    ];
 
     /**
      * Provider classes to register.

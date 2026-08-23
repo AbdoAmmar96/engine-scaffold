@@ -2,6 +2,7 @@
 
 namespace Modules\Locations\Models;
 
+use App\Support\LogsActivity;
 use App\Support\Bilingual;
 use App\Support\Sluggable;
 use Illuminate\Database\Eloquent\Model;
@@ -31,7 +32,7 @@ use Modules\Properties\Models\Property;
  */
 class Location extends Model
 {
-    use Bilingual, Sluggable;
+    use Bilingual, LogsActivity, Sluggable;
 
     protected $fillable = [
         'name', 'name_en', 'slug', 'note', 'note_en', 'about', 'about_en',

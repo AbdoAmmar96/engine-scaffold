@@ -1,5 +1,6 @@
 import { Link, usePage } from "@inertiajs/react";
 import {
+    BarChart3,
     Briefcase,
     Building2,
     Home,
@@ -11,9 +12,11 @@ import {
     ListTree,
     LogOut,
     MapPin,
+    Megaphone,
     Newspaper,
     Palette,
     Phone,
+    ScrollText,
     Search,
     Settings,
     Share2,
@@ -30,8 +33,10 @@ const CATALOG = "manage catalog";
 const LISTINGS = "manage listings";
 const PROJECTS = "manage projects";
 const LEADS = "manage leads";
+const FEATURE = "feature listings";
 const USERS = "manage users";
 const ROLES = "manage roles";
+const REPORTS = "view reports";
 
 /** اللينك بيظهر لو معاه أي صلاحية من دول — الأدمن والوسيط بيدخلوا نفس الشاشة */
 type NavItem = { href: string; label: string; icon: typeof Home; perm: string[] };
@@ -59,12 +64,17 @@ const moduleNav: NavItem[] = [
     { href: "/admin/compounds", label: "الكمبوندات", icon: Building2, perm: [CATALOG, PROJECTS] },
     { href: "/admin/developers", label: "المطوّرون", icon: Briefcase, perm: [CATALOG] },
     { href: "/admin/locations", label: "المناطق", icon: MapPin, perm: [CATALOG] },
+    { href: "/admin/featured-ads", label: "المساحات الإعلانية", icon: Megaphone, perm: [FEATURE] },
     { href: "/admin/leads", label: "الطلبات", icon: Inbox, perm: [LEADS] },
     { href: "/admin/posts", label: "المدونة", icon: Newspaper, perm: [CONTENT] },
 ];
 
 // إدارة النظام
-const systemNav: NavItem[] = [{ href: "/admin/users", label: "المستخدمون", icon: UserCog, perm: [USERS, ROLES] }];
+const systemNav: NavItem[] = [
+    { href: "/admin/reports", label: "التقارير", icon: BarChart3, perm: [REPORTS] },
+    { href: "/admin/users", label: "المستخدمون", icon: UserCog, perm: [USERS, ROLES] },
+    { href: "/admin/activity", label: "سجل النشاط", icon: ScrollText, perm: [USERS] },
+];
 
 export default function AdminLayout({ title, children }: { title: string; children: ReactNode }) {
     const { auth } = usePage<SharedProps>().props;

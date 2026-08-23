@@ -2,6 +2,7 @@
 
 namespace Modules\Compounds\Models;
 
+use App\Support\LogsActivity;
 use App\Models\User;
 use App\Support\Bilingual;
 use App\Support\Sluggable;
@@ -45,7 +46,7 @@ use Modules\Properties\Models\Property;
  */
 class Compound extends Model
 {
-    use Bilingual, Sluggable;
+    use Bilingual, LogsActivity, Sluggable;
 
     protected $fillable = [
         'name', 'name_en', 'slug', 'developer_id', 'owner_id', 'location_id', 'description', 'description_en',

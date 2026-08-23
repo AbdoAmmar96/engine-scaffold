@@ -67,15 +67,26 @@ trait OwnedResource
         ]];
     }
 
-    /** حسابات الوسطاء والشركات */
+    /**
+     * حسابات الوسطاء والشركات.
+     *
+     * الإيميل بيان شخصي، فبيبان لمين بيدير المستخدمين بس — قبل كده كان
+     * ظاهر لأي حد معاه «manage catalog»، يعني مدخل البيانات والتسويق كانوا
+     * بيقروا إيميلات كل الوسطاء من قايمة منسدلة. رقم الحساب بيفرّق بين
+     * اتنين بنفس الاسم من غير ما يكشف حاجة.
+     */
     protected static function ownerOptions(): array
     {
+        $seesEmails = (bool) self::actor()?->can('manage users');
+
         return User::role(RolePermissionSeeder::ownerRoles())
             ->orderBy('name')
             ->get()
             ->map(fn (User $u) => [
                 'value' => (string) $u->id,
-                'label' => $u->displayName().' — '.$u->email,
+                'label' => $seesEmails
+                    ? $u->displayName().' — '.$u->email
+                    : $u->displayName().' #'.$u->id,
             ])
             ->all();
     }

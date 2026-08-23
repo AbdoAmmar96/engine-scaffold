@@ -2,6 +2,7 @@
 
 namespace Modules\Leads\Models;
 
+use App\Support\LogsActivity;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -32,6 +33,8 @@ use Modules\Properties\Models\Property;
  */
 class Lead extends Model
 {
+    use LogsActivity;
+
     protected $fillable = [
         'user_id', 'owner_id', 'property_id', 'compound_id',
         'name', 'phone', 'email', 'area', 'budget', 'message', 'source', 'status', 'notes',

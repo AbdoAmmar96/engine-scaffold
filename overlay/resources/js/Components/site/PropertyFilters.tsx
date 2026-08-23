@@ -1,5 +1,5 @@
 import { router, usePage } from "@inertiajs/react";
-import { RotateCcw, SlidersHorizontal } from "lucide-react";
+import { BellPlus, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import type { SearchOptions, SharedProps } from "@/lib/types";
 
@@ -35,6 +35,9 @@ const copy = {
         apply: "طبّق الفلاتر",
         reset: "امسح الكل",
         sort: "ترتيب",
+        save: "احفظ البحث ده",
+        saveHint: "هنبعتلك إيميل أول ما ينزل اللي يطابقه",
+        saveGuest: "سجّل دخولك عشان تحفظ البحث",
     },
     en: {
         advanced: "Advanced filters",
@@ -65,6 +68,9 @@ const copy = {
         apply: "Apply filters",
         reset: "Clear all",
         sort: "Sort",
+        save: "Save this search",
+        saveHint: "We'll email you when something matches",
+        saveGuest: "Sign in to save this search",
     },
 };
 
@@ -92,7 +98,7 @@ export default function PropertyFilters({
      */
     locked?: string[];
 }) {
-    const { locale } = usePage<SharedProps>().props;
+    const { locale, auth } = usePage<SharedProps>().props;
     const t = copy[locale] ?? copy.ar;
 
     const [draft, setDraft] = useState<Filters>(filters);
@@ -154,6 +160,16 @@ export default function PropertyFilters({
     );
 
     const plain = (list: string[]) => list.map((v) => ({ value: v, label: v }));
+
+    // الفلاتر المطبّقة فعلًا (اللي في الرابط) مش المسودّة —
+    // العميل بيحفظ اللي شايفه، مش اللي لسه بيكتبه
+    const applied = Object.entries(filters).filter(([, v]) => v !== "" && v !== 0);
+
+    const saveSearch = () => {
+        const query = new URLSearchParams(applied.map(([k, v]) => [k, String(v)])).toString();
+
+        router.post(`/${locale}/account/saved-searches?${query}`, {}, { preserveScroll: true });
+    };
 
     return (
         <form
@@ -282,6 +298,27 @@ export default function PropertyFilters({
                     <SlidersHorizontal size={15} />
                     {t.advanced}
                 </button>
+
+                {applied.length > 0 &&
+                    (auth.user ? (
+                        <button
+                            type="button"
+                            onClick={saveSearch}
+                            title={t.saveHint}
+                            className="flex items-center gap-2 rounded-brand border border-primary/40 bg-primary/5 px-4 py-2.5 text-[13px] font-extrabold text-primary transition hover:bg-primary/10"
+                        >
+                            <BellPlus size={15} />
+                            {t.save}
+                        </button>
+                    ) : (
+                        <a
+                            href={`/${locale}/login`}
+                            className="flex items-center gap-2 rounded-brand border border-gray-200 px-4 py-2.5 text-[13px] font-extrabold text-muted transition hover:border-primary hover:text-primary"
+                        >
+                            <BellPlus size={15} />
+                            {t.saveGuest}
+                        </a>
+                    ))}
 
                 <button
                     type="button"

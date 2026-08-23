@@ -1,6 +1,7 @@
 import { Link, usePage } from "@inertiajs/react";
 import { ArrowLeft, Building2, Home, LayoutGrid, SearchX } from "lucide-react";
 import ActiveFilters, { type SearchFilters } from "@/Components/site/ActiveFilters";
+import AdStrip, { type Ad } from "@/Components/site/AdStrip";
 import PageHero from "@/Components/site/PageHero";
 import PropertyCard from "@/Components/site/PropertyCard";
 import PropertyFilters from "@/Components/site/PropertyFilters";
@@ -53,6 +54,7 @@ export default function Properties({
     category,
     options,
     landing = null,
+    ads = [],
 }: {
     properties: Property[];
     filters: SearchFilters;
@@ -60,6 +62,7 @@ export default function Properties({
     category: string | null;
     options: SearchOptions;
     landing?: Landing | null;
+    ads?: Ad[];
 }) {
     const { locale, settings } = usePage<SharedProps>().props;
     const ar = locale === "ar";
@@ -114,6 +117,12 @@ export default function Properties({
                     <ActiveFilters filters={filters} path={path} locked={landing?.locked} />
 
                     <PropertyFilters filters={filters} options={options} path={path} locked={landing?.locked} />
+
+                    {ads.length > 0 && (
+                        <div className="mb-6">
+                            <AdStrip ads={ads} compact />
+                        </div>
+                    )}
 
                     {properties.length > 0 ? (
                         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

@@ -2,6 +2,7 @@
 
 namespace Modules\Seo\Models;
 
+use App\Support\LogsActivity;
 use App\Support\Bilingual;
 use App\Support\SharedSlugSpace;
 use App\Support\Sluggable;
@@ -42,7 +43,7 @@ use Modules\Properties\Models\Property;
  */
 class LandingPage extends Model
 {
-    use Bilingual, Sluggable;
+    use Bilingual, LogsActivity, Sluggable;
 
     protected $table = 'seo_landing_pages';
 

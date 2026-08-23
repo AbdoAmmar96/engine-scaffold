@@ -9,6 +9,7 @@ use Illuminate\Routing\Controller;
 use Inertia\Inertia;
 use Inertia\Response;
 use Modules\Properties\Models\Property;
+use Modules\Marketing\Support\AdSlot;
 use Modules\Seo\Models\LandingPage;
 
 /**
@@ -37,6 +38,7 @@ class PropertyPageController extends Controller
             'filters' => $filters,
             'category' => $category,
             'options' => Catalog::searchOptions($locale),
+            'ads' => AdSlot::at('listing', $locale, 3),
             'meta' => Seo::page(
                 $locale,
                 $title,
@@ -70,6 +72,11 @@ class PropertyPageController extends Controller
         // الشاشة بتوعده بإحصائيات وتوريه أصفار على طول
         Property::recordView((int) $property['id']);
 
+        // المسجّل قايمته بتمشي معاه بين الأجهزة؛ الزائر بيتخزّنله في المتصفح
+        if ($user = $request->user()) {
+            Property::recordVisit($user->id, (int) $property['id']);
+        }
+
         $crumb = $locale === 'en' ? 'Properties' : 'عقارات';
 
         // لو الأدمن مكتبش وصف، بنركّب جملة من البيانات نفسها — أحسن من ميتا فاضية
@@ -80,6 +87,7 @@ class PropertyPageController extends Controller
         return Inertia::render('Site/Property', [
             'property' => $property,
             'related' => Catalog::relatedProperties($locale, $property),
+            'ads' => AdSlot::at('sidebar', $locale, 2),
             'meta' => Seo::page(
                 $locale,
                 $property['title'],
@@ -116,6 +124,7 @@ class PropertyPageController extends Controller
             'filters' => $filters,
             'category' => null,
             'options' => Catalog::searchOptions($locale),
+            'ads' => AdSlot::at('listing', $locale, 3),
             'landing' => [
                 'slug' => $landing->slug,
                 'title' => $title,

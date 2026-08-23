@@ -1,5 +1,5 @@
 import { Link, router, usePage } from "@inertiajs/react";
-import { Building2, Eye, Heart, Inbox, Pencil, Plus, Trash2, EyeOff } from "lucide-react";
+import { Building2, Eye, EyeOff, Heart, Inbox, Megaphone, Pencil, Plus, Trash2 } from "lucide-react";
 import AccountLayout from "@/Layouts/AccountLayout";
 import type { SharedProps } from "@/lib/types";
 
@@ -23,6 +23,8 @@ const copy = {
         confirm: "تحذف الوحدة دي نهائيًا؟",
         stats: { views: "مشاهدات", saves: "محفوظة", requests: "طلبات" },
         rejected: "سبب الرفض:",
+        promote: "رقّي الإعلان",
+        promoteHint: "اطلب مساحة مميّزة والفريق هيرجعلك بالسعر والمدة",
     },
     en: {
         title: "My listings",
@@ -43,6 +45,8 @@ const copy = {
         confirm: "Delete this listing permanently?",
         stats: { views: "Views", saves: "Saves", requests: "Requests" },
         rejected: "Rejection reason:",
+        promote: "Promote",
+        promoteHint: "Ask for a sponsored slot — we'll come back with price and duration",
     },
 };
 
@@ -61,6 +65,8 @@ interface Listing {
     views: number;
     saves: number;
     requests: number;
+    /** حالة طلب الترقية — null يعني الزرار متاح */
+    promotion: { open: boolean; state: { label: string; tone: string }; reason: string } | null;
 }
 
 const tones: Record<string, string> = {
@@ -165,6 +171,16 @@ export default function Properties({
                                     </p>
                                 )}
 
+                                {p.promotion && (
+                                    <p className="flex flex-wrap items-center gap-2 text-[12px] font-bold text-muted">
+                                        <Megaphone size={13} className="text-primary" />
+                                        <span className={`rounded-full px-2.5 py-1 text-[11px] font-extrabold ${tones[p.promotion.state.tone] ?? tones.muted}`}>
+                                            {p.promotion.state.label}
+                                        </span>
+                                        {p.promotion.reason && <span className="text-danger">{p.promotion.reason}</span>}
+                                    </p>
+                                )}
+
                                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                                     {stat(p.views, t.stats.views, Eye)}
                                     {stat(p.saves, t.stats.saves, Heart)}
@@ -198,6 +214,18 @@ export default function Properties({
                                     {p.hidden ? <Eye size={13} /> : <EyeOff size={13} />}
                                     {p.hidden ? t.show : t.hide}
                                 </button>
+
+                                {p.live && !p.promotion && (
+                                    <button
+                                        type="button"
+                                        title={t.promoteHint}
+                                        onClick={() => router.post(`/${locale}/account/my-properties/${p.id}/feature`, {}, { preserveScroll: true })}
+                                        className="flex items-center gap-1.5 rounded-brand border border-primary/40 bg-primary/5 px-3 py-2 text-[12px] font-extrabold text-primary transition hover:bg-primary/10"
+                                    >
+                                        <Megaphone size={13} />
+                                        {t.promote}
+                                    </button>
+                                )}
 
                                 <button
                                     type="button"

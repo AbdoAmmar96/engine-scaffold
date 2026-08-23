@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Core\Http\Controllers\ActivityController;
 use Modules\Core\Http\Controllers\AuthController;
 use Modules\Core\Http\Controllers\DashboardController;
 use Modules\Core\Http\Controllers\MediaController;
@@ -54,6 +55,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('menus/{id}/edit', [MenuAdminController::class, 'edit'])->name('menus.edit');
             Route::put('menus/{id}',      [MenuAdminController::class, 'update'])->name('menus.update');
             Route::delete('menus/{id}',   [MenuAdminController::class, 'destroy'])->name('menus.destroy');
+        });
+
+        // سجل النشاط — قراءة بس، ومع اللي بيدير المستخدمين (أدمن وسوبر أدمن)
+        Route::middleware('permission:manage users')->group(function () {
+            Route::get('activity', [ActivityController::class, 'index'])->name('activity.index');
         });
 
         // إدارة مستخدمي اللوحة (إضافة/حذف حساب وتغيير كلمة المرور والدور)

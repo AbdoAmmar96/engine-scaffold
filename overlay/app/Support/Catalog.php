@@ -2,7 +2,9 @@
 
 namespace App\Support;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\Blog\Models\Post;
 use Modules\Compounds\Models\Compound;
@@ -192,6 +194,55 @@ class Catalog
                 $query->where($column, true);
             }
         }
+    }
+
+    /**
+     * تطبيق الفلاتر على استعلام جاهز — نفس منطق الصفحة بالظبط.
+     * التنبيهات بتستخدمه عشان اللي في الإيميل يبقى هو اللي في الموقع.
+     */
+    public static function applyFilters(Builder $query, array $filters): void
+    {
+        self::applyPropertyFilters($query, $filters);
+    }
+
+    /** اسم الفلتر وقيمته في جملة — للإيميل ولملخّص البحث المحفوظ */
+    public static function filterLabel(string $key, string $value, string $locale): ?string
+    {
+        if ($value === '' || ! isset(self::FILTER_SCHEMA[$key])) {
+            return null;
+        }
+
+        $en = $locale === 'en';
+
+        $names = $en
+            ? ['q' => 'Search', 'type' => 'Type', 'location' => 'Area', 'purpose' => 'Purpose',
+                'category' => 'Section', 'finishing' => 'Finishing', 'developer' => 'Developer',
+                'compound' => 'Project', 'sort' => 'Sort', 'price_min' => 'Price from',
+                'price_max' => 'Price to', 'area_min' => 'Size from', 'area_max' => 'Size to',
+                'beds' => 'Beds', 'baths' => 'Baths', 'down_max' => 'Max down',
+                'monthly_max' => 'Max instalment', 'years_max' => 'Max years',
+                'delivery' => 'Delivered before', 'featured' => 'Featured', 'garden' => 'Garden',
+                'roof' => 'Roof', 'dressing' => 'Dressing room']
+            : ['q' => 'بحث', 'type' => 'النوع', 'location' => 'المنطقة', 'purpose' => 'الغرض',
+                'category' => 'القسم', 'finishing' => 'التشطيب', 'developer' => 'المطوّر',
+                'compound' => 'المشروع', 'sort' => 'الترتيب', 'price_min' => 'سعر من',
+                'price_max' => 'سعر إلى', 'area_min' => 'مساحة من', 'area_max' => 'مساحة إلى',
+                'beds' => 'غرف', 'baths' => 'حمامات', 'down_max' => 'أقصى مقدم',
+                'monthly_max' => 'أقصى قسط', 'years_max' => 'أقصى سنوات',
+                'delivery' => 'تسليم قبل', 'featured' => 'مميّزة', 'garden' => 'حديقة',
+                'roof' => 'روف', 'dressing' => 'غرفة ملابس'];
+
+        $shown = match (self::FILTER_SCHEMA[$key]) {
+            'bool' => $en ? 'yes' : 'أيوه',
+            'purpose' => $value === 'rent' ? ($en ? 'Rent' : 'إيجار') : ($en ? 'Sale' : 'بيع'),
+            'category' => Property::CATEGORIES[$value][$en ? 'en' : 'ar'] ?? $value,
+            'finishing' => Property::FINISHING[$value][$en ? 'en' : 'ar'] ?? $value,
+            'sort' => self::SORTS[$value][$en ? 'en' : 'ar'] ?? $value,
+            'int' => number_format((int) $value),
+            default => $value,
+        };
+
+        return $names[$key].': '.$shown;
     }
 
     /**
@@ -474,6 +525,37 @@ class Catalog
             'compounds' => (int) $l->compounds_count,
             'properties' => (int) $l->properties_count,
         ])->all();
+    }
+
+    /**
+     * «شوهدت مؤخرًا» للحساب المسجّل — بترجع فاضية للزائر،
+     * وساعتها المتصفح بيجيبها من localStorage عبر /recently-viewed.
+     */
+    public static function recentlyViewed(string $locale, int $limit = 8): array
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return [];
+        }
+
+        $ids = DB::table('recently_viewed')
+            ->where('user_id', $user->id)
+            ->orderByDesc('viewed_at')
+            ->limit($limit)
+            ->pluck('property_id');
+
+        if ($ids->isEmpty()) {
+            return [];
+        }
+
+        $rows = Property::published()
+            ->whereIn('id', $ids)
+            ->with(['location', 'compound.developer', 'compound.location', 'developer'])
+            ->get()
+            ->sortBy(fn (Property $p) => $ids->search($p->id));
+
+        return $rows->map(fn (Property $p) => $p->toCard($locale))->values()->all();
     }
 
     /** مقالات المدونة المنشورة */

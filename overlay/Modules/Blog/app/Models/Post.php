@@ -2,6 +2,7 @@
 
 namespace Modules\Blog\Models;
 
+use App\Support\LogsActivity;
 use App\Support\Bilingual;
 use App\Support\Sluggable;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,7 +30,7 @@ use Illuminate\Support\Carbon;
  */
 class Post extends Model
 {
-    use Bilingual, Sluggable;
+    use Bilingual, LogsActivity, Sluggable;
 
     protected $fillable = [
         'title', 'title_en', 'slug', 'category', 'category_en', 'excerpt', 'excerpt_en',

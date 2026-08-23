@@ -5,9 +5,12 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Modules\Developers\Http\Controllers\DeveloperPageController;
 use Modules\Locations\Http\Controllers\LocationPageController;
+use Modules\Marketing\Http\Controllers\AdClickController;
 use Modules\Properties\Http\Controllers\AccountPropertyController;
 use Modules\Properties\Http\Controllers\AddPropertyController;
 use Modules\Properties\Http\Controllers\PropertyPageController;
+use Modules\Properties\Http\Controllers\RecentlyViewedController;
+use Modules\Properties\Http\Controllers\SavedSearchController;
 
 // الجذر → العربية (اللغة الافتراضية)
 Route::redirect('/', '/ar');
@@ -23,6 +26,8 @@ Route::prefix('{locale}')
             'latestCompounds'  => \App\Support\Catalog::compounds($locale, 3),
             'areas'            => \App\Support\Catalog::areas($locale, 3),
             'searchOptions'    => \App\Support\Catalog::searchOptions($locale),
+            'ads'              => \Modules\Marketing\Support\AdSlot::at('hero', $locale, 3),
+            'recentlyViewed'   => \App\Support\Catalog::recentlyViewed($locale),
             'meta'             => \App\Support\Seo::page($locale, ''),
         ]))->name('home');
 
@@ -43,6 +48,13 @@ Route::prefix('{locale}')
         Route::post('/add-property', [AddPropertyController::class, 'store'])
             ->middleware('throttle:5,60')
             ->name('add-property.store');
+
+        // كروت «شوهدت مؤخرًا» — المتصفح بيبعت الأرقام والسيرفر بيرجّع الكروت
+        Route::get('/recently-viewed', RecentlyViewedController::class)->name('recently-viewed');
+
+        /* ---------- تتبّع الإعلانات ---------- */
+        // ريدايركت مش جافاسكربت: الضغطة بتتحسب حتى لو الـ JS واقع
+        Route::get('/ads/{ad}', AdClickController::class)->whereNumber('ad')->name('ads.click');
 
         /* ---------- المطوّرون ---------- */
         Route::get('/developers', [DeveloperPageController::class, 'index'])->name('developers');
@@ -226,6 +238,12 @@ Route::prefix('{locale}')
             Route::post('favorites/{property}', [\Modules\Core\Http\Controllers\FavoriteController::class, 'toggle'])
                 ->whereNumber('property')->name('account.favorites.toggle');
 
+            /* ---------- البحث المحفوظ ---------- */
+            Route::get('account/saved-searches',       [SavedSearchController::class, 'index'])->name('account.searches');
+            Route::post('account/saved-searches',      [SavedSearchController::class, 'store'])->name('account.searches.store');
+            Route::put('account/saved-searches/{id}',  [SavedSearchController::class, 'update'])->whereNumber('id')->name('account.searches.update');
+            Route::delete('account/saved-searches/{id}', [SavedSearchController::class, 'destroy'])->whereNumber('id')->name('account.searches.destroy');
+
             /* ---------- وحدات المعلن ---------- */
             // على الصلاحية مش على الدور: الوسيط والشركة والمعلن كلهم
             // بيديروا وحداتهم من هنا، والفرق بينهم إن الأولانيين معاهم لوحة كمان
@@ -236,6 +254,7 @@ Route::prefix('{locale}')
                 Route::get('account/my-properties/{id}/edit',   [AccountPropertyController::class, 'edit'])->whereNumber('id')->name('account.properties.edit');
                 Route::put('account/my-properties/{id}',        [AccountPropertyController::class, 'update'])->whereNumber('id')->name('account.properties.update');
                 Route::post('account/my-properties/{id}/toggle', [AccountPropertyController::class, 'toggle'])->whereNumber('id')->name('account.properties.toggle');
+                Route::post('account/my-properties/{id}/feature', [AccountPropertyController::class, 'requestFeature'])->whereNumber('id')->name('account.properties.feature');
                 Route::delete('account/my-properties/{id}',     [AccountPropertyController::class, 'destroy'])->whereNumber('id')->name('account.properties.destroy');
             });
         });

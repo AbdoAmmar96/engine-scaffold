@@ -438,3 +438,54 @@ test('the admin login links to the same password reset', async ({ page }) => {
         '/ar/forgot-password',
     );
 });
+
+/* ---------------------------------------------------------------------------
+ | المساحات الإعلانية · البحث المحفوظ · شوهدت مؤخرًا
+ | المنطق متغطّي في FeaturedAdsTest و SavedSearchTest — هنا الشكل والتفاعل.
+ ---------------------------------------------------------------------------- */
+
+test('a sponsored slot is labelled as one', async ({ page }) => {
+    await page.goto('/ar/properties', { waitUntil: 'networkidle' });
+
+    const strip = page.getByText('إعلان مميّز', { exact: true });
+
+    // مفيش مساحات مباعة على التثبيت الافتراضي — لو ظهرت لازم تبقى مكتوب عليها
+    if ((await strip.count()) > 0) {
+        await expect(strip.first()).toBeVisible();
+    }
+});
+
+test('saving a search asks a guest to sign in first', async ({ page }) => {
+    await page.goto('/ar/properties?purpose=sale', { waitUntil: 'networkidle' });
+
+    const cta = page.getByRole('link', { name: /سجّل دخولك عشان تحفظ البحث/ });
+
+    await expect(cta).toHaveAttribute('href', '/ar/login');
+});
+
+test('the save-search button only appears once something is filtered', async ({ page }) => {
+    await page.goto('/ar/properties', { waitUntil: 'networkidle' });
+
+    await expect(page.getByText(/احفظ البحث ده|سجّل دخولك عشان تحفظ البحث/)).toHaveCount(0);
+});
+
+test('opening a unit remembers it in the browser', async ({ page }) => {
+    await page.goto('/ar/properties', { waitUntil: 'networkidle' });
+    await page.locator('article a').first().click();
+    await page.waitForURL(/\/ar\/properties\/[^/]+$/, { timeout: 20_000 });
+
+    const stored = await page.evaluate(() => window.localStorage.getItem('bp.recently-viewed'));
+
+    expect(JSON.parse(stored ?? '[]').length).toBeGreaterThan(0);
+
+    // وبيرجع على الرئيسية كقسم «شوهدت مؤخرًا»
+    await page.goto('/ar', { waitUntil: 'networkidle' });
+    await expect(page.getByText('شوهدت مؤخرًا').first()).toBeVisible({ timeout: 20_000 });
+});
+
+test('the admin reports and activity screens are gated', async ({ page }) => {
+    for (const path of ['/admin/reports', '/admin/activity', '/admin/featured-ads']) {
+        await page.goto(path);
+        await expect(page).toHaveURL(/\/admin\/login/);
+    }
+});

@@ -1,12 +1,12 @@
 import { Link, router, usePage } from "@inertiajs/react";
-import { Building2, CheckCircle2, Heart, Inbox, LogOut, UserRound } from "lucide-react";
+import { AlertCircle, Building2, CheckCircle2, Heart, Inbox, LogOut, Search, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import SiteLayout from "@/Layouts/SiteLayout";
 import type { SharedProps } from "@/lib/types";
 
 const copy = {
-    ar: { overview: "نظرة عامة", favorites: "المحفوظة", requests: "طلباتي", listings: "وحداتي", logout: "خروج", hello: "أهلًا" },
-    en: { overview: "Overview", favorites: "Saved", requests: "My requests", listings: "My listings", logout: "Sign out", hello: "Hi" },
+    ar: { overview: "نظرة عامة", favorites: "المحفوظة", requests: "طلباتي", listings: "وحداتي", searches: "البحث المحفوظ", logout: "خروج", hello: "أهلًا" },
+    en: { overview: "Overview", favorites: "Saved", requests: "My requests", listings: "My listings", searches: "Saved searches", logout: "Sign out", hello: "Hi" },
 };
 
 /**
@@ -27,6 +27,7 @@ export default function AccountLayout({ title, children }: { title: string; chil
             ? [{ href: `/${locale}/account/my-properties`, label: t.listings, icon: Building2, exact: false }]
             : []),
         { href: `/${locale}/account/favorites`, label: t.favorites, icon: Heart, exact: false },
+        { href: `/${locale}/account/saved-searches`, label: t.searches, icon: Search, exact: false },
         { href: `/${locale}/account/requests`, label: t.requests, icon: Inbox, exact: false },
     ];
 
@@ -74,6 +75,13 @@ export default function AccountLayout({ title, children }: { title: string; chil
 
             <section className="bg-surface px-4 py-10">
                 <div className="mx-auto flex max-w-5xl flex-col gap-6">
+                    {flash.error && (
+                        <div className="flex items-center gap-2 rounded-2xl border border-danger/30 bg-danger/10 px-5 py-3.5 text-[13px] font-extrabold text-danger">
+                            <AlertCircle size={16} />
+                            {flash.error}
+                        </div>
+                    )}
+
                     {flash.success && (
                         <div className="flex items-center gap-2 rounded-2xl border border-success/30 bg-success/10 px-5 py-3.5 text-[13px] font-extrabold text-success">
                             <CheckCircle2 size={16} />

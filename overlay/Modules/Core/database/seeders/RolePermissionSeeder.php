@@ -32,6 +32,7 @@ class RolePermissionSeeder extends Seeder
         'manage content' => 'المدونة والقوائم وصفحات الهبوط',
         'manage media' => 'مكتبة الميديا',
         'manage leads' => 'صندوق الطلبات',
+        'view reports' => 'تقارير الأداء',
         'manage settings' => 'إعدادات الموقع والهوية',
         'manage users' => 'المستخدمون',
         'manage roles' => 'أدوار فريق العمل',
@@ -50,7 +51,7 @@ class RolePermissionSeeder extends Seeder
             'permissions' => [
                 'manage catalog', 'publish listings', 'feature listings',
                 'manage listings', 'manage projects', 'manage content', 'manage media',
-                'manage leads', 'manage settings', 'manage users', 'manage roles',
+                'manage leads', 'view reports', 'manage settings', 'manage users', 'manage roles',
             ],
         ],
         'admin' => [
@@ -60,7 +61,7 @@ class RolePermissionSeeder extends Seeder
             'permissions' => [
                 'manage catalog', 'publish listings', 'feature listings',
                 'manage listings', 'manage projects', 'manage content', 'manage media',
-                'manage leads', 'manage settings', 'manage users',
+                'manage leads', 'view reports', 'manage settings', 'manage users',
             ],
         ],
         'data_entry' => [
@@ -73,7 +74,7 @@ class RolePermissionSeeder extends Seeder
             'label' => 'مسؤول تسويق',
             'note' => 'تمييز الإعلانات وصفحات الهبوط والمدونة',
             'staff' => true,
-            'permissions' => ['manage catalog', 'feature listings', 'manage content', 'manage media'],
+            'permissions' => ['manage catalog', 'feature listings', 'manage content', 'manage media', 'view reports'],
         ],
         'editor' => [
             'label' => 'محرّر محتوى',

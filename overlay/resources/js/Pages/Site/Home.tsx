@@ -1,4 +1,6 @@
 import { Link, usePage } from "@inertiajs/react";
+import AdStrip, { type Ad } from "@/Components/site/AdStrip";
+import RecentlyViewed from "@/Components/site/RecentlyViewed";
 import CompoundCard from "@/Components/site/CompoundCard";
 import CountUp from "@/Components/site/CountUp";
 import FrameMedia from "@/Components/site/FrameMedia";
@@ -90,11 +92,15 @@ export default function Home({
     latestCompounds,
     areas,
     searchOptions,
+    ads = [],
+    recentlyViewed = [],
 }: {
     latestProperties: Property[];
     latestCompounds: Compound[];
     areas: Area[];
     searchOptions: SearchOptions;
+    ads?: Ad[];
+    recentlyViewed?: Property[];
 }) {
     const { locale, settings } = usePage<SharedProps>().props;
     const ar = locale === "ar";
@@ -138,6 +144,10 @@ export default function Home({
         <SiteLayout>
             {/* ---------------- الهيرو الرئيسي: فيديو خلفية + بحث ---------------- */}
             <HeroSearch options={searchOptions} variant={settings.theme?.hero_variant ?? "video"} />
+
+            <AdStrip ads={ads} />
+
+            <RecentlyViewed properties={recentlyViewed} />
 
             {/* ---------------- هيرو ثانوي ---------------- */}
             <section className="bg-surface px-4 pb-20 pt-10">

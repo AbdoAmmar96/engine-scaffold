@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\LogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,6 +13,7 @@ use Modules\Compounds\Models\Compound;
 use Modules\Core\Database\Seeders\RolePermissionSeeder;
 use Modules\Leads\Models\Lead;
 use Modules\Properties\Models\Property;
+use Modules\Properties\Models\SavedSearch;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -25,7 +27,7 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class User extends Authenticatable
 {
-    use HasFactory, HasRoles, Notifiable;
+    use HasFactory, HasRoles, LogsActivity, Notifiable;
 
     protected $fillable = [
         'name',
@@ -81,6 +83,16 @@ class User extends Authenticatable
     public function requests(): HasMany
     {
         return $this->hasMany(Lead::class, 'user_id');
+    }
+
+    /**
+     * عمليات البحث المحفوظة + تنبيهاتها
+     *
+     * @return HasMany<SavedSearch, $this>
+     */
+    public function savedSearches(): HasMany
+    {
+        return $this->hasMany(SavedSearch::class);
     }
 
     /** العقارات المحفوظة */

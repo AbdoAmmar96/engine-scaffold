@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Models;
 
+use App\Support\LogsActivity;
 use App\Support\Bilingual;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -23,7 +24,7 @@ use Illuminate\Support\Facades\Cache;
  */
 class MenuItem extends Model
 {
-    use Bilingual;
+    use Bilingual, LogsActivity;
 
     protected $fillable = ['location', 'parent_id', 'label', 'label_en', 'url', 'new_tab', 'sort', 'is_active'];
 

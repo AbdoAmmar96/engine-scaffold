@@ -15,9 +15,11 @@ import {
     Tag,
     Wallet,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import FavoriteButton from "@/Components/site/FavoriteButton";
 import Gallery from "@/Components/site/Gallery";
+import AdStrip, { type Ad } from "@/Components/site/AdStrip";
+import { pushRecent } from "@/Components/site/RecentlyViewed";
 import LeadForm from "@/Components/site/LeadForm";
 import PageHero from "@/Components/site/PageHero";
 import PropertyCard from "@/Components/site/PropertyCard";
@@ -105,13 +107,18 @@ const copy = {
 export default function PropertyPage({
     property,
     related,
+    ads = [],
 }: {
     property: PropertyDetail;
     related: Property[];
+    ads?: Ad[];
 }) {
     const { locale, settings } = usePage<SharedProps>().props;
     const ar = locale === "ar";
     const t = copy[locale] ?? copy.ar;
+
+    // الزيارة بتتسجّل في المتصفح للزائر — المسجّل بيتسجّلوه في السيرفر كمان
+    useEffect(() => pushRecent(property.id), [property.id]);
 
     const wa = settings.contact?.whatsapp;
     const phone = settings.contact?.phone;
@@ -366,6 +373,7 @@ export default function PropertyPage({
                                 </span>
                             </Link>
                         )}
+                        <AdStrip ads={ads} compact />
                     </aside>
                 </div>
             </section>
