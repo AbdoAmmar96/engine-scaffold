@@ -1,84 +1,209 @@
-# BP Engine — Phase 1 Scaffold
-Laravel 12 + Inertia v2 + React TS + Vite + Tailwind v4 · Modular MVC (nwidart) · Theme Engine · داشبورد React مخصوص (بدون Filament)
+# BP Engine — منصّة مواقع عقارية
+
+Laravel 12 · Inertia v2 · React 19 + TypeScript · Vite 7 · Tailwind v4 · Modular MVC (nwidart)
+عربي أولًا + RTL · ثنائي اللغة `/ar` و `/en` · Theme Engine بيتحكم فيه من الداشبورد **من غير build**
 
 © شركة شريك الأعمال لتقنية المعلومات — bp-eg.com
 
 ---
 
-## التشغيل (3 خطوات)
+## ⚠ الريبو ده طبقتين — اقرا ده الأول
+
+```
+engine-scaffold/          ← الريبو ده: المولّد
+├── setup.sh              بينشئ Laravel 12 نضيف + يثبّت الحزم + يولّد الموديولات + ينسخ overlay/ فوقه
+├── deploy.sh             بيرفع على استضافة مشتركة (Hostinger)
+├── sync-overlay.sh       بيحدّث overlay/ من engine/
+├── overlay/              الملفات المخصّصة اللي بتتنسخ فوق لارافيل النضيف (342 ملف)
+└── engine/               ← التطبيق الفعلي — متجاهَل في .gitignore وله ريبو منفصل
+```
+
+| | الريبو | فيه إيه |
+|---|---|---|
+| **الموقع** | [`Real-Estate-Template-`](https://github.com/AbdoAmmar96/Real-Estate-Template-) | تطبيق لارافيل كامل — **الكود الحي كله هنا** |
+| **المولّد** | [`engine-scaffold`](https://github.com/AbdoAmmar96/engine-scaffold) | `setup.sh` + `deploy.sh` + `overlay/` |
+
+**القاعدة الوحيدة اللي متتكسرش:** الكود بيتعدّل في `engine/`، وبعد أي شغل تشغّل `./sync-overlay.sh` عشان `overlay/` يتطابق معاه. لو نسيت، `setup.sh` هيطلّع نسخة أقدم من الموقع.
+
+---
+
+## التشغيل
 
 ```bash
-# المتطلبات: PHP 8.3+ · Composer · Node 20+   (Laravel Herd عندك بيغطيهم)
-chmod +x setup.sh
-./setup.sh engine        # اسم فولدر المشروع — اختياري
+# المتطلبات: PHP 8.3+ · Composer · Node 20+
+chmod +x setup.sh && ./setup.sh engine
 cd engine && composer run dev
 ```
 
 | | |
 |---|---|
-| الموقع | http://localhost:8000/ar (و /en) |
+| الموقع | http://localhost:8000/ar (و `/en`) |
 | الداشبورد | http://localhost:8000/admin |
-| الدخول | admin@bp-eg.com / password ← **غيّرها فورًا** |
-| قاعدة البيانات | SQLite جاهزة — للتحويل لـ MySQL عدّل `.env` وشغّل `php artisan migrate:fresh --seed` |
+| الدخول | بيتطبع في نهاية `setup.sh` — **احفظه، مش بيتعرض تاني** |
+| قاعدة البيانات | SQLite جاهزة · للتحويل لـ MySQL عدّل `.env` وشغّل `php artisan migrate:fresh --seed` |
 
-## أول تجربة تعملها (إثبات الـ Theme Engine)
-1. افتح الداشبورد → الإعدادات → **الهوية والألوان**.
-2. غيّر "اللون الأساسي" من الذهبي لأي لون.
-3. احفظ، وافتح الموقع واعمل ريفريش — **الموقع كله اتغير من غير أي build**.
-
-## إيه اللي جوه الحزمة
-
-```
-setup.sh                 ← ينشئ Laravel 12 + يثبت الحزم + يولّد 10 موديولات + يركّب الملفات + migrate/seed
-overlay/
-├── bootstrap/app.php                    Inertia middleware + role/permission aliases
-├── routes/web.php                       راوتات الموقع بـ /ar /en + تحويل الجذر
-├── app/Http/Middleware/                 HandleInertiaRequests (shared props) + SetLocale
-├── app/Models/User.php                  + HasRoles
-├── resources/views/app.blade.php        حقن توكنز الثيم من DB + خط Cairo + GTM من الإعدادات
-├── resources/css/app.css                Tailwind v4 @theme inline ← قلب الـ Theme Engine
-├── vite.config.ts · tsconfig.json
-├── resources/js/
-│   ├── app.tsx · ssr.tsx
-│   ├── Layouts/SiteLayout.tsx           هيدر + سويتشر لغة + فوتر حقوق شريك الأعمال (إلزامي)
-│   ├── Layouts/AdminLayout.tsx          سايدبار RTL + ناڤ الموديولات
-│   ├── Pages/Site/Home.tsx              هيرو مؤقت بتوكنز الثيم (ع/EN)
-│   ├── Pages/Admin/{Login,Dashboard}.tsx
-│   ├── Pages/Admin/Settings/Edit.tsx    شاشة إعدادات ديناميكية (ألوان تلقائيًا لأي قيمة #hex)
-│   └── Components/admin/                ui.tsx (Form Kit v0) + ResourceTable.tsx (Table Kit v0)
-├── Modules/Core/
-│   ├── routes/web.php                   /admin: auth + dashboard + settings
-│   ├── app/Models/Setting.php
-│   ├── app/Services/SettingsService.php كاش دائم + فلش تلقائي
-│   ├── app/Http/Controllers/            Auth · Dashboard · Settings
-│   └── database/                        migration settings + Seeders (Palette A + Cairo + admin user)
-└── database/seeders/DatabaseSeeder.php
-```
-
-## قرارات مقصودة في المرحلة دي
-- **Auth مبسطة** (session + role:admin) — Fortify + 2FA بيتركبوا في المرحلة 2 من غير ما يتغير أي راوت.
-- **ResourceTable v0** مبني يدوي server-driven — TanStack بيتركب مكانه بنفس الـ API لما الجداول تتعقد.
-- الموديولات التسعة الباقية متولّدة فاضية — كل مرحلة بتملى بتاعها.
-
-## الخريطة الجاية
-- **المرحلة 2:** Media Manager + Menu Builder + Users/Roles UI + Fortify/2FA + Activity Log
-- **المرحلة 3:** Block Builder (dnd-kit) + المعاينة الحية + أنماط الهيرو (static/slider/video)
-- **المرحلة 4:** Locations → Developers → Compounds → Properties (أدمن CRUD + صفحات عامة + فلاتر)
-- **المرحلة 5+:** Leads/واتساب → Blog/SEO/SSR → WebGL hero → Playwright → Deploy
+### أول تجربة (إثبات الـ Theme Engine)
+الداشبورد → الإعدادات → **الهوية والألوان** → غيّر اللون الأساسي → احفظ → افتح الموقع.
+**الموقع كله اتغيّر من غير build.** الألوان بتتخزّن في جدول `settings` وبتتحقن كـ CSS custom properties في `app.blade.php`، و Tailwind v4 بيستهلكها عن طريق `@theme inline`.
 
 ---
 
-## v1.1 — الموقع فاتح + 4 صفحات جديدة
-- **الثيم الافتراضي بقى أبيض بالكامل** (هيرو وأقسام وفوتر فواتح) — الكحلي والدهبي بقوا للنصوص والأزرار. الرجوع للداكن في أي وقت = تغيير `bg / surface / text` من شاشة الهوية والألوان.
-- **صفحات جديدة:** `/properties` (فلاتر UI + كروت عقارات) · `/compounds` (كروت مشاريع بسعر البداية والمقدم والتقسيط) · `/about` · `/contact` (فورم بيبني رسالة واتساب فعلية من بيانات الإعدادات).
-- بيانات العقارات والكمبوندات تجريبية من `app/Support/DemoContent.php` (أسماء مشاريع خيالية) — المرحلة 4 بتبدلها بالموديلات الحقيقية بنفس الـ props.
-- الهيدر فيه ناڤ كامل + منيو موبايل، والفوتر فاتح بثلاث أعمدة + سطر الحقوق.
+## هيكل المشروع
+
+```
+engine/
+├── app/
+│   ├── Models/User.php                    الحساب + الأدوار + المحفوظات والبحث المحفوظ
+│   ├── Http/Middleware/                   HandleInertiaRequests · SetLocale · EnsureStaff
+│   ├── Providers/AppServiceProvider.php   رسالة استعادة كلمة المرور (عربية) + لينكها
+│   └── Support/                           ← الطبقة المشتركة بين كل الموديولات
+│       ├── Catalog.php                    مصدر بيانات الموقع العام: فلاتر · ترتيب · بحث · صفحات
+│       ├── ResourceController.php         CRUD عام للأدمن — الموديول بيحدّد الحقول وبس
+│       ├── OwnedResource.php              عزل الملكية: مين بيشوف صفوف مين
+│       ├── Seo.php                        ميتا + JSON-LD + canonical/hreflang (بتترندر في السيرفر)
+│       ├── Sluggable.php · SharedSlugSpace.php   روابط فريدة عبر جدولين
+│       ├── Bilingual.php                  عمود عربي + <name>_en اختياري
+│       ├── LogsActivity.php               بيسجّل الإضافة/التعديل/الحذف في سجل النشاط
+│       └── DemoContent.php                بيانات تجريبية للتثبيت الجديد
+│
+├── Modules/                               11 موديول — كلها enabled في modules_statuses.json
+│   ├── Core/         auth · dashboard · settings · users · media · menus · activity log
+│   ├── Properties/   العقارات: صفحات عامة · CRUD أدمن · أضف عقارك · وحداتي · البحث المحفوظ
+│   ├── Compounds/    المشاريع · Developers/ المطوّرون · Locations/ المناطق
+│   ├── Leads/        صندوق الطلبات + استقبال فورمات الموقع
+│   ├── Blog/         المدونة
+│   ├── Seo/          sitemap · robots · صفحات الهبوط البرمجية
+│   ├── Marketing/    المساحات الإعلانية المجدولة + التقارير
+│   └── Pages/ · Reviews/   سكافولد لسه فاضي
+│
+├── resources/
+│   ├── css/app.css                        Tailwind v4 @theme inline ← قلب الـ Theme Engine
+│   ├── views/app.blade.php                حقن توكنز الثيم + الميتا + GTM/Pixel من الإعدادات
+│   └── js/
+│       ├── Layouts/                       SiteLayout · AdminLayout · AccountLayout
+│       ├── Pages/Site/                    الرئيسية · العقارات · الوحدة · المشاريع · المطوّرون
+│       │   │                              · المناطق · المدونة · من نحن · اتصل بنا · أضف عقارك
+│       │   ├── Auth/                      دخول · تسجيل · نسيت كلمة المرور · كلمة مرور جديدة
+│       │   └── Account/                   نظرة عامة · وحداتي · المحفوظة · البحث المحفوظ · طلباتي
+│       ├── Pages/Admin/                   Login · Dashboard · Resource(Index/Form) · Settings
+│       │                                  · Media · Reports · Activity
+│       └── Components/site/ · admin/      كومبوننتات مشتركة — دوّر هنا قبل ما تكتب واحدة جديدة
+│
+├── routes/
+│   ├── web.php                            الموقع العام تحت /{locale} + مساحة الحساب
+│   └── console.php                        الجدولة: تنبيهات البحث المحفوظ · صفحات الهبوط
+└── tests/
+    ├── Feature/                           13 ملف · 187 اختبار
+    └── e2e/smoke.spec.ts                  Playwright — ديسكتوب وموبايل
+```
+
+**الأرقام:** 11 موديول · 168 راوت · 29 جدول · 62 ملف TSX · 12 صلاحية · 10 أدوار.
 
 ---
 
-## v1.2 — WebGL + أنيميشن + اللوجو والفيديو
-- **هيرو WebGL حي**: شادر خام (بدون three.js — صفر dependencies إضافية) بيرسم بقع ذهبي/كحلي متحركة فوق الخلفية الفاتحة، بيقرأ الألوان من توكنز الثيم تلقائيًا. Lazy-loaded، بيحترم reduced-motion، DPR cap 1.5، وبيتوقف لما يخرج من الشاشة. تشغيل/إيقاف من الداشبورد: `hero_variant = webgl / static`.
-- **أنيميشن**: `Reveal` (ظهور عند التمرير بدون مكتبات) على كل الأقسام + `CountUp` عدادات متحركة للإحصائيات + hover lift على الكروت.
-- **اللوجو الحقيقي متركّب**: `public/images/logo.png` (مقصوص، خلفية شفافة، 512px) — ظاهر في الهيدر والهيرو، ومساره بيتغير من الداشبورد → اللوجو والميديا.
-- **قسم الفيديو التعريفي** في الرئيسية: حط رابط mp4 أو YouTube في الداشبورد → اللوجو والميديا → رابط الفيديو، وهيظهر فورًا (لحد ما يترفع، البلوك بيعرض مكانه الجاهز).
-- **أقسام جديدة في الرئيسية**: أحدث العقارات (3) · الفيديو · أحدث الكمبوندات (2) · كيف نعمل (3 خطوات) — والكروت بقت مكونات مشتركة (`PropertyCard` / `CompoundCard`) بتتستخدم في كل الصفحات.
+## اللي شغّال دلوقتي
+
+### الموقع العام
+- **الرئيسية** — هيرو ببحث (فيديو/WebGL/صورة من الإعدادات) · مساحات إعلانية · شوهدت مؤخرًا · أحدث العقارات والمشاريع · المناطق · المطوّرون · إحصائيات محسوبة من الجداول.
+- **العقارات** `/properties` — **٢٣ فلتر** (سعر · مساحة · غرف · حمامات · تشطيب · مقدم · قسط · سنوات · تسليم · حديقة/روف/غرفة ملابس · مميّز) و**٦ ترتيبات**. كلها في الرابط، فالنتيجة قابلة للمشاركة والفهرسة.
+- **الأقسام** `/properties/commercial` و `/residential` · **صفحة الوحدة** `/properties/{slug}` بمعرض صور وكود مرجعي ونظام سداد وفورم طلب.
+- **صفحات SEO برمجية** — `apartments-for-sale-in-new-cairo` وأخواتها، بتتولّد من الوحدات الموجودة فعلًا، ونصوصها تتحرّر من اللوحة.
+- **المشاريع · المطوّرون · المناطق · المدونة** — لكل واحد قايمة وصفحة تفصيلية.
+- **أضف عقارك** `/add-property` — فورم عام بيعمل وحدة في انتظار المراجعة + طلب في صندوق الطلبات، برفع صور.
+- **SEO** — ميتا و canonical و hreflang و JSON-LD بتترندر **في السيرفر** (مش `<Head>` بعد التحميل) · `sitemap.xml` و `robots.txt` من الداتابيز.
+
+### مساحة الحساب `/account`
+نظرة عامة · **وحداتي** (إضافة/تعديل/إخفاء + مشاهدات ومحفوظات وطلبات لكل وحدة + طلب ترقية لإعلان مميّز) · العقارات المحفوظة · **البحث المحفوظ + تنبيه بريدي** · طلباتي · تعديل البيانات وكلمة المرور.
+
+### لوحة التحكم `/admin`
+CRUD للعقارات والمشاريع والمطوّرين والمناطق والمدونة والطلبات والمستخدمين · مكتبة ميديا · القوائم · صفحات الهبوط · **المساحات الإعلانية المجدولة** · **التقارير** · **سجل النشاط** · الإعدادات (عام · الهوية والألوان · اللوجو · التواصل · السوشيال · السيو · التكاملات).
+
+### الأدوار (١٠)
+| الدور | بيعمل إيه | اللوحة |
+|---|---|---|
+| سوبر أدمن | كل حاجة + توزيع أدوار الفريق | ✅ |
+| مدير المنصّة | كل حاجة ماعدا أدوار الفريق | ✅ |
+| مدخل بيانات | يدخل ويعدّل الكتالوج — من غير نشر ولا حذف | ✅ |
+| مسؤول تسويق | تمييز الإعلانات · صفحات الهبوط · المدونة · التقارير | ✅ |
+| محرّر محتوى | المدونة وصفحات الهبوط والقوائم والميديا | ✅ |
+| مستشار عقاري | الطلبات المسنودة له بس | ✅ |
+| شركة / مطوّر | مشاريعها ووحداتها وطلباتها | ✅ |
+| وسيط عقاري | وحداته وطلباته | ✅ |
+| معلن / مالك عقار | وحداته من «حسابي» | ❌ |
+| عميل | محفوظاته وبحثه وطلباته | ❌ |
+
+**القاعدة:** الصلاحية هي اللي بتحكم مش اسم الدور. `manage catalog` = بيشوف كل الصفوف · `publish listings` = بيعتمد وينشر ويحذف · `feature listings` = بيميّز. فتقدر تعمل دور جديد من `RolePermissionSeeder` من غير ما تلمس كود.
+
+---
+
+## الأوامر
+
+```bash
+cd engine
+
+composer run dev          # server + queue + pail + vite مع بعض
+composer run test         # PHPUnit
+composer run lint         # Pint — يصلّح · lint:check للفحص بس
+composer run analyse      # PHPStan/Larastan level 5
+composer run types        # tsc --noEmit
+composer run check        # الأربعة مع بعض ← شغّلها قبل ما تسلّم
+
+npm run dev · build       # Vite
+npm run e2e · e2e:ui      # Playwright (بيشغّل artisan serve لوحده)
+
+php artisan seo:landing-pages [--min=5] [--prune]   # توليد صفحات الهبوط
+php artisan searches:alert                          # تنبيهات البحث المحفوظ (في الجدولة يوميًا)
+```
+
+### خط الأساس (متحقَّق منه)
+`php artisan test` → **187/187 ✅** · `playwright` → **85 ✅ (+1 متخطّى عن قصد)** · `tsc --noEmit` → **نضيف ✅**
+`phpstan level 5` → **58 خطأ** (خط أساس مش هدف — متزوّدش عليه) · `pint --test` → ملفات قديمة محتاجة فورمات
+
+---
+
+## الرفع
+
+```bash
+./deploy.sh    # بيبني الأصول محليًا (السيرفر مفيهوش node) ويرفع ويعمل migrate + seed
+```
+
+بيحافظ على: `.env` · قاعدة البيانات · `storage/app` · لينك الميديا.
+والتطبيق بيتحط **بره الويب روت** — السكربت بيرفض يشتغل غير كده عشان `.env` ما يتعرّضش للنت.
+
+المتغيّرات: `DOMAIN` · `SSH_HOST` · `SSH_PORT` · `SSH_KEY` · `REMOTE_WEB` · `REMOTE_APP`.
+
+---
+
+## قرارات مقصودة
+
+- **مفيش SSR.** الميتا و JSON-LD بيتحسبوا في السيرفر وبيترندروا في البليد — أرخص من SSR كامل وبيحل مشكلة الفهرسة اللي `<Head>` بتاعة Inertia مبتحلهاش من غيره.
+- **`ResourceController` عام.** موديول جديد = كلاس صغير + راوت، من غير أي شاشة جديدة.
+- **العزل بصلاحية مش بدور.** كل قواعد «مين يشوف إيه» متطبّقة في `scope()` و`findModel()` — يعني بتتفرض على القايمة **وعلى أي وصول بالـ id**.
+- **الروابط في الـ query string.** كل فلتر بيروح للسيرفر — النتيجة تتشارك وتتفهرس، مش فلترة في المتصفح.
+- **العدّادات على query builder.** المشاهدات والظهور والضغطات مبتحرّكش `updated_at` — وإلا كل زيارة كانت هتغيّر `lastmod` في خريطة الموقع.
+
+---
+
+## سجل الإصدارات
+
+**v1.5 — النمو**
+مساحات إعلانية مجدولة (موضع + فترة + أولوية + ظهور/ضغطات/CTR) وطلب ترقية من المعلن · البحث المحفوظ + تنبيه بريدي يومي · شوهدت مؤخرًا (localStorage للزائر، جدول للمسجّل) · شاشة تقارير (مصادر الطلبات · مراحل المتابعة · أكتر المناطق · أكتر الوحدات مشاهدة · أداء الإعلانات · طلبات ٣٠ يوم) · سجل نشاط للمساءلة · موديول `Marketing` جديد.
+
+**v1.4 — اكتمال المنتج**
+٥ أدوار جديدة (سوبر أدمن · مدخل بيانات · تسويق · مستشار · معلن) وفصل `publish listings` و`feature listings` و`manage media` · `/account/my-properties` بإحصائيات لكل وحدة · نسيت كلمة المرور (رسالة عربية، sendmail على الاستضافة) · إخفاء إيميلات الحسابات عن غير مديري المستخدمين.
+
+**v1.3 — SEO + أضف عقارك**
+٢٦ صفحة هبوط برمجية بتتولّد من الوحدات الموجودة، نصوصها تتحرّر من اللوحة، وروابطها فريدة على جدولين · `/add-property`.
+
+**v1.2 — الأساس**
+حقول العقار الكاملة + `price_amount` رقمي + دورة الاعتماد (draft/pending/published/rejected/sold/rented) + ٢٣ فلتر و٦ ترتيبات · قوائم منسدلة في الناف بار من الداتابيز.
+
+**v1.1 — الموقع فاتح + الصفحات الأساسية** · **v1.0 — السكافولد والـ Theme Engine**
+
+---
+
+## توثيق إضافي
+
+- `docs/PDR.md` — مراجعة تصميم/متطلبات (لقطة بتاريخ 2026-08-20 — الأرقام فيها اتخطّاها الشغل اللي بعدها).
+- `docs/SAAS-READINESS.md` — تحليل التحوّل لـ SaaS.
+- `CLAUDE.md` — دليل الشغل جوه المشروع (أعراف · عوائق · حالة الجودة).

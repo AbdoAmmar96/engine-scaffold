@@ -47,7 +47,7 @@ php -r '
 
 # كل الموديولات في أمر artisan واحد — لو اتولدوا واحد واحد، تاني أمر بيفشل
 # لأن الـ ServiceProvider بتاع الموديول الأول لسه مش في الـ autoload
-php artisan module:make Core Pages Locations Developers Compounds Properties Leads Blog Seo Reviews --no-interaction
+php artisan module:make Core Pages Locations Developers Compounds Properties Leads Blog Seo Reviews Marketing --no-interaction
 
 composer dump-autoload
 

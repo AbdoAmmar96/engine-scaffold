@@ -43,23 +43,30 @@ engine-scaffold/          ← الريبو ده (السكافولد)
 
 ## الموديولات
 
-`Modules/` فيها 10 موديولات، كلها enabled في `modules_statuses.json`:
+`Modules/` فيها 11 موديول، كلها enabled في `modules_statuses.json`:
 
-`Core` · `Pages` · `Locations` · `Developers` · `Compounds` · `Properties` · `Leads` · `Blog` · `Seo` · `Reviews`
+`Core` · `Properties` · `Compounds` · `Developers` · `Locations` · `Leads` · `Blog` · `Seo` · `Marketing` · `Pages` · `Reviews`
 
-`Core` هو الأنضج (auth · dashboard · settings · users). موديولات تانية عندها CRUD أدمن فعلي،
-وموديولات (`Pages`, `Seo`, `Reviews`) لسه stubs متولّدة. راجع `docs/PDR.md` للجرد التفصيلي.
+- **`Core`** — auth · dashboard · settings · users · media · menus · **سجل النشاط**.
+- **`Properties`** — الأنضج: صفحات عامة · CRUD أدمن · «أضف عقارك» · «وحداتي» · **البحث المحفوظ + تنبيهاته** · شوهدت مؤخرًا.
+- **`Seo`** — sitemap · robots · **صفحات الهبوط البرمجية** (`LandingPage` + أمر `seo:landing-pages`).
+- **`Marketing`** — **المساحات الإعلانية المجدولة** (`FeaturedAd`) + **شاشة التقارير**.
+- **`Pages`** و **`Reviews`** لسه stubs متولّدة.
 
 الـ CRUD الأدمن كله بيرث من `app/Support/ResourceController.php` — أي تعديل هناك بيمسّ كل الموديولات.
 
 ---
 
-## الراوتات (المصدر: `php artisan route:list --except-vendor` — 118 راوت)
+## الراوتات (المصدر: `php artisan route:list --except-vendor` — 168 راوت)
 
-- **الموقع العام:** `/{locale}` وتحته `/properties` `/compounds` `/about` `/contact` `/blog` `/blog/{slug}`
-  · `POST /{locale}/leads` · و `/` بيعمل redirect للّغة.
-- **الداشبورد:** `/admin` (dashboard) · `/admin/login` · `/admin/settings/{group}` ·
-  وموارد: `users` `properties` `compounds` `developers` `locations` `leads` `posts`.
+- **الموقع العام:** `/{locale}` وتحته `/properties` (+ `/commercial` `/residential` + `{slug}` للوحدة
+  **وللـ landing page** — راجع `SharedSlugSpace`) · `/compounds` · `/developers` · `/areas` · `/blog`
+  · `/add-property` · `/ads/{id}` (تتبّع الضغطة) · `/recently-viewed` (JSON) · `/about` · `/contact`.
+- **الحساب:** `/{locale}/account` · `/account/my-properties` · `/account/saved-searches`
+  · `/account/favorites` · `/account/requests` · دخول/تسجيل/نسيت كلمة المرور.
+- **الداشبورد:** `/admin` · `/admin/settings/{group}` · موارد `users` `properties` `compounds`
+  `developers` `locations` `leads` `posts` `landing-pages` `featured-ads` · `/admin/media`
+  · `/admin/menus` · `/admin/reports` · `/admin/activity`.
 - **API:** `/api/v1/*` لكل موديول (RESTful).
 
 ### 🔴 عطل مؤكَّد في طبقة الـ API
@@ -110,10 +117,10 @@ npm run e2e:ui          # Playwright بواجهة
 
 ### حالة الجودة الحالية (خط الأساس — متحقَّق منه)
 - `tsc --noEmit` → **نضيف ✅**
-- `php artisan test` → **3/3 ناجحة ✅** (تغطية اسمية بس — مش تغطية حقيقية)
-- `playwright test` → **12/12 ناجحة ✅**
-- `phpstan level 5` → **78 خطأ** ❌ (خط أساس، مش هدف — متزوّدش عليه)
-- `pint --test` → **34 ملف محتاج فورمات** ❌
+- `php artisan test` → **187/187 ناجحة ✅** (13 ملف Feature — تغطية حقيقية للدومين)
+- `playwright test` → **85 ناجحة + 1 متخطّى عن قصد ✅**
+- `phpstan level 5` → **58 خطأ** ❌ (خط أساس، مش هدف — **متزوّدش عليه**)
+- `pint --test` → ملفات قديمة محتاجة فورمات ❌ (الجديد كله نضيف — سيب القديم لكوميت لوحده)
 
 لو الشغل بتاعك مالوش علاقة بيهم، متصلّحهمش في نفس الـ commit — اعملهم لوحدهم.
 
@@ -134,6 +141,26 @@ npm run e2e:ui          # Playwright بواجهة
 - بعد `php artisan boost:update` مش محتاج تعمل حاجة — الـ skills symlinks بتتحدّث لوحدها.
 
 ---
+
+## أنظمة فرعية لازم تعرفها قبل ما تلمس حاجة
+
+- **دورة الاعتماد.** الوحدة مبتظهرش غير بـ `status = published` **و** `is_active = true` — استخدم
+  `Property::published()` في أي استعلام عام. التحكم في `PropertyAdminController::applyModeration`
+  بتلات طبقات: `publish listings` بيحدد الحالة · `manage catalog` لوحدها بتعدّل من غير ما تلمس
+  الحالة · صاحب الوحدة أي تعديل منه بيرجّعها للمراجعة.
+- **مساحة الاسم المشتركة للروابط.** `/properties/{slug}` بيخدم الوحدات **وصفحات الهبوط**.
+  التفرّد مفروض على الجدولين في `app/Support/SharedSlugSpace.php` — أي موديل جديد ينشر تحت
+  نفس المسار لازم يضاف هناك.
+- **صفحات الهبوط.** بتتولّد بأمر `seo:landing-pages` من الوحدات الموجودة فعلًا. النصوص الفاضية
+  بتتولّد، والمكتوبة بتغلب. الأمر idempotent وبيتشغّل في كل `db:seed` وأسبوعيًا من الجدولة.
+- **العدّادات.** المشاهدات والظهور والضغطات بتتزوّد على **query builder** مش على الموديل —
+  عشان `updated_at` ماتتحركش (خريطة الموقع بتبني `lastmod` عليها) وسجل النشاط ما يتلوّثش.
+- **سجل النشاط.** `App\Support\LogsActivity` متركّب على موديلات الدومين. بيسجّل أفعال الناس بس
+  (اللي فيها مستخدم مسجّل) — السيدرز والأوامر مبتتسجّلش عن قصد.
+- **البريد.** `MAIL_MAILER=sendmail` على الاستضافة المشتركة. استعادة كلمة المرور وتنبيهات
+  البحث المحفوظ معتمدين عليه — لو رجع `log` الرسايل بتروح في الفراغ من غير خطأ.
+- **الجدولة** في `routes/console.php`: `searches:alert` يوميًا 9ص · `seo:landing-pages` أسبوعيًا.
+  محتاجة cron على السيرفر (`php artisan schedule:run` كل دقيقة) — **لسه مش مركّبة على الإنتاج**.
 
 ## أعراف الكود
 
