@@ -20,7 +20,7 @@ const copy = {
         contact: "بيانات التواصل",
         name: "الاسم",
         phone: "الموبايل",
-        email: "الإيميل (اختياري)",
+        email: "الإيميل",
         submit: "ابعت العقار للمراجعة",
         sending: "جارٍ الإرسال…",
         doneTitle: "وصلنا عقارك ✅",
@@ -28,6 +28,7 @@ const copy = {
         another: "أضف عقار تاني",
         note: "الإعلان مبيظهرش على الموقع قبل المراجعة — ده بيحمي الباحثين من الإعلانات الوهمية.",
         required: "الحقول المطلوبة عليها *",
+        mineGuest: "بعتنالك على الإيميل لينك تفعّل بيه حسابك وتتابع وحدتك منه.",
         mine: "تابع وحداتك من «وحداتي»",
     },
     en: {
@@ -42,7 +43,7 @@ const copy = {
         contact: "Contact details",
         name: "Name",
         phone: "Mobile",
-        email: "Email (optional)",
+        email: "Email",
         submit: "Send for review",
         sending: "Sending…",
         doneTitle: "Your property was received ✅",
@@ -50,6 +51,7 @@ const copy = {
         another: "Add another property",
         note: "Listings are not visible on the site before review — that is what keeps fake ads out.",
         required: "Required fields are marked *",
+        mineGuest: "We emailed you a link to activate your account and follow your listing.",
         mine: "Track them under “My listings”",
     },
 };
@@ -133,7 +135,9 @@ export default function AddProperty({ options }: { options: ListingOptions }) {
                             <CheckCircle2 size={40} className="text-success" />
                             <h2 className="mt-4 text-xl font-extrabold text-secondary">{t.doneTitle}</h2>
                             <p className="mt-2 max-w-md text-sm leading-7 text-muted">{t.doneText}</p>
-                            <p className="mt-1 text-[12px] font-bold text-muted">{t.mine}</p>
+                            <p className="mt-1 text-[12px] font-bold text-muted">
+                                {auth.user ? t.mine : t.mineGuest}
+                            </p>
                             <button
                                 type="button"
                                 onClick={() => setSent(false)}
@@ -151,7 +155,8 @@ export default function AddProperty({ options }: { options: ListingOptions }) {
                                 <div className="grid gap-4 md:grid-cols-3">
                                     {contact("name", t.name, true)}
                                     {contact("phone", t.phone, true)}
-                                    {contact("email", t.email, false, "email")}
+                                    {/* مطلوب: الإيميل هو اللي بيحدّد الحساب اللي الوحدة بتتسجّل عليه */}
+                                    {contact("email", t.email, true, "email")}
                                 </div>
                             </fieldset>
 

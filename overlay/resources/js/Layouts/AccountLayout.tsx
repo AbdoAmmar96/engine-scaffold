@@ -1,12 +1,12 @@
 import { Link, router, usePage } from "@inertiajs/react";
-import { AlertCircle, Building2, CheckCircle2, Heart, Inbox, LogOut, Search, UserRound } from "lucide-react";
+import { AlertCircle, Building2, CheckCircle2, Heart, Inbox, LogOut, Search, Star, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import SiteLayout from "@/Layouts/SiteLayout";
 import type { SharedProps } from "@/lib/types";
 
 const copy = {
-    ar: { overview: "نظرة عامة", favorites: "المحفوظة", requests: "طلباتي", listings: "وحداتي", searches: "البحث المحفوظ", logout: "خروج", hello: "أهلًا" },
-    en: { overview: "Overview", favorites: "Saved", requests: "My requests", listings: "My listings", searches: "Saved searches", logout: "Sign out", hello: "Hi" },
+    ar: { overview: "نظرة عامة", favorites: "المحفوظة", requests: "طلباتي", listings: "وحداتي", searches: "البحث المحفوظ", review: "قيّم تجربتك", logout: "خروج", hello: "أهلًا" },
+    en: { overview: "Overview", favorites: "Saved", requests: "My requests", listings: "My listings", searches: "Saved searches", review: "Rate us", logout: "Sign out", hello: "Hi" },
 };
 
 /**
@@ -29,6 +29,7 @@ export default function AccountLayout({ title, children }: { title: string; chil
         { href: `/${locale}/account/favorites`, label: t.favorites, icon: Heart, exact: false },
         { href: `/${locale}/account/saved-searches`, label: t.searches, icon: Search, exact: false },
         { href: `/${locale}/account/requests`, label: t.requests, icon: Inbox, exact: false },
+        { href: `/${locale}/account/review`, label: t.review, icon: Star, exact: false },
     ];
 
     return (

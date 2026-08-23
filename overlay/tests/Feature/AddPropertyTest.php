@@ -5,11 +5,14 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Modules\Core\Database\Seeders\RolePermissionSeeder;
 use Modules\Leads\Models\Lead;
 use Modules\Locations\Models\Location;
 use Modules\Properties\Models\Property;
+use Modules\Properties\Notifications\ListingReceivedNotification;
 use Tests\TestCase;
 
 /**
@@ -161,12 +164,123 @@ class AddPropertyTest extends TestCase
         $this->assertSame($customer->id, Lead::sole()->owner_id);
     }
 
-    public function test_a_guest_submission_has_no_owner(): void
+    /* ---------------- الزائر بياخد حساب ---------------- */
+
+    public function test_a_guest_gets_an_account_that_owns_the_unit(): void
     {
+        Notification::fake();
+
         $this->post('/ar/add-property', $this->payload());
 
-        $this->assertNull(Property::sole()->owner_id);
+        $user = User::where('email', 'sami@example.com')->sole();
+
+        // من غير ده الوحدة بتبقى يتيمة والصفحة بتوعده بمتابعة مستحيلة
+        $this->assertTrue($user->hasRole('lister'));
+        $this->assertSame($user->id, Property::sole()->owner_id);
+        $this->assertSame($user->id, Lead::sole()->owner_id);
+        $this->assertSame('01000000000', $user->phone);
+
+        // مالك الوحدة مش «عميل قدّم طلب»
         $this->assertNull(Lead::sole()->user_id);
+    }
+
+    public function test_the_owner_actually_finds_the_unit_after_signing_in(): void
+    {
+        Notification::fake();
+
+        $this->post('/ar/add-property', $this->payload());
+
+        $refs = $this->actingAs(User::where('email', 'sami@example.com')->sole())
+            ->get('/ar/account/my-properties')
+            ->assertOk()
+            ->viewData('page')['props']['properties'];
+
+        // ده الوعد اللي الصفحة بتقوله — لازم يتنفّذ فعلًا
+        $this->assertCount(1, $refs);
+        $this->assertSame('شقة ١٥٠م بحديقة', $refs[0]['title']);
+    }
+
+    public function test_the_guest_is_emailed_a_link_to_set_a_password(): void
+    {
+        Notification::fake();
+
+        $this->post('/ar/add-property', $this->payload());
+
+        Notification::assertSentTo(
+            User::where('email', 'sami@example.com')->sole(),
+            ListingReceivedNotification::class,
+        );
+    }
+
+    public function test_the_new_account_cannot_be_entered_without_that_link(): void
+    {
+        Notification::fake();
+
+        $this->post('/ar/add-property', $this->payload());
+
+        // كلمة السر عشوائية — الحساب مايتفتحش غير باللينك اللي في الإيميل،
+        // فحد بعت بإيميل مش بتاعه مش بياخد وصول لحاجة
+        foreach (['', 'password', '01000000000', 'sami@example.com'] as $guess) {
+            $this->assertFalse(Auth::attempt(['email' => 'sami@example.com', 'password' => $guess]));
+        }
+    }
+
+    public function test_a_second_submission_reuses_the_same_account(): void
+    {
+        Notification::fake();
+
+        $this->post('/ar/add-property', $this->payload());
+        $this->post('/ar/add-property', $this->payload(['title' => 'فيلا ٣٠٠م']));
+
+        $this->assertSame(1, User::where('email', 'sami@example.com')->count());
+        $this->assertSame(2, Property::where('owner_id', User::where('email', 'sami@example.com')->value('id'))->count());
+    }
+
+    public function test_an_existing_account_is_used_as_is_and_told_about_it(): void
+    {
+        Notification::fake();
+
+        $existing = User::create([
+            'name' => 'صاحب الحساب',
+            'email' => 'sami@example.com',
+            'password' => 'a-password-they-chose',
+        ]);
+        $existing->assignRole('lister');
+
+        $this->post('/ar/add-property', $this->payload());
+
+        $this->assertSame(1, User::where('email', 'sami@example.com')->count());
+        $this->assertSame($existing->id, Property::sole()->owner_id);
+
+        // كلمة سره ما اتلمستش — الوحدة بتتحط على حسابه وهو بيتبلّغ
+        $this->assertTrue(Auth::attempt(['email' => 'sami@example.com', 'password' => 'a-password-they-chose']));
+        Notification::assertSentTo($existing->fresh(), ListingReceivedNotification::class);
+    }
+
+    public function test_the_form_does_not_reveal_whether_the_email_has_an_account(): void
+    {
+        Notification::fake();
+
+        $first = $this->post('/ar/add-property', $this->payload())->assertSessionHas('success');
+
+        $second = $this->post('/ar/add-property', $this->payload(['title' => 'وحدة تانية']))
+            ->assertSessionHas('success');
+
+        // نفس الرسالة في الحالتين، وإلا الفورم بيبقى أداة يعرف بيها
+        // أي حد مين عنده حساب هنا
+        $this->assertSame(
+            $first->getSession()->get('success'),
+            $second->getSession()->get('success'),
+        );
+    }
+
+    public function test_the_email_is_required_because_it_picks_the_account(): void
+    {
+        $this->post('/ar/add-property', $this->payload(['email' => null]))
+            ->assertSessionHasErrors('email');
+
+        $this->assertSame(0, Property::count());
+        $this->assertSame(0, User::count());
     }
 
     public function test_the_honeypot_swallows_bots_without_writing_anything(): void
@@ -181,7 +295,7 @@ class AddPropertyTest extends TestCase
     public function test_the_essentials_are_required(): void
     {
         $this->post('/ar/add-property', [])
-            ->assertSessionHasErrors(['name', 'phone', 'title', 'purpose', 'type']);
+            ->assertSessionHasErrors(['name', 'phone', 'email', 'title', 'purpose', 'type']);
 
         $this->assertSame(0, Property::count());
     }

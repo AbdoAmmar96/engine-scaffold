@@ -22,6 +22,7 @@ use Modules\Properties\Http\Controllers\AddPropertyController;
 use Modules\Properties\Http\Controllers\PropertyPageController;
 use Modules\Properties\Http\Controllers\RecentlyViewedController;
 use Modules\Properties\Http\Controllers\SavedSearchController;
+use Modules\Reviews\Http\Controllers\AccountReviewController;
 
 // الجذر → العربية (اللغة الافتراضية)
 Route::redirect('/', '/ar');
@@ -39,6 +40,7 @@ Route::prefix('{locale}')
             'searchOptions' => Catalog::searchOptions($locale),
             'ads' => AdSlot::at('hero', $locale, 3),
             'recentlyViewed' => Catalog::recentlyViewed($locale),
+            'reviews' => Catalog::reviews($locale, 6),
             'meta' => Seo::page($locale, ''),
         ]))->name('home');
 
@@ -234,6 +236,12 @@ Route::prefix('{locale}')
 
             Route::post('favorites/{property}', [FavoriteController::class, 'toggle'])
                 ->whereNumber('property')->name('account.favorites.toggle');
+
+            /* ---------- قيّم تجربتك ---------- */
+            // رأي واحد للحساب — الحفظ بيعدّل الموجود مش بيضيف تاني
+            Route::get('account/review', [AccountReviewController::class, 'edit'])->name('account.review');
+            Route::post('account/review', [AccountReviewController::class, 'store'])
+                ->middleware('throttle:10,60')->name('account.review.store');
 
             /* ---------- البحث المحفوظ ---------- */
             Route::get('account/saved-searches', [SavedSearchController::class, 'index'])->name('account.searches');

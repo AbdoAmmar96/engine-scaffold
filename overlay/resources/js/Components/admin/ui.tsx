@@ -71,14 +71,17 @@ export function ColorField({
 
 export function Card({ title, actions, children }: { title?: string; actions?: ReactNode; children: ReactNode }) {
     return (
-        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
+        // min-w-0 ضرورية: عنصر الجريد أو الفلكس بيرفض افتراضيًا يقل عن عرض محتواه،
+        // فجدول عريض جوّه كارت كان بيمدّ الصفحة كلها بدل ما يعمل سكرول جوّه إطاره.
+        // الكارت مالوش يمدّ اللي حواليه أبدًا.
+        <div className="min-w-0 rounded-2xl border border-gray-200 bg-white shadow-sm">
             {(title || actions) && (
-                <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+                <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-4 sm:px-6">
                     <h2 className="text-base font-extrabold text-gray-900">{title}</h2>
                     {actions}
                 </div>
             )}
-            <div className="p-6">{children}</div>
+            <div className="p-4 sm:p-6">{children}</div>
         </div>
     );
 }

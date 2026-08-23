@@ -1,4 +1,4 @@
-import { Link, usePage } from "@inertiajs/react";
+import { Link, router, usePage } from "@inertiajs/react";
 import {
     BarChart3,
     Briefcase,
@@ -9,6 +9,7 @@ import {
     Images,
     Inbox,
     LayoutDashboard,
+    Menu,
     Link2,
     ListTree,
     LogOut,
@@ -18,12 +19,14 @@ import {
     Palette,
     Phone,
     ScrollText,
+    Star,
     Search,
     Settings,
     Share2,
     UserCog,
+    X,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { FlashBanner } from "@/Components/admin/ui";
 import type { SharedProps } from "@/lib/types";
 
@@ -70,6 +73,7 @@ const moduleNav: NavItem[] = [
     { href: "/admin/featured-ads", label: "المساحات الإعلانية", icon: Megaphone, perm: [FEATURE] },
     { href: "/admin/leads", label: "الطلبات", icon: Inbox, perm: [LEADS] },
     { href: "/admin/posts", label: "المدونة", icon: Newspaper, perm: [CONTENT] },
+    { href: "/admin/reviews", label: "آراء العملاء", icon: Star, perm: [CONTENT] },
 ];
 
 // إدارة النظام
@@ -83,6 +87,25 @@ export default function AdminLayout({ title, children }: { title: string; childr
     const { auth } = usePage<SharedProps>().props;
     const path = typeof window !== "undefined" ? window.location.pathname : "";
     const can = auth.user?.can ?? [];
+
+    // السايدبار ثابت على الديسكتوب، ودرج بينفتح على الموبايل.
+    // قبل كده كان `ps-64` ثابت على كل المقاسات — يعني على شاشة 390 بكسل
+    // المحتوى كان بياخد 134 بكسل والباقي بيطفح برّه الشاشة، واللوحة عمليًا
+    // مش قابلة للاستخدام من الموبايل. والوسيط والمعلن بيتابعوا من الموبايل.
+    const [open, setOpen] = useState(false);
+
+    // بيتقفل مع أي تنقّل — من غير كده الدرج بيفضل مفتوح فوق الصفحة الجديدة
+    useEffect(() => router.on("navigate", () => setOpen(false)), []);
+
+    // Escape بيقفله — سلوك متوقّع لأي درج أو مودال
+    useEffect(() => {
+        if (! open) return;
+
+        const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+        document.addEventListener("keydown", onKey);
+
+        return () => document.removeEventListener("keydown", onKey);
+    }, [open]);
 
     // اللينك بيظهر بس لو المستخدم معاه صلاحية واحدة على الأقل — نفس التحقق موجود على الراوت
     const allowed = (items: NavItem[]) => items.filter((i) => i.perm.some((perm) => can.includes(perm)));
@@ -115,17 +138,42 @@ export default function AdminLayout({ title, children }: { title: string; childr
 
     return (
         <div dir="rtl" className="flex min-h-screen bg-gray-100 font-sans text-gray-900">
+            {/* الخلفية السودا بتقفل الدرج — التاتش بره الدرج معناه «اقفله» */}
+            {open && (
+                <div
+                    onClick={() => setOpen(false)}
+                    aria-hidden
+                    className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+                />
+            )}
+
             {/* ------------------------------ Sidebar ------------------------------ */}
-            <aside className="fixed inset-y-0 start-0 z-40 flex w-64 flex-col bg-bg-dark p-4">
-                <div className="mb-8 flex items-center gap-2 px-2 pt-2">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary font-extrabold text-primary-fg">
-                        BP
+            {/* اللوحة كلها dir=rtl، فـ translate-x-full بيطلّعه ناحية اليمين برّه الشاشة */}
+            <aside
+                className={`fixed inset-y-0 start-0 z-40 flex w-64 flex-col bg-bg-dark p-4 transition-transform duration-200 lg:translate-x-0 ${
+                    open ? "translate-x-0" : "translate-x-full"
+                }`}
+            >
+                <div className="mb-8 flex items-center justify-between gap-2 px-2 pt-2">
+                    <span className="flex items-center gap-2">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary font-extrabold text-primary-fg">
+                            BP
+                        </span>
+                        <span className="text-sm font-extrabold text-white">إنجن شريك الأعمال</span>
                     </span>
-                    <span className="text-sm font-extrabold text-white">إنجن شريك الأعمال</span>
+
+                    <button
+                        type="button"
+                        onClick={() => setOpen(false)}
+                        aria-label="اقفل القايمة"
+                        className="rounded-lg p-1 text-gray-400 transition hover:bg-white/10 hover:text-white lg:hidden"
+                    >
+                        <X size={18} />
+                    </button>
                 </div>
 
                 {/* min-h-0 مهم: من غيره الفلكس مبيسمحش للعنصر يقل عن محتواه فالسكرول مبيشتغلش */}
-                <nav className="-mx-1 flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-1">
+                <nav onClick={() => setOpen(false)} className="-mx-1 flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-1">
                     {item("/admin", "لوحة التحكم", LayoutDashboard, path === "/admin")}
 
                     {section("الإعدادات", settingsNav)}
@@ -149,16 +197,34 @@ export default function AdminLayout({ title, children }: { title: string; childr
             </aside>
 
             {/* ------------------------------ Content ------------------------------ */}
-            <div className="flex-1 ps-64">
-                <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white/90 px-8 backdrop-blur">
-                    <h1 className="text-lg font-extrabold">{title}</h1>
-                    <a href="/ar" target="_blank" className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-secondary">
+            {/* min-w-0 ضرورية: من غيرها عنصر الفلكس بيرفض يقل عن عرض محتواه،
+                فجدول عريض بيمدّد الصفحة كلها بدل ما يعمل سكرول جوّه إطاره */}
+            <div className="min-w-0 flex-1 ps-0 lg:ps-64">
+                <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-gray-200 bg-white/90 px-4 backdrop-blur lg:px-8">
+                    <div className="flex min-w-0 items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={() => setOpen(true)}
+                            aria-label="افتح القايمة"
+                            aria-expanded={open}
+                            className="-ms-1 rounded-lg p-2 text-gray-600 transition hover:bg-gray-100 hover:text-secondary lg:hidden"
+                        >
+                            <Menu size={20} />
+                        </button>
+                        <h1 className="truncate text-base font-extrabold lg:text-lg">{title}</h1>
+                    </div>
+
+                    <a
+                        href="/ar"
+                        target="_blank"
+                        className="flex shrink-0 items-center gap-2 text-sm font-bold text-gray-500 hover:text-secondary"
+                    >
                         <Home size={16} />
-                        عرض الموقع
+                        <span className="hidden sm:inline">عرض الموقع</span>
                     </a>
                 </header>
 
-                <main className="p-8">{children}</main>
+                <main className="p-4 lg:p-8">{children}</main>
             </div>
 
             <FlashBanner />

@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Support\PasswordLink;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\ServiceProvider;
 use Modules\Core\Services\SettingsService;
@@ -28,20 +30,15 @@ class AppServiceProvider extends ServiceProvider
      */
     private function configurePasswordResetMail(): void
     {
-        $link = fn (object $notifiable, string $token) => url(sprintf(
-            '/%s/reset-password/%s?email=%s',
-            app()->getLocale(),
-            $token,
-            urlencode($notifiable->getEmailForPasswordReset()),
-        ));
+        $link = fn (CanResetPassword $notifiable, string $token) => PasswordLink::url($notifiable, $token);
 
         ResetPassword::createUrlUsing($link);
 
         // toMailUsing بياخد التوكن مش اللينك — بيعدّي على resetUrl() من فوقها،
         // فالكولباك اللي فوق مبيتناديش هنا واللينك لازم يتبني تاني بنفس المصدر
-        ResetPassword::toMailUsing(function (object $notifiable, string $token) use ($link) {
+        ResetPassword::toMailUsing(function (CanResetPassword $notifiable, string $token) use ($link) {
             $site = app(SettingsService::class)->get('general', 'site_name', config('app.name'));
-            $minutes = config('auth.passwords.users.expire', 60);
+            $minutes = PasswordLink::expiresIn();
 
             return (new MailMessage)
                 ->subject("استعادة كلمة المرور — {$site}")

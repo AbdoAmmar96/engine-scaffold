@@ -76,7 +76,7 @@ export default function Reports({
         return (
             <ul className="flex flex-col gap-3">
                 {rows.map((r) => (
-                    <li key={r.label} className="grid grid-cols-[9rem_1fr_3rem] items-center gap-3">
+                    <li key={r.label} className="grid grid-cols-[6.5rem_1fr_2.5rem] items-center gap-2 sm:grid-cols-[9rem_1fr_3rem] sm:gap-3">
                         <span className="truncate text-[12px] font-bold text-gray-600" title={r.label}>
                             {r.label}
                         </span>
@@ -188,6 +188,7 @@ export default function Reports({
                         {topProperties.length === 0 ? (
                             <p className="py-6 text-center text-sm text-gray-400">لسه مفيش وحدات منشورة</p>
                         ) : (
+                            <div className="overflow-x-auto">
                             <table className="w-full text-[12px]">
                                 <thead>
                                     <tr className="text-gray-500">
@@ -209,6 +210,7 @@ export default function Reports({
                                     ))}
                                 </tbody>
                             </table>
+                            </div>
                         )}
                     </Card>
                 </div>
@@ -217,6 +219,7 @@ export default function Reports({
                     {ads.length === 0 ? (
                         <p className="py-6 text-center text-sm text-gray-400">مفيش مساحات إعلانية لسه</p>
                     ) : (
+                        <div className="overflow-x-auto">
                         <table className="w-full text-[12px]">
                             <thead>
                                 <tr className="text-gray-500">
@@ -248,6 +251,7 @@ export default function Reports({
                                 ))}
                             </tbody>
                         </table>
+                        </div>
                     )}
                 </Card>
             </div>

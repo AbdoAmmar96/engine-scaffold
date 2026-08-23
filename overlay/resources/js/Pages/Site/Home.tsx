@@ -6,6 +6,7 @@ import CountUp from "@/Components/site/CountUp";
 import FrameMedia from "@/Components/site/FrameMedia";
 import HeroSearch from "@/Components/site/HeroSearch";
 import PropertyCard from "@/Components/site/PropertyCard";
+import Reviews, { type ReviewCard } from "@/Components/site/Reviews";
 import Reveal from "@/Components/site/Reveal";
 import SiteLayout from "@/Layouts/SiteLayout";
 import type { Area, Compound, Property, SearchOptions, SharedProps } from "@/lib/types";
@@ -46,6 +47,8 @@ const copy = {
             ["التعاقد والتسليم", "حضور محامي المنصة، ومتابعة أقساط ما بعد التعاقد."],
         ],
         areasTitle: "مناطق بنغطيها بالتفصيل",
+        reviewsTitle: "عملاء اشتروا معانا",
+        reviewsDesc: "آراء مكتوبة من حسابات عملاء فعليين — بنراجعها قبل ما تنزل، ومبنكتبش ولا واحدة بالنيابة عنهم.",
         ctaTitle: "محتار بين وحدتين؟",
         ctaSub: "ابعتلنا الاختيارات وهنرجّعلك مقارنة مكتوبة بالسعر وسعر المتر ونظام السداد وتاريخ التسليم.",
         ctaBtn: "تواصل معنا",
@@ -80,6 +83,8 @@ const copy = {
             ["Contract and handover", "Our lawyer attends, and we follow up post-contract instalments."],
         ],
         areasTitle: "Areas we cover in depth",
+        reviewsTitle: "Clients who bought with us",
+        reviewsDesc: "Written from real client accounts — we review each one before it appears, and we never write one on their behalf.",
         ctaTitle: "Torn between two units?",
         ctaSub: "Send us your options and we will return a written comparison of price, price per m², payment plan and delivery date.",
         ctaBtn: "Contact us",
@@ -94,6 +99,7 @@ export default function Home({
     searchOptions,
     ads = [],
     recentlyViewed = [],
+    reviews = [],
 }: {
     latestProperties: Property[];
     latestCompounds: Compound[];
@@ -101,6 +107,7 @@ export default function Home({
     searchOptions: SearchOptions;
     ads?: Ad[];
     recentlyViewed?: Property[];
+    reviews?: ReviewCard[];
 }) {
     const { locale, settings } = usePage<SharedProps>().props;
     const ar = locale === "ar";
@@ -305,6 +312,9 @@ export default function Home({
                     </div>
                 </div>
             </section>
+
+            {/* ---------------- آراء العملاء (بيختفي لو مفيش رأي معتمد) ---------------- */}
+            <Reviews items={reviews} title={t.reviewsTitle} desc={t.reviewsDesc} />
 
             {/* ---------------- بانر المقارنة ---------------- */}
             <section className="bg-bg px-4 pb-20">

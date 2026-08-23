@@ -5,12 +5,14 @@ namespace App\Support;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Modules\Blog\Models\Post;
 use Modules\Compounds\Models\Compound;
 use Modules\Developers\Models\Developer;
 use Modules\Locations\Models\Location;
 use Modules\Properties\Models\Property;
+use Modules\Reviews\Models\Review;
 
 /**
  * مصدر بيانات الموقع العام — بيقرا من الجداول الحقيقية.
@@ -200,6 +202,30 @@ class Catalog
      * تطبيق الفلاتر على استعلام جاهز — نفس منطق الصفحة بالظبط.
      * التنبيهات بتستخدمه عشان اللي في الإيميل يبقى هو اللي في الموقع.
      */
+    /**
+     * آراء العملاء المعتمدة.
+     *
+     * مفيش fallback لـ DemoContent هنا عن قصد: باقي الكتالوج بيرجع لبيانات
+     * تجريبية على التثبيت الجديد عشان الصفحة تبان، بس رأي عميل متلفّق حاجة
+     * تانية خالص. القسم بيختفي وهو فاضي.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function reviews(string $locale, int $limit = 6): array
+    {
+        if (! Schema::hasTable('reviews')) {
+            return [];
+        }
+
+        return Review::published()
+            ->orderBy('sort')
+            ->orderByDesc('published_at')
+            ->limit($limit)
+            ->get()
+            ->map(fn (Review $r) => $r->toCard($locale))
+            ->all();
+    }
+
     public static function applyFilters(Builder $query, array $filters): void
     {
         self::applyPropertyFilters($query, $filters);

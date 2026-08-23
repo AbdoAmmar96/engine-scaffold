@@ -489,3 +489,46 @@ test('the admin reports and activity screens are gated', async ({ page }) => {
         await expect(page).toHaveURL(/\/admin\/login/);
     }
 });
+
+/* ---------------------------------------------------------------------------
+ | الطفح الأفقي
+ |
+ | الصنف ده بيعدّي من مراجعة الكود ومن اختبارات PHP بصمت: الصفحة بترندر
+ | صح، والـHTTP بيرجّع 200، والمستخدم بس هو اللي بيلاقي نفسه بيسحب الشاشة
+ | يمين وشمال. حصل فعلًا — لوحة التحكم فضلت شهور بسايدبار `ps-64` ثابت
+ | فكانت مش قابلة للاستخدام من الموبايل، ومحدش اكتشفها من الكود.
+ |
+ | الاختبار بيتشغّل على الديسكتوب والموبايل من `playwright.config.ts`.
+ ---------------------------------------------------------------------------- */
+
+const NO_SCROLL_PAGES = [
+    '/ar',
+    '/ar/properties',
+    '/ar/compounds',
+    '/ar/developers',
+    '/ar/areas',
+    '/ar/blog',
+    '/ar/about',
+    '/ar/contact',
+    '/ar/add-property',
+    '/ar/login',
+    '/ar/register',
+    '/ar/forgot-password',
+    '/admin/login',
+    '/en',
+    '/en/properties',
+];
+
+for (const path of NO_SCROLL_PAGES) {
+    test(`${path} does not scroll sideways`, async ({ page }) => {
+        await page.goto(path, { waitUntil: 'networkidle' });
+
+        const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+            scrollWidth: document.documentElement.scrollWidth,
+            clientWidth: document.documentElement.clientWidth,
+        }));
+
+        // بكسل سماح للتقريب في القياس
+        expect(scrollWidth, `${path} بيطفح ${scrollWidth - clientWidth}px`).toBeLessThanOrEqual(clientWidth + 1);
+    });
+}

@@ -2,6 +2,7 @@
 
 namespace Modules\Properties\Http\Controllers;
 
+use App\Models\User;
 use App\Support\Seo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -9,7 +10,9 @@ use Illuminate\Routing\Controller;
 use Inertia\Inertia;
 use Inertia\Response;
 use Modules\Leads\Models\Lead;
+use Illuminate\Support\Str;
 use Modules\Properties\Models\Property;
+use Modules\Properties\Notifications\ListingReceivedNotification;
 use Modules\Properties\Support\HandlesListingInput;
 
 /**
@@ -18,6 +21,11 @@ use Modules\Properties\Support\HandlesListingInput;
  * الطلب بيتحوّل لحاجتين مع بعض: وحدة في انتظار المراجعة (عشان تدخل
  * دورة الاعتماد زي أي وحدة تانية بدل ما تتكتب تاني بالإيد)، وطلب في
  * صندوق الطلبات (عشان حد يكلّم صاحبها). الاتنين مربوطين ببعض.
+ *
+ * **الزائر بياخد حساب.** قبل كده الوحدة كانت بتتسجّل بـ `owner_id = null`،
+ * والصفحة بتقوله «تابع وحداتك من وحداتي» وهو مالوش حساب — وحتى لو سجّل،
+ * الشاشة بتفلتر على المالك فمكانش هيشوفها أبدًا. دلوقتي الإيميل بيحدّد
+ * الحساب: موجود بيتربط بيه، مش موجود بيتعمل واحد ويوصله لينك يحدّد كلمة سره.
  *
  * الوحدة مبتظهرش على الموقع قبل ما الأدمن يعتمدها — status = pending.
  */
@@ -56,7 +64,8 @@ class AddPropertyController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'phone' => ['required', 'string', 'max:40'],
-            'email' => ['nullable', 'email', 'max:190'],
+            // مطلوب: هو ده اللي بيحدّد الحساب اللي الوحدة هتتسجّل عليه
+            'email' => ['required', 'email', 'max:190'],
             ...$this->listingRules(),
         ], [], [
             'name' => 'الاسم',
@@ -66,17 +75,20 @@ class AddPropertyController extends Controller
         ]);
 
         $images = $this->resolveImages(null, $data, $request->file('images') ?? []);
-        $user = $request->user();
+
+        $signedIn = $request->user();
+        [$user, $isNewAccount] = $signedIn
+            ? [$signedIn, false]
+            : $this->accountFor($data);
 
         // العميل اللي عرض وحدة بقى «معلن»: من غير كده الوحدة بتتسجّل
         // باسمه ومايقدرش يتابعها ولا يعدّلها من حسابه.
-        if ($user?->hasRole('customer')) {
+        if ($user->hasRole('customer')) {
             $user->syncRoles(['lister']);
         }
 
-        // الوسيط/الشركة/المعلن بيبقوا ملّاك وحدتهم من أول لحظة — الزائر
-        // اللي مش مسجّل لأ، فوحدته تحت إدارة المنصّة لحد ما الأدمن يوزّعها
-        $owner = $user?->ownsListings() ? $user->id : null;
+        // بيتقرا بعد الترقية: الحساب اللي اترقّى دلوقتي بقى بيملك وحداته
+        $owner = $user->ownsListings() ? $user->id : null;
 
         $property = Property::create($this->listingColumns($data, $images) + [
             'owner_id' => $owner,
@@ -88,18 +100,57 @@ class AddPropertyController extends Controller
         Lead::create([
             'name' => $data['name'],
             'phone' => $data['phone'],
-            'email' => $data['email'] ?? null,
+            'email' => $data['email'],
             'message' => $this->summary($data, $property),
             'source' => 'listing',
             'status' => 'new',
             'property_id' => $property->id,
             'owner_id' => $owner,
-            'user_id' => $user && ! $user->ownsListings() ? $user->id : null,
+            'user_id' => $user->ownsListings() ? null : $user->id,
         ]);
 
+        // المسجّل شايف وحدته في «وحداتي» على طول — مش محتاج رسالة
+        if (! $signedIn) {
+            $user->notify(new ListingReceivedNotification($property, $locale, $isNewAccount));
+        }
+
         return back()->with('success', $en
-            ? 'Your property was received ✅ — our team reviews it and publishes it within 24 hours.'
-            : 'وصلنا عقارك ✅ — الفريق بيراجعه وبينشره خلال ٢٤ ساعة.');
+            ? 'Your property was received ✅ — our team reviews it and publishes it within 24 hours. Check your email to follow it from your account.'
+            : 'وصلنا عقارك ✅ — الفريق بيراجعه وبينشره خلال ٢٤ ساعة. بص في بريدك عشان تتابعه من حسابك.');
+    }
+
+    /**
+     * الحساب اللي الوحدة هتتسجّل عليه، والإيميل هو المفتاح.
+     *
+     * **مبنقولش للي بعت إن الإيميل عليه حساب ولا لأ** — الرسالة اللي بترجع
+     * واحدة في الحالتين، زي «نسيت كلمة المرور» بالظبط. غير كده الفورم بيبقى
+     * أداة يعرف بيها أي حد مين عنده حساب هنا.
+     *
+     * وكلمة السر عشوائية مش فاضية: الحساب مايتفتحش غير باللينك اللي في
+     * الإيميل، فحتى لو حد بعت بإيميل مش بتاعه مش هياخد وصول لحاجة —
+     * والوحدة نفسها `pending` ومش بتظهر قبل مراجعة الأدمن.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array{0: User, 1: bool}
+     */
+    private function accountFor(array $data): array
+    {
+        $existing = User::where('email', $data['email'])->first();
+
+        if ($existing) {
+            return [$existing, false];
+        }
+
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'],
+            'password' => Str::password(32),
+        ]);
+
+        $user->syncRoles(['lister']);
+
+        return [$user, true];
     }
 
     /** ملخّص الطلب في صندوق الطلبات — الأدمن يقرا الأساسي من غير ما يفتح الوحدة */

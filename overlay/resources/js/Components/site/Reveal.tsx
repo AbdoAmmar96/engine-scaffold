@@ -36,7 +36,11 @@ export default function Reveal({
     return (
         <div
             ref={ref}
-            className={className}
+            // min-w-0: العنصر ده بيتحط جوّه جريد وفلكس في كل الموقع، وعنصر
+            // الجريد بيرفض افتراضيًا يقل عن عرض محتواه. من غيرها كارت فيه
+            // نص إنجليزي طويل كان بيمدّ الصفحة كلها — والعربي مكانش بيبان
+            // فيه العطل لأن كلماته أقصر، فالطفح ظهر في /en بس.
+            className={`min-w-0 ${className}`}
             style={{
                 opacity: shown ? 1 : 0,
                 transform: shown ? "translateY(0)" : "translateY(28px)",
