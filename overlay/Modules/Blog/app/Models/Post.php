@@ -2,8 +2,8 @@
 
 namespace Modules\Blog\Models;
 
-use App\Support\LogsActivity;
 use App\Support\Bilingual;
+use App\Support\LogsActivity;
 use App\Support\Sluggable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;

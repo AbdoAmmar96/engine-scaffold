@@ -2,8 +2,9 @@
 
 namespace Modules\Seo\Providers;
 
-use Nwidart\Modules\Support\ModuleServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
+use Modules\Seo\Console\GenerateLandingPages;
+use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class SeoServiceProvider extends ModuleServiceProvider
 {
@@ -23,7 +24,7 @@ class SeoServiceProvider extends ModuleServiceProvider
      * @var string[]
      */
     protected array $commands = [
-        \Modules\Seo\Console\GenerateLandingPages::class,
+        GenerateLandingPages::class,
     ];
 
     /**
@@ -38,8 +39,8 @@ class SeoServiceProvider extends ModuleServiceProvider
 
     /**
      * Define module schedules.
-     * 
-     * @param $schedule
+     *
+     * @param  $schedule
      */
     // protected function configureSchedules(Schedule $schedule): void
     // {

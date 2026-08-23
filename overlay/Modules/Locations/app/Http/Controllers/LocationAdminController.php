@@ -9,15 +9,25 @@ use Modules\Locations\Models\Location;
 
 class LocationAdminController extends ResourceController
 {
-    protected function modelClass(): string { return Location::class; }
-    protected function key(): string { return 'locations'; }
+    protected function modelClass(): string
+    {
+        return Location::class;
+    }
+
+    protected function key(): string
+    {
+        return 'locations';
+    }
 
     protected function labels(): array
     {
         return ['plural' => 'المناطق', 'singular' => 'منطقة'];
     }
 
-    protected function searchable(): array { return ['name', 'name_en']; }
+    protected function searchable(): array
+    {
+        return ['name', 'name_en'];
+    }
 
     protected function columns(): array
     {

@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Modules\Core\Models\MenuItem;
 use Modules\Core\Services\SettingsService;
 
 class HandleInertiaRequests extends Middleware
@@ -26,8 +27,8 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
 
             'settings' => fn () => app(SettingsService::class)->public(),
-            'locale'   => fn () => app()->getLocale(),
-            'menu'     => fn () => \Modules\Core\Models\MenuItem::nav(app()->getLocale()),
+            'locale' => fn () => app()->getLocale(),
+            'menu' => fn () => MenuItem::nav(app()->getLocale()),
 
             'auth' => [
                 // can = صلاحيات المستخدم، عشان اللوحة تخفي اللي مش مسموح له بيه
@@ -42,7 +43,7 @@ class HandleInertiaRequests extends Middleware
 
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
-                'error'   => fn () => $request->session()->get('error'),
+                'error' => fn () => $request->session()->get('error'),
             ],
         ];
     }

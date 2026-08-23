@@ -63,19 +63,36 @@ class UserAdminController extends ResourceController
         return RolePermissionSeeder::ROLES[$role]['label'] ?? '—';
     }
 
-    protected function modelClass(): string { return User::class; }
-    protected function key(): string { return 'users'; }
+    protected function modelClass(): string
+    {
+        return User::class;
+    }
+
+    protected function key(): string
+    {
+        return 'users';
+    }
 
     protected function labels(): array
     {
         return ['plural' => 'المستخدمون', 'singular' => 'مستخدم'];
     }
 
-    protected function searchable(): array { return ['name', 'email', 'phone', 'company_name']; }
-    protected function with(): array { return ['roles']; }
+    protected function searchable(): array
+    {
+        return ['name', 'email', 'phone', 'company_name'];
+    }
+
+    protected function with(): array
+    {
+        return ['roles'];
+    }
 
     /** جدول users مفيهوش عمود sort */
-    protected function orderColumn(): ?string { return null; }
+    protected function orderColumn(): ?string
+    {
+        return null;
+    }
 
     protected function columns(): array
     {

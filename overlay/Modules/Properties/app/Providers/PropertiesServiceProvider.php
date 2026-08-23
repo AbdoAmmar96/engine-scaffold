@@ -2,8 +2,9 @@
 
 namespace Modules\Properties\Providers;
 
-use Nwidart\Modules\Support\ModuleServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
+use Modules\Properties\Console\SendSearchAlerts;
+use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class PropertiesServiceProvider extends ModuleServiceProvider
 {
@@ -23,7 +24,7 @@ class PropertiesServiceProvider extends ModuleServiceProvider
      * @var string[]
      */
     protected array $commands = [
-        \Modules\Properties\Console\SendSearchAlerts::class,
+        SendSearchAlerts::class,
     ];
 
     /**
@@ -38,8 +39,8 @@ class PropertiesServiceProvider extends ModuleServiceProvider
 
     /**
      * Define module schedules.
-     * 
-     * @param $schedule
+     *
+     * @param  $schedule
      */
     // protected function configureSchedules(Schedule $schedule): void
     // {

@@ -24,10 +24,10 @@ Route::middleware('web')->group(function () {
  */
 
 Route::prefix('admin')->name('admin.')->middleware(['web', 'auth', 'staff', 'permission:manage content'])->group(function () {
-    Route::get('landing-pages',           [LandingPageAdminController::class, 'index'])->name('landing-pages.index');
-    Route::get('landing-pages/create',    [LandingPageAdminController::class, 'create'])->name('landing-pages.create');
-    Route::post('landing-pages',          [LandingPageAdminController::class, 'store'])->name('landing-pages.store');
+    Route::get('landing-pages', [LandingPageAdminController::class, 'index'])->name('landing-pages.index');
+    Route::get('landing-pages/create', [LandingPageAdminController::class, 'create'])->name('landing-pages.create');
+    Route::post('landing-pages', [LandingPageAdminController::class, 'store'])->name('landing-pages.store');
     Route::get('landing-pages/{id}/edit', [LandingPageAdminController::class, 'edit'])->name('landing-pages.edit');
-    Route::put('landing-pages/{id}',      [LandingPageAdminController::class, 'update'])->name('landing-pages.update');
-    Route::delete('landing-pages/{id}',   [LandingPageAdminController::class, 'destroy'])->name('landing-pages.destroy');
+    Route::put('landing-pages/{id}', [LandingPageAdminController::class, 'update'])->name('landing-pages.update');
+    Route::delete('landing-pages/{id}', [LandingPageAdminController::class, 'destroy'])->name('landing-pages.destroy');
 });

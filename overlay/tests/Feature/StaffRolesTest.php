@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Core\Database\Seeders\AdminUserSeeder;
 use Modules\Core\Database\Seeders\RolePermissionSeeder;
 use Modules\Leads\Models\Lead;
 use Modules\Locations\Models\Location;
@@ -306,7 +307,7 @@ class StaffRolesTest extends TestCase
 
         // AdminUserSeeder بيتشغّل بعد RolePermissionSeeder في كل ديبلوي —
         // وكان بيرجّع الدور لـ admin ويلغي الترقية
-        $this->seed(\Modules\Core\Database\Seeders\AdminUserSeeder::class);
+        $this->seed(AdminUserSeeder::class);
 
         $this->assertTrue($admin->fresh()->hasRole('super_admin'));
     }
@@ -315,7 +316,7 @@ class StaffRolesTest extends TestCase
     {
         config(['app.admin_email' => null]);
 
-        $this->seed(\Modules\Core\Database\Seeders\AdminUserSeeder::class);
+        $this->seed(AdminUserSeeder::class);
 
         $admin = User::whereHas('roles', fn ($q) => $q->where('name', 'super_admin'))->first();
 

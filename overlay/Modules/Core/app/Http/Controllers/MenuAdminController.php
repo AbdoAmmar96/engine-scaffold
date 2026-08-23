@@ -12,15 +12,25 @@ use Modules\Core\Models\MenuItem;
  */
 class MenuAdminController extends ResourceController
 {
-    protected function modelClass(): string { return MenuItem::class; }
-    protected function key(): string { return 'menus'; }
+    protected function modelClass(): string
+    {
+        return MenuItem::class;
+    }
+
+    protected function key(): string
+    {
+        return 'menus';
+    }
 
     protected function labels(): array
     {
         return ['plural' => 'القوائم', 'singular' => 'لينك'];
     }
 
-    protected function searchable(): array { return ['label', 'label_en', 'url']; }
+    protected function searchable(): array
+    {
+        return ['label', 'label_en', 'url'];
+    }
 
     protected function columns(): array
     {

@@ -1,9 +1,14 @@
 <?php
 
+use App\Http\Middleware\EnsureStaff;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -17,15 +22,15 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'role'       => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-            'locale'     => \App\Http\Middleware\SetLocale::class,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+            'locale' => SetLocale::class,
             // لوحة التحكم للموظفين بس — العميل بيتحوّل لمساحته
-            'staff'      => \App\Http\Middleware\EnsureStaff::class,
+            'staff' => EnsureStaff::class,
         ]);
 
         // لوحة التحكم ليها لوجين، والموقع ليه لوجين تاني — الضيف بيروح المناسب له
-        $middleware->redirectGuestsTo(fn (Illuminate\Http\Request $request) => $request->is('admin', 'admin/*')
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('admin', 'admin/*')
             ? route('admin.login')
             : route('account.login', ['locale' => app()->getLocale()]));
     })

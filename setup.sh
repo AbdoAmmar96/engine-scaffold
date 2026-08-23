@@ -81,10 +81,27 @@ for module_dir in Modules/*/; do
     done
 done
 
+# vendor:publish فوق نشر ميجريشنز Spatie بتوقيت النهاردة، والـ overlay جاب
+# نفس الملفات بالتوقيت اللي الإنجن اتجرّب عليه. لو الاتنين فضلوا، نفس الجدول
+# بيتعمل مرتين والتاني بيقع. الـ overlay هو المرجع — المنشور بيتشال.
+for f in "$SCRIPT_DIR"/overlay/database/migrations/*.php; do
+    [ -e "$f" ] || continue
+
+    base="$(basename "$f")"
+    name="${base#*_*_*_*_}"          # شيل الطابع الزمني وسيب الاسم
+
+    for dup in database/migrations/*_"$name"; do
+        [ -e "$dup" ] || continue
+        [ "$(basename "$dup")" = "$base" ] || rm -f "$dup"
+    done
+done
+
 echo "==> [6/7] قاعدة البيانات (SQLite افتراضيًا — بدّلها لـ MySQL من .env وقت ما تحب)"
 touch database/database.sqlite
+# migrate لوحده بيشغّل ميجريشنز الموديولات كمان (nwidart بيسجّل مساراتها).
+# module:migrate من غير اسم موديول بيطلبه تفاعليًا وبيرمي استثناء —
+# كان مكتوم بـ || true، فالتثبيت الناجح كان بيطبع خطأ مخيف مالوش معنى.
 php artisan migrate --force
-php artisan module:migrate --force || true
 php artisan db:seed --force
 php artisan storage:link || true
 

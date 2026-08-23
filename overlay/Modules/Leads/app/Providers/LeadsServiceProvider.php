@@ -2,8 +2,8 @@
 
 namespace Modules\Leads\Providers;
 
-use Nwidart\Modules\Support\ModuleServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
+use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class LeadsServiceProvider extends ModuleServiceProvider
 {
@@ -36,8 +36,8 @@ class LeadsServiceProvider extends ModuleServiceProvider
 
     /**
      * Define module schedules.
-     * 
-     * @param $schedule
+     *
+     * @param  $schedule
      */
     // protected function configureSchedules(Schedule $schedule): void
     // {

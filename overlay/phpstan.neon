@@ -1,5 +1,9 @@
 includes:
     - vendor/larastan/larastan/extension.neon
+    # الأخطاء القديمة متجمّدة في ملف لوحدها عشان الـ CI يقدر يحكم:
+    # أي خطأ **جديد** بيوقف البناء، والقديم بيتصلّح لما حد يلمس ملفه.
+    # متزوّدش على الـ baseline — صلّح بدل ما تضيف.
+    - phpstan-baseline.neon
 
 parameters:
     level: 5

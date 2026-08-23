@@ -215,7 +215,6 @@ abstract class ResourceController extends Controller
     }
 
     /** ------------------------------------------------------------------ */
-
     protected function schema(): array
     {
         return [

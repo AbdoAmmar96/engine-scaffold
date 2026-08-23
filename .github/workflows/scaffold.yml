@@ -1,0 +1,90 @@
+name: Scaffold
+
+# الريبو ده مش تطبيق — ده مولّد مشاريع. الحاجة الوحيدة اللي تستاهل
+# تتفحص فيه هي السؤال: `setup.sh` **لسه بيطلّع مشروع شغّال؟**
+#
+# بيتكسر بصمت بطريقتين حصلوا فعلًا:
+#  1. حزمة بتنزل نسخة جديدة مش متوافقة (Inertia 3 مع inertia-laravel 2،
+#     أو @vitejs/plugin-react 6 اللي بيطلب vite 8).
+#  2. ملف اتعدّل في engine/ وماترحّلش لـ overlay/، فالتثبيت الجديد
+#     بيطلّع نسخة أقدم من الموقع.
+#
+# مبيتشغّلش مع كل push: بياخد دقايق ومفيش داعي يتكرّر على كل كوميت.
+
+on:
+  schedule:
+    # كل اتنين الصبح — لو حزمة كسرت التثبيت، بنعرف بدري مش وقت التسليم
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+  push:
+    # التغيير في السكافولد نفسه هو اللي بيستاهل إعادة الفحص
+    paths:
+      - 'setup.sh'
+      - 'sync-overlay.sh'
+      - 'overlay/**'
+      - '.github/workflows/scaffold.yml'
+
+jobs:
+  build:
+    name: setup.sh بيطلّع مشروع شغّال
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: sqlite3, pdo_sqlite, mbstring, intl, gd, zip
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: فحص صياغة السكربتات
+        run: |
+          bash -n setup.sh
+          bash -n sync-overlay.sh
+          bash -n deploy.sh
+
+      - name: فحص صياغة كل PHP في الـ overlay
+        # ملف مكسور في الـ overlay مبيبانش غير وقت التثبيت
+        run: find overlay -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+
+      - name: تشغيل setup.sh كامل
+        run: ./setup.sh generated
+
+      - name: بناء الأصول
+        # setup.sh سكربت تطوير — بيسيب المشروع مستنّي `npm run dev`.
+        # من غير build الـ manifest مش موجود وكل صفحة بترمي ViteException،
+        # فالفحص لازم يبني الأول عشان يقيس التطبيق مش غياب الأصول.
+        working-directory: generated
+        run: npm run build
+
+      - name: التطبيق المتولّد بيرد فعلًا
+        # مش بنكتفي بإن السكربت خلص من غير خطأ: بنطلب صفحات حقيقية.
+        # التثبيت ممكن ينجح والموقع يرمي 500 من أول طلب.
+        working-directory: generated
+        run: |
+          php artisan serve --host=127.0.0.1 --port=8000 &
+          for i in $(seq 1 30); do
+            curl -sf -o /dev/null http://127.0.0.1:8000/ar && break
+            sleep 2
+          done
+
+          fail=0
+          for path in /ar /en /ar/properties /ar/compounds /ar/blog /ar/about /admin/login /sitemap.xml /robots.txt; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8000$path")
+            printf '%-20s %s\n' "$path" "$code"
+            [ "$code" = "200" ] || fail=1
+          done
+
+          exit $fail
+
+      - name: الأرقام المتوقّعة
+        working-directory: generated
+        run: |
+          php artisan module:list
+          php artisan route:list --except-vendor | tail -2

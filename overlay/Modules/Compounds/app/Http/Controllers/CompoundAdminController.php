@@ -14,16 +14,30 @@ class CompoundAdminController extends ResourceController
 {
     use OwnedResource;
 
-    protected function modelClass(): string { return Compound::class; }
-    protected function key(): string { return 'compounds'; }
+    protected function modelClass(): string
+    {
+        return Compound::class;
+    }
+
+    protected function key(): string
+    {
+        return 'compounds';
+    }
 
     protected function labels(): array
     {
         return ['plural' => 'الكمبوندات', 'singular' => 'كمبوند'];
     }
 
-    protected function searchable(): array { return ['name', 'name_en']; }
-    protected function with(): array { return ['developer', 'location', 'owner']; }
+    protected function searchable(): array
+    {
+        return ['name', 'name_en'];
+    }
+
+    protected function with(): array
+    {
+        return ['developer', 'location', 'owner'];
+    }
 
     protected function columns(): array
     {

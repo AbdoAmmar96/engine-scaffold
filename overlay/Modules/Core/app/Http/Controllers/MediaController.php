@@ -20,6 +20,7 @@ class MediaController extends Controller
     private const DIR = 'media';
 
     private const IMAGE_EXT = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif', 'svg'];
+
     private const VIDEO_EXT = ['mp4', 'webm', 'ogg'];
 
     public function index(): Response

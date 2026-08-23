@@ -10,10 +10,10 @@ use Modules\Leads\Http\Controllers\LeadAdminController;
  */
 
 Route::prefix('admin')->name('admin.')->middleware(['web', 'auth', 'staff', 'permission:manage leads'])->group(function () {
-    Route::get('leads',           [LeadAdminController::class, 'index'])->name('leads.index');
-    Route::get('leads/create',    [LeadAdminController::class, 'create'])->name('leads.create');
-    Route::post('leads',          [LeadAdminController::class, 'store'])->name('leads.store');
+    Route::get('leads', [LeadAdminController::class, 'index'])->name('leads.index');
+    Route::get('leads/create', [LeadAdminController::class, 'create'])->name('leads.create');
+    Route::post('leads', [LeadAdminController::class, 'store'])->name('leads.store');
     Route::get('leads/{id}/edit', [LeadAdminController::class, 'edit'])->name('leads.edit');
-    Route::put('leads/{id}',      [LeadAdminController::class, 'update'])->name('leads.update');
-    Route::delete('leads/{id}',   [LeadAdminController::class, 'destroy'])->name('leads.destroy');
+    Route::put('leads/{id}', [LeadAdminController::class, 'update'])->name('leads.update');
+    Route::delete('leads/{id}', [LeadAdminController::class, 'destroy'])->name('leads.destroy');
 });

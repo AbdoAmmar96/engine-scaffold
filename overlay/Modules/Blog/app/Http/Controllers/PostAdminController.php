@@ -13,15 +13,25 @@ use Modules\Blog\Models\Post;
  */
 class PostAdminController extends ResourceController
 {
-    protected function modelClass(): string { return Post::class; }
-    protected function key(): string { return 'posts'; }
+    protected function modelClass(): string
+    {
+        return Post::class;
+    }
+
+    protected function key(): string
+    {
+        return 'posts';
+    }
 
     protected function labels(): array
     {
         return ['plural' => 'المدونة', 'singular' => 'مقال'];
     }
 
-    protected function searchable(): array { return ['title', 'title_en', 'slug', 'category']; }
+    protected function searchable(): array
+    {
+        return ['title', 'title_en', 'slug', 'category'];
+    }
 
     protected function columns(): array
     {

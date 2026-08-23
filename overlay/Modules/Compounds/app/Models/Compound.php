@@ -2,9 +2,9 @@
 
 namespace Modules\Compounds\Models;
 
-use App\Support\LogsActivity;
 use App\Models\User;
 use App\Support\Bilingual;
+use App\Support\LogsActivity;
 use App\Support\Sluggable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;

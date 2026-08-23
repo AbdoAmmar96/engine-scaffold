@@ -2,8 +2,8 @@
 
 namespace Modules\Leads\Models;
 
-use App\Support\LogsActivity;
 use App\Models\User;
+use App\Support\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;

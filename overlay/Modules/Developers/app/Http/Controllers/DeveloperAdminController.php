@@ -9,15 +9,25 @@ use Modules\Developers\Models\Developer;
 
 class DeveloperAdminController extends ResourceController
 {
-    protected function modelClass(): string { return Developer::class; }
-    protected function key(): string { return 'developers'; }
+    protected function modelClass(): string
+    {
+        return Developer::class;
+    }
+
+    protected function key(): string
+    {
+        return 'developers';
+    }
 
     protected function labels(): array
     {
         return ['plural' => 'المطوّرون', 'singular' => 'مطوّر'];
     }
 
-    protected function searchable(): array { return ['name', 'name_en']; }
+    protected function searchable(): array
+    {
+        return ['name', 'name_en'];
+    }
 
     protected function columns(): array
     {

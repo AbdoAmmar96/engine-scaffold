@@ -2,8 +2,8 @@
 
 namespace Modules\Core\Models;
 
-use App\Support\LogsActivity;
 use App\Support\Bilingual;
+use App\Support\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 

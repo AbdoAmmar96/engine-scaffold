@@ -2,8 +2,8 @@
 
 namespace Modules\Seo\Models;
 
-use App\Support\LogsActivity;
 use App\Support\Bilingual;
+use App\Support\LogsActivity;
 use App\Support\SharedSlugSpace;
 use App\Support\Sluggable;
 use Illuminate\Database\Eloquent\Builder;

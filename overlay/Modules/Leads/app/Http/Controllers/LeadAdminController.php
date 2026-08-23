@@ -15,20 +15,36 @@ class LeadAdminController extends ResourceController
 {
     use OwnedResource;
 
-    protected function modelClass(): string { return Lead::class; }
-    protected function key(): string { return 'leads'; }
+    protected function modelClass(): string
+    {
+        return Lead::class;
+    }
+
+    protected function key(): string
+    {
+        return 'leads';
+    }
 
     protected function labels(): array
     {
         return ['plural' => 'الطلبات', 'singular' => 'طلب'];
     }
 
-    protected function searchable(): array { return ['name', 'phone', 'email', 'message']; }
+    protected function searchable(): array
+    {
+        return ['name', 'phone', 'email', 'message'];
+    }
 
-    protected function with(): array { return ['owner', 'property', 'compound']; }
+    protected function with(): array
+    {
+        return ['owner', 'property', 'compound'];
+    }
 
     /** جدول leads مفيهوش عمود sort — الأحدث الأول */
-    protected function orderColumn(): ?string { return null; }
+    protected function orderColumn(): ?string
+    {
+        return null;
+    }
 
     protected function columns(): array
     {

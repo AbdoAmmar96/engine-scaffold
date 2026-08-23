@@ -8,8 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
 use Inertia\Response;
-use Modules\Properties\Models\Property;
 use Modules\Marketing\Support\AdSlot;
+use Modules\Properties\Models\Property;
 use Modules\Seo\Models\LandingPage;
 
 /**

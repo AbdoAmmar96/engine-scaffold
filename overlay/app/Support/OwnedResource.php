@@ -16,7 +16,6 @@ use Modules\Core\Database\Seeders\RolePermissionSeeder;
  */
 trait OwnedResource
 {
-
     protected function ownerColumn(): string
     {
         return 'owner_id';

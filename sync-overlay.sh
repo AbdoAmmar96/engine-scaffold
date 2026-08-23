@@ -28,6 +28,9 @@ mkdir -p "$OVERLAY"
 PATHS=(
     "app"
     "bootstrap/app.php"
+    # الميجريشنز جزء من المنتج: من غيرها التثبيت الجديد بيطلّع جداول ناقصة
+    # (ميجريشن أعمدة المستخدم فضلت ناقصة والسيدر كان بيقع على is_active)
+    "database/migrations"
     "database/seeders"
     "lang"
     "resources/css"

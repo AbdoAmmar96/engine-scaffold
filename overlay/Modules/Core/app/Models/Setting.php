@@ -11,7 +11,7 @@ class Setting extends Model
     protected $fillable = ['group', 'key', 'value', 'is_public'];
 
     protected $casts = [
-        'value'     => 'json',
+        'value' => 'json',
         'is_public' => 'boolean',
     ];
 }

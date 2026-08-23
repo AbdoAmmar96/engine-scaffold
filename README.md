@@ -157,8 +157,26 @@ php artisan searches:alert                          # تنبيهات البحث 
 ```
 
 ### خط الأساس (متحقَّق منه)
-`php artisan test` → **236/236 ✅** · `playwright` → **95 ✅ (+1 متخطّى عن قصد)** · `tsc --noEmit` → **نضيف ✅**
-`phpstan level 5` → **37 خطأ** (خط أساس مش هدف — متزوّدش عليه) · `pint --test` → ملفات قديمة محتاجة فورمات
+`pint --test` → **نضيف ✅** · `phpstan level 5` → **نضيف ✅** · `tsc --noEmit` → **نضيف ✅**
+`php artisan test` → **236/236 ✅** · `playwright` → **125 ✅ (+1 متخطّى عن قصد)**
+الـ 37 خطأ القديمة في PHPStan متجمّدة في `engine/phpstan-baseline.neon` — أي خطأ **جديد** بيوقف الـ CI.
+**متزوّدش على الـ baseline:** إعادة توليده بتخفي الجديد مع القديم وتفضي البوابة من معناها.
+
+---
+
+## الـ CI
+
+| | |
+|---|---|
+| `engine/.github/workflows/ci.yml` | كل push وPR: Pint · PHPStan · TypeScript · PHPUnit · Playwright |
+| `.github/workflows/scaffold.yml` | أسبوعيًا + لما `setup.sh` أو `overlay/` يتغيّروا: بيشغّل `setup.sh` كامل ويطلب ٩ صفحات من المشروع المتولّد |
+
+الفحص التاني ده بيمسك حاجتين بتكسروا السكافولد بصمت: حزمة نزلت نسخة مش متوافقة،
+أو ملف اتعدّل في `engine/` وماترحّلش لـ `overlay/`.
+
+**أول تشغيل ليه كشف عطل حقيقي عايش من شهور:** `sync-overlay.sh` ماكانش بينسخ
+`database/migrations`، فأي تثبيت جديد كان بيطلّع جدول `users` ناقص أعمدة والسيدر
+بيقع. `engine/` شغّال فمحدش لاحظ — والسكافولد محدش بيشغّله.
 
 ---
 
