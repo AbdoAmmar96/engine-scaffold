@@ -3,6 +3,7 @@
 namespace Modules\Core\Http\Controllers;
 
 use App\Models\User;
+use App\Support\Scheduler;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
@@ -25,6 +26,9 @@ class DashboardController extends Controller
         $role = $user->roles->pluck('name')->first();
 
         return Inertia::render('Admin/Dashboard', [
+            // الجدولة تخصّ مين بيقدر يظبط السيرفر — الوسيط مالوش دعوة بيها،
+            // وتحذير محدش يقدر يتصرّف فيه بيتحوّل لضوضاء بتتجاهل
+            'scheduler' => $user->can('manage settings') ? Scheduler::status() : null,
             'role' => [
                 'key' => $role,
                 'label' => RolePermissionSeeder::ROLES[$role]['label'] ?? '—',

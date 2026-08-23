@@ -1,8 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Modules\Reviews\Http\Controllers\ReviewsController;
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('reviews', ReviewsController::class)->names('reviews');
-});
+/*
+ |----------------------------------------------------------------------
+ | Reviews Module — راوتات الويب
+ | الموديول لسه هيكل — مفيش راوتات.
+ |
+ | كان هنا `Route::resource` متولّد ورا `auth,verified`، و`verified`
+ | محتاج تفعيل إيميل مش مركّب — يعني الراوتات كانت مقفولة على الكل
+ | وبتشاور على كنترولر فاضي.
+ |----------------------------------------------------------------------
+ */

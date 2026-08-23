@@ -67,6 +67,20 @@ echo "==> [5/7] تركيب ملفات الإنجن (overlay)"
 cp -Rf "$SCRIPT_DIR/overlay/." .
 rm -f vite.config.js   # نسختنا vite.config.ts هي المعتمدة
 
+# module:make بيولّد لكل موديول كنترولر وفيوهات سكافولد الإنجن مش بيستخدمهم.
+# سيبانهم مش مجرد فوضى: الكنترولر ده بيرجّع blade view من راوت API،
+# وPHPStan بيعدّ أخطاءه، وأي راوت متولّد بيشاور عليه بيدخل الجدول ميت.
+# الـ overlay هو المرجع — اللي مش موجود فيه بيتشال.
+for module_dir in Modules/*/; do
+    module="$(basename "$module_dir")"
+
+    for stub in "app/Http/Controllers/${module}Controller.php" \
+                "resources/views/index.blade.php" \
+                "resources/views/components"; do
+        [ -e "$SCRIPT_DIR/overlay/${module_dir}${stub}" ] || rm -rf "${module_dir}${stub}"
+    done
+done
+
 echo "==> [6/7] قاعدة البيانات (SQLite افتراضيًا — بدّلها لـ MySQL من .env وقت ما تحب)"
 touch database/database.sqlite
 php artisan migrate --force

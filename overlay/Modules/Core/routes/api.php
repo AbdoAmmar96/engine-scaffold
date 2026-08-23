@@ -1,8 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Modules\Core\Http\Controllers\CoreController;
-
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('cores', CoreController::class)->names('core');
-});
+/*
+ |----------------------------------------------------------------------
+ | Core Module — API
+ | لسه مفيش API للموديول ده.
+ |
+ | كان هنا `apiResource` متولّد من module:make ورا `auth:sanctum`.
+ | اتشال: sanctum مش مركّب أصلًا (`config('auth.guards')` = ["web"])
+ | فكل نداء كان بيرمي استثناء، والكنترولر كان بيرجّع blade view من
+ | راوت API ومناهج الكتابة فيه فاضية. API حقيقي لما يتطلب هيتصمّم
+ | بـ Resources ونسخنة ومصادقة — مش بإحياء السكافولد.
+ |----------------------------------------------------------------------
+ */

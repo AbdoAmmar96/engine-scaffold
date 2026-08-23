@@ -1,8 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Modules\Pages\Http\Controllers\PagesController;
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('pages', PagesController::class)->names('pages');
-});
+/*
+ |----------------------------------------------------------------------
+ | Pages Module — راوتات الويب
+ | الموديول لسه هيكل — مفيش راوتات.
+ |
+ | كان هنا `Route::resource` متولّد ورا `auth,verified`، و`verified`
+ | محتاج تفعيل إيميل مش مركّب — يعني الراوتات كانت مقفولة على الكل
+ | وبتشاور على كنترولر فاضي.
+ |----------------------------------------------------------------------
+ */

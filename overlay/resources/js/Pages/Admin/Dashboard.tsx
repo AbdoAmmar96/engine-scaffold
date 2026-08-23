@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
-import { ArrowLeft, Building2, Inbox, Newspaper, Palette, Settings, Share2, ShieldCheck, Users } from "lucide-react";
+import { AlarmClockOff, ArrowLeft, Building2, Check, Copy, Inbox, Newspaper, Palette, Settings, Share2, ShieldCheck, Users } from "lucide-react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Card } from "@/Components/admin/ui";
 import type { SharedProps } from "@/lib/types";
@@ -44,10 +45,79 @@ const dotStyles: Record<Phase["status"], string> = {
     todo: "bg-gray-300",
 };
 
+/**
+ * حالة الجدولة.
+ *
+ * الـ cron على الاستضافة المشتركة بيتضاف من لوحة الاستضافة مش من الكود، فممكن
+ * ما يتضافش ومحدش ياخد باله — الموقع شكله سليم والتنبيهات مش بتتبعت. الشريط ده
+ * بيخلّي الغياب ظاهر، وبيدّي السطر المطلوب جاهز للنسخ بدل ما المدير يدوّر عليه.
+ */
+type SchedulerStatus = { healthy: boolean; ever_ran: boolean; minutes: number | null; command: string };
+
+function sinceLabel(minutes: number): string {
+    if (minutes < 60) return `${minutes} دقيقة`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} ساعة`;
+    return `${Math.floor(hours / 24)} يوم`;
+}
+
+function SchedulerAlert({ status }: { status: SchedulerStatus }) {
+    const [copied, setCopied] = useState(false);
+
+    const copy = async () => {
+        try {
+            await navigator.clipboard.writeText(status.command);
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 2000);
+        } catch {
+            // المتصفح ممكن يمنع الكليب بورد بره HTTPS — السطر ظاهر ويتحدّد بالإيد
+            setCopied(false);
+        }
+    };
+
+    return (
+        <div className="mb-6 rounded-2xl border border-amber-300 bg-amber-50 p-5">
+            <div className="flex items-start gap-3">
+                <AlarmClockOff size={20} className="mt-0.5 shrink-0 text-amber-700" />
+                <div className="min-w-0 flex-1">
+                    <p className="font-extrabold text-amber-900">
+                        {status.ever_ran ? "الجدولة واقفة" : "الجدولة لسه ما اشتغلتش"}
+                    </p>
+                    <p className="mt-1 text-sm text-amber-800">
+                        {status.ever_ran && status.minutes !== null
+                            ? `آخر تشغيل من ${sinceLabel(status.minutes)}. `
+                            : "مفيش cron متضاف على السيرفر. "}
+                        تنبيهات البحث المحفوظ مش بتوصل، وصفحات الهبوط مش بتتحدّث.
+                    </p>
+                    <p className="mt-3 text-xs font-bold text-amber-900">
+                        من لوحة الاستضافة ← Cron Jobs ← كل دقيقة، وحطّ السطر ده:
+                    </p>
+                    <div className="mt-2 flex items-center gap-2">
+                        <code
+                            dir="ltr"
+                            className="min-w-0 flex-1 overflow-x-auto rounded-xl border border-amber-200 bg-white px-3 py-2 text-start text-xs text-gray-700"
+                        >
+                            {status.command}
+                        </code>
+                        <button
+                            type="button"
+                            onClick={copy}
+                            className="flex shrink-0 items-center gap-1.5 rounded-xl border border-amber-300 bg-white px-3 py-2 text-xs font-bold text-amber-900 transition hover:bg-amber-100"
+                        >
+                            {copied ? <Check size={14} /> : <Copy size={14} />}
+                            {copied ? "اتنسخ" : "انسخ"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 type Stat = { label: string; value: number; href: string };
 type Role = { key: string; label: string; note: string; scoped: boolean };
 
-export default function Dashboard({ role, stats }: { role: Role; stats: Stat[] }) {
+export default function Dashboard({ role, stats, scheduler }: { role: Role; stats: Stat[]; scheduler: SchedulerStatus | null }) {
     const { auth } = usePage<SharedProps>().props;
     const can = auth.user?.can ?? [];
 
@@ -58,6 +128,8 @@ export default function Dashboard({ role, stats }: { role: Role; stats: Stat[] }
 
     return (
         <AdminLayout title="لوحة التحكم">
+            {scheduler && !scheduler.healthy && <SchedulerAlert status={scheduler} />}
+
             {/* شريط الدور: بيوضّح للوسيط/الشركة إنهم شايفين بتاعهم بس */}
             <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-gray-200 bg-white px-5 py-4">
                 <span className="flex items-center gap-2 text-sm font-extrabold text-gray-900">
@@ -68,6 +140,12 @@ export default function Dashboard({ role, stats }: { role: Role; stats: Stat[] }
                 {role.scoped && (
                     <span className="rounded-full bg-amber-100 px-3 py-1 text-[11px] font-extrabold text-amber-700">
                         بتشوف بياناتك بس
+                    </span>
+                )}
+                {scheduler?.healthy && (
+                    <span className="ms-auto flex items-center gap-1.5 text-[11px] font-bold text-gray-400">
+                        <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                        الجدولة شغّالة
                     </span>
                 )}
             </div>

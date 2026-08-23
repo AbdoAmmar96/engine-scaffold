@@ -57,7 +57,7 @@ engine-scaffold/          ← الريبو ده (السكافولد)
 
 ---
 
-## الراوتات (المصدر: `php artisan route:list --except-vendor` — 168 راوت)
+## الراوتات (المصدر: `php artisan route:list --except-vendor` — 120 راوت)
 
 - **الموقع العام:** `/{locale}` وتحته `/properties` (+ `/commercial` `/residential` + `{slug}` للوحدة
   **وللـ landing page** — راجع `SharedSlugSpace`) · `/compounds` · `/developers` · `/areas` · `/blog`
@@ -67,17 +67,20 @@ engine-scaffold/          ← الريبو ده (السكافولد)
 - **الداشبورد:** `/admin` · `/admin/settings/{group}` · موارد `users` `properties` `compounds`
   `developers` `locations` `leads` `posts` `landing-pages` `featured-ads` · `/admin/media`
   · `/admin/menus` · `/admin/reports` · `/admin/activity`.
-- **API:** `/api/v1/*` لكل موديول (RESTful).
+- **API:** **مفيش.** الجارد الوحيد المعرّف هو `web` — `config('auth.guards')` = `["web"]`.
 
-### 🔴 عطل مؤكَّد في طبقة الـ API
-راوتات `api/v1/*` كلها ورا middleware `auth:sanctum`، لكن **`laravel/sanctum` مش مركّب**
-و `config('auth.guards')` بيرجّع `["web"]` بس. يعني كل الـ 45+ endpoint بترمي
-`InvalidArgumentException: Auth guard [sanctum] is not defined` وقت التشغيل.
-لو هتشتغل على الـ API: يا إما `composer require laravel/sanctum` وتظبط الجارد، يا إما تغيّر الـ middleware.
+### مفيش طبقة API — ده قرار مش نسيان
+كان فيه 49 راوت متولّد من `module:make`: `api/v1/*` ورا `auth:sanctum` و`sanctum` مش
+مركّبة أصلًا (كل نداء = `InvalidArgumentException`)، و`/pages` `/reviews` ورا `verified`
+وتفعيل الإيميل مش مركّب. والكنترولرات اللي وراهم كانت سكافولد خام: `index()` بترجّع
+**blade view من راوت API** ومناهج الكتابة فاضية.
 
-### ملاحظة تانية
-راوتات `/pages` `/reviews` `/seos` (سكافولد nwidart الافتراضي) ورا `web,auth,verified` —
-والـ `verified` محتاج email verification مش مركّب، فعمليًا مقفولة.
+اتشالوا كلهم بدل ما يتحطّلهم جارد — تركيب `sanctum` عشان يحمي كنترولر فاضي بيدّي الميت
+شكل الحي وبس. أي API حقيقي هيتصمّم بـ Resources ونسخنة ومصادقة، مش بإحياء السكافولد.
+
+`tests/Feature/RouteHealthTest.php` بيمنع رجوع الاتنين: أي راوت ورا جارد مش معرّف، أو
+بيشاور على كلاس/ميثود مش موجودة، بيسقّط الاختبار. و`setup.sh` بينضّف سكافولد `module:make`
+بعد نسخ الـ overlay عشان تثبيت جديد ما يرجّعهمش.
 
 ---
 
@@ -117,9 +120,9 @@ npm run e2e:ui          # Playwright بواجهة
 
 ### حالة الجودة الحالية (خط الأساس — متحقَّق منه)
 - `tsc --noEmit` → **نضيف ✅**
-- `php artisan test` → **187/187 ناجحة ✅** (13 ملف Feature — تغطية حقيقية للدومين)
-- `playwright test` → **85 ناجحة + 1 متخطّى عن قصد ✅**
-- `phpstan level 5` → **58 خطأ** ❌ (خط أساس، مش هدف — **متزوّدش عليه**)
+- `php artisan test` → **197/197 ناجحة ✅** (15 ملف Feature — تغطية حقيقية للدومين)
+- `playwright test` → **95 ناجحة + 1 متخطّى عن قصد ✅**
+- `phpstan level 5` → **37 خطأ** ❌ (خط أساس، مش هدف — **متزوّدش عليه**)
 - `pint --test` → ملفات قديمة محتاجة فورمات ❌ (الجديد كله نضيف — سيب القديم لكوميت لوحده)
 
 لو الشغل بتاعك مالوش علاقة بيهم، متصلّحهمش في نفس الـ commit — اعملهم لوحدهم.
@@ -159,8 +162,19 @@ npm run e2e:ui          # Playwright بواجهة
   (اللي فيها مستخدم مسجّل) — السيدرز والأوامر مبتتسجّلش عن قصد.
 - **البريد.** `MAIL_MAILER=sendmail` على الاستضافة المشتركة. استعادة كلمة المرور وتنبيهات
   البحث المحفوظ معتمدين عليه — لو رجع `log` الرسايل بتروح في الفراغ من غير خطأ.
-- **الجدولة** في `routes/console.php`: `searches:alert` يوميًا 9ص · `seo:landing-pages` أسبوعيًا.
-  محتاجة cron على السيرفر (`php artisan schedule:run` كل دقيقة) — **لسه مش مركّبة على الإنتاج**.
+- **الجدولة** في `routes/console.php`: `searches:alert` يوميًا 9ص · `seo:landing-pages` أسبوعيًا
+  · نبضة كل دقيقة. محتاجة سطر cron واحد على السيرفر بينده `cron.sh` — والسكريبت ده هو نقطة
+  الدخول الوحيدة عشان لوحة الاستضافة تاخد سطر ثابت مايتغيّرش:
+  ```
+  * * * * * bash /home/<user>/bp-engine/cron.sh
+  ```
+  مسار مطلق مش `~` — التوسّع مش مضمون في بيئة الكرون. لوحة Hostinger: اختار
+  **Custom** مش **PHP**؛ خانة PHP بتفرض `/usr/bin/php <ملف>` ومفيهاش مكان لتوجيه
+  المخرجات، فـ `schedule:run` كان هيبعت إيميل كل دقيقة.
+  **لسه مش مركّبة على الإنتاج** — لكن غيابها بقى ظاهر مش صامت: `App\Support\Scheduler`
+  بيقرا نبضة `storage/app/schedule-heartbeat`، ولوحة التحكم بتحذّر مين معاه `manage settings`
+  لو عدّت 3 دقايق من غير نبضة. متنسخش النبضة في الرفع (`deploy.sh` بيستثنيها) وإلا كرون
+  واقف هيبان شغّال.
 
 ## أعراف الكود
 
