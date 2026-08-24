@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { execFileSync } from 'node:child_process';
 
 /**
  * Smoke coverage for the public site + admin entry point.
@@ -12,7 +13,6 @@ const PUBLIC_PAGES = [
     { path: '/ar/compounds', name: 'compounds' },
     { path: '/ar/about', name: 'about' },
     { path: '/ar/contact', name: 'contact' },
-    { path: '/ar/blog', name: 'blog' },
 ];
 
 for (const page of PUBLIC_PAGES) {
@@ -599,3 +599,83 @@ for (const width of [1280, 1536, 1920]) {
         expect(scale.rowWidth).toBeLessThanOrEqual(1280);
     });
 }
+
+
+/* ---------------------------------------------------------------------------
+ | قسم المدونة — مقفول افتراضيًا
+ |
+ | الافتراضي إخفاء، فصفحة المدونة مش في PUBLIC_PAGES: هي 404 على التثبيت
+ | النضيف. بس الصفحة نفسها لازم تفضل متغطّية لما العميل يفتحها، فالمجموعة
+ | دي بتفتح القسم وتقفله تاني.
+ |
+ | serial + afterAll: التبديل بيغيّر حالة عامة، فممنوع يتداخل مع نفسه،
+ | ولازم يترجّع حتى لو الاختبار وقع في النص.
+ ---------------------------------------------------------------------------- */
+
+const artisan = (code: string) =>
+    execFileSync('php', ['artisan', 'tinker', '--execute', code], {
+        cwd: process.cwd(),
+        encoding: 'utf8',
+    });
+
+/**
+ * بيبدّل القسم ويتأكد إنه اتبدّل فعلًا.
+ *
+ * التأكيد مش زيادة: أول نسخة من الدالة دي كتبت `Modules\Core\...` جوه
+ * template literal، والـ `\C` اتبلع كهروب فوصل اسم الكلاس من غير شرطات،
+ * وtinker وقع، ورجّع صفر — فالاختبار عدّى أخضر وهو مش بيبدّل حاجة.
+ */
+const setBlog = (on: '0' | '1') => {
+    artisan(
+        `app(Modules\\Core\\Services\\SettingsService::class)->setMany('general', ['blog_enabled' => '${on}']);`,
+    );
+
+    const now = artisan(
+        `echo app(Modules\\Core\\Services\\SettingsService::class)->get('general', 'blog_enabled');`,
+    ).trim();
+
+    if (now !== on) {
+        throw new Error(`فشل تبديل المدونة: المطلوب ${on} والموجود ${now || '(فاضي)'}`);
+    }
+};
+
+test.describe.serial('the blog section', () => {
+    // مشروع واحد بس: serial بيرتّب جوه المشروع مش بين المشاريع — ولو desktop
+    // و mobile بدّلوا نفس الإعداد في نفس اللحظة الاختبار بيبقى flaky
+    const desktopOnly = 'التبديل بيغيّر حالة عامة، فبيتشغّل في مشروع واحد';
+
+    test.afterAll(() => setBlog('0'));
+
+    test('is a 404 while it is closed', async ({ page }, testInfo) => {
+        test.skip(testInfo.project.name !== 'desktop', desktopOnly);
+
+        setBlog('0');
+
+        const res = await page.goto('/ar/blog');
+
+        expect(res?.status()).toBe(404);
+    });
+
+    test('renders without console or network errors once opened', async ({ page }, testInfo) => {
+        test.skip(testInfo.project.name !== 'desktop', desktopOnly);
+
+        setBlog('1');
+
+        const consoleErrors: string[] = [];
+        const failedRequests: string[] = [];
+
+        page.on('console', (msg) => {
+            if (msg.type() === 'error') consoleErrors.push(msg.text());
+        });
+        page.on('response', (res) => {
+            if (res.status() >= 400) failedRequests.push(`${res.status()} ${res.url()}`);
+        });
+
+        const res = await page.goto('/ar/blog', { waitUntil: 'networkidle' });
+
+        expect(res?.status()).toBe(200);
+        await expect(page.locator('#app')).not.toBeEmpty();
+        expect(consoleErrors).toEqual([]);
+        expect(failedRequests).toEqual([]);
+    });
+});
