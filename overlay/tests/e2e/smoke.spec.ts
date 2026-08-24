@@ -536,16 +536,18 @@ for (const path of NO_SCROLL_PAGES) {
 /* ---------------------------------------------------------------------------
  | تنسيق الهيدر
  |
- | صنف تاني بيعدّي بصمت: الصفحة مبتسحبش يمين وشمال، فاختبار الطفح بيعدّي،
- | ومع ذلك القائمة بتلمس الشعار أو الأزرار وبتبقى مكرمشة.
+ | صنف بيعدّي بصمت: الصفحة مبتسحبش يمين وشمال فاختبار الطفح بيعدّي، ومع
+ | ذلك القائمة بتلمس الشعار، أو الشعار بيبان عايم في نص الشاشة بدل ما
+ | يبدأ من حافتها.
  |
- | حصل فعلًا: البادينج كان `2xl:px-3.5`، والهيدر محدود بـ `max-w-7xl`
- | يعني 1280 مهما كبرت الشاشة — فعند 1536 البادينج كبر جوه حاوية ما كبرتش
- | والقائمة خرجت 36 بكسل عن إطارها ولمست الطرفين.
+ | حصل الاتنين: الهيدر كان محصور في `max-w-7xl` فعلى شاشة 1920 المحتوى
+ | بيتوسّط في 1280 ويسيب 320 بكسل فاضيين على كل جنب — والشعار مش على
+ | بداية الصفحة. وقبلها كان البادينج `2xl:px-3.5` جوه نفس الحاوية الثابتة
+ | فالقائمة خرجت 36 بكسل عن إطارها ولمست الطرفين.
  |
  | وعدد اللينكات نفسه متغيّر: قفل قسم من الإعدادات بيشيل واحد، فالتنسيق
  | لازم يفضل متوازن بالعددين.
- ---------------------------------------------------------------------------- */
+ --------------------------------------------------------------------------- */
 
 for (const width of [1280, 1536, 1920]) {
     test(`the header nav keeps its distance at ${width}px`, async ({ page }, testInfo) => {
@@ -554,7 +556,7 @@ for (const width of [1280, 1536, 1920]) {
         await page.setViewportSize({ width, height: 900 });
         await page.goto('/ar', { waitUntil: 'networkidle' });
 
-        const gap = await page.evaluate(() => {
+        const box = await page.evaluate(() => {
             const row = document.querySelector('header > div');
             if (!row) return null;
 
@@ -562,55 +564,38 @@ for (const width of [1280, 1536, 1920]) {
             const items = [...nav.children].map((el) => el.getBoundingClientRect());
             if (items.length === 0) return null;
 
-            const box = nav.getBoundingClientRect();
+            const rect = nav.getBoundingClientRect();
             const start = Math.min(...items.map((i) => i.left));
             const end = Math.max(...items.map((i) => i.right));
+            const brand = logo.getBoundingClientRect();
+            const buttons = actions.getBoundingClientRect();
+            const pageWidth = document.documentElement.clientWidth;
 
             return {
                 // اللينكات خرجت عن إطار <nav>؟
-                spill: Math.max(0, box.left - start) + Math.max(0, end - box.right),
-                // rtl: الشعار يمين واللينكات شماله، والأزرار شمال واللينكات يمينها
-                toLogo: logo.getBoundingClientRect().left - end,
-                toActions: start - actions.getBoundingClientRect().right,
+                spill: Math.max(0, rect.left - start) + Math.max(0, end - rect.right),
+                // rtl: الشعار على يمين الصفحة والأزرار على شمالها
+                toLogo: brand.left - end,
+                toActions: start - buttons.right,
+                logoFromEdge: pageWidth - brand.right,
+                actionsFromEdge: buttons.left,
             };
         });
 
-        expect(gap).not.toBeNull();
-        expect(gap!.spill).toBe(0);
-        expect(gap!.toLogo).toBeGreaterThanOrEqual(16);
-        expect(gap!.toActions).toBeGreaterThanOrEqual(16);
+        expect(box).not.toBeNull();
+        expect(box!.spill).toBe(0);
+        expect(box!.toLogo).toBeGreaterThanOrEqual(16);
+        expect(box!.toActions).toBeGreaterThanOrEqual(16);
 
-        // الحارس الحقيقي: الصف محدود بـ max-w-7xl فعرضه ثابت، فأي مقاس جوّه
-        // مايتغيرش بعرض الشاشة. الفحص ده بيمسك العطل حتى لو عدد اللينكات
-        // الحالي صغير كفاية إنه يستحمل التوسيع.
-        const scale = await page.evaluate(() => {
-            const link = document.querySelector('header nav a');
-            const row = document.querySelector('header > div');
+        // الشعار على بداية الصفحة — مش عايم في نصّها. 40 = بادينج الصفحة وشوية.
+        expect(box!.logoFromEdge).toBeLessThanOrEqual(40);
+        expect(box!.actionsFromEdge).toBeLessThanOrEqual(40);
 
-            return {
-                padding: getComputedStyle(link!).paddingInline,
-                fontSize: getComputedStyle(link!).fontSize,
-                rowWidth: Math.round(row!.getBoundingClientRect().width),
-            };
-        });
-
-        expect(scale.padding).toBe('10px');
-        expect(scale.fontSize).toBe('13.5px');
-        expect(scale.rowWidth).toBeLessThanOrEqual(1280);
+        // المسافة على جنبي القائمة واحدة — الفرق بيكشف حاوية بتتوسّط
+        // بدل ما تمتد، أو مقاس بيكبر بعرض الشاشة جوه حاوية ثابتة
+        expect(Math.abs(box!.toLogo - box!.toActions)).toBeLessThanOrEqual(2);
     });
 }
-
-
-/* ---------------------------------------------------------------------------
- | قسم المدونة — مقفول افتراضيًا
- |
- | الافتراضي إخفاء، فصفحة المدونة مش في PUBLIC_PAGES: هي 404 على التثبيت
- | النضيف. بس الصفحة نفسها لازم تفضل متغطّية لما العميل يفتحها، فالمجموعة
- | دي بتفتح القسم وتقفله تاني.
- |
- | serial + afterAll: التبديل بيغيّر حالة عامة، فممنوع يتداخل مع نفسه،
- | ولازم يترجّع حتى لو الاختبار وقع في النص.
- ---------------------------------------------------------------------------- */
 
 const artisan = (code: string) =>
     execFileSync('php', ['artisan', 'tinker', '--execute', code], {

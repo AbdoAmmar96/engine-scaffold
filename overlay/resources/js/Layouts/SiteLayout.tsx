@@ -78,7 +78,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
 
             {/* ---------- شريط علوي كحلي: تواصل سريع + سوشيال ---------- */}
             <div className="hidden bg-bg-dark text-white/70 md:block">
-                <div className="mx-auto flex h-9 max-w-7xl items-center justify-between px-4 text-xs font-bold">
+                <div className="flex h-9 items-center justify-between px-4 text-xs font-bold lg:px-8">
                     <div className="flex items-center gap-5">
                         {contact.phone && (
                             <a href={`tel:${contact.phone}`} className="flex items-center gap-1.5 transition hover:text-primary">
@@ -116,7 +116,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
 
             {/* ------------------------------ Header ------------------------------ */}
             <header className="sticky top-0 z-40 border-b border-gray-100 bg-bg/95 backdrop-blur-md">
-                <div className="mx-auto flex h-[68px] max-w-7xl items-center gap-4 px-4">
+                <div className="flex h-[68px] items-center gap-4 px-4 lg:px-8">
                     <Link href={`/${locale}`} className="flex min-w-0 shrink-0 items-center gap-3">
                         {branding.logo_path && (
                             <img src={branding.logo_path} alt={general.site_name ?? ""} className="h-11 w-auto" />
