@@ -86,7 +86,9 @@ export default function About({ content, stats: counts0, developers }: {
             {/* ---------- التعهّد (بيختفي لو الأدمن ماكتبش نصه) ---------- */}
             {content.pledge.length > 0 && (
             <section className="bg-bg px-4 py-14">
-                <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start">
+                {/* عمود واحد: النص تحت العنوان مش جنبه. العمودين كانوا بيبعدوا
+                    العنوان عن نصّه، وسطر قصير كان بيسيب نص الشاشة فاضي جنبه */}
+                <div className="mx-auto max-w-7xl">
                     <Reveal>
                         <span className="inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-4 py-2 text-[11px] font-extrabold text-secondary">
                             {t.pledgeLabel}
@@ -99,11 +101,14 @@ export default function About({ content, stats: counts0, developers }: {
                         <span className="mt-5 block h-1 w-16 rounded-full bg-primary" aria-hidden />
                     </Reveal>
                     <Reveal delay={120}>
-                        {content.pledge.map((para, i) => (
-                            <p key={i} className={`text-base leading-[1.95] text-muted${i > 0 ? " mt-4" : ""}`}>
-                                {para}
-                            </p>
-                        ))}
+                        {/* عرض محدود للقراءة — السطر الطويل أوي بيتعب العين */}
+                        <div className="mt-6 max-w-3xl">
+                            {content.pledge.map((para, i) => (
+                                <p key={i} className={`text-base leading-[1.95] text-muted${i > 0 ? " mt-4" : ""}`}>
+                                    {para}
+                                </p>
+                            ))}
+                        </div>
                     </Reveal>
                 </div>
             </section>

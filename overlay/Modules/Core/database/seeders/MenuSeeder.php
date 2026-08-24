@@ -32,12 +32,17 @@ class MenuSeeder extends Seeder
         ['label' => 'اتصل بنا', 'label_en' => 'Contact', 'url' => '/contact'],
     ];
 
-    /** الفوتر مسطّح — القوايم المنسدلة مالهاش لازمة هناك */
+    /**
+     * الفوتر: العنصر اللي له أبناء بيبقى عمود بعنوانه، والباقي بيتجمّع
+     * تحت «الموقع». نفس تركيبة الهيدر بالظبط، فالأدمن بيرتّبها من اللوحة.
+     */
     private const FOOTER = [
-        ['label' => 'العقارات', 'label_en' => 'Properties', 'url' => '/properties'],
-        ['label' => 'عقارات تجارية', 'label_en' => 'Commercial', 'url' => '/properties/commercial'],
-        ['label' => 'الكمبوندات', 'label_en' => 'Compounds', 'url' => '/compounds'],
-        ['label' => 'المطوّرون', 'label_en' => 'Developers', 'url' => '/developers'],
+        ['label' => 'خدماتنا', 'label_en' => 'Our services', 'url' => null, 'children' => [
+            ['label' => 'العقارات', 'label_en' => 'Properties', 'url' => '/properties'],
+            ['label' => 'عقارات تجارية', 'label_en' => 'Commercial', 'url' => '/properties/commercial'],
+            ['label' => 'الكمبوندات', 'label_en' => 'Compounds', 'url' => '/compounds'],
+            ['label' => 'المطوّرون', 'label_en' => 'Developers', 'url' => '/developers'],
+        ]],
         ['label' => 'المناطق', 'label_en' => 'Areas', 'url' => '/areas'],
         ['label' => 'المدونة', 'label_en' => 'Blog', 'url' => '/blog'],
         ['label' => 'أضف عقارك', 'label_en' => 'Add your property', 'url' => '/add-property'],
@@ -56,7 +61,11 @@ class MenuSeeder extends Seeder
         }
 
         foreach (self::FOOTER as $i => $item) {
-            $this->put('footer', $item, $i, null);
+            $parent = $this->put('footer', $item, $i, null);
+
+            foreach ($item['children'] ?? [] as $j => $child) {
+                $this->put('footer', $child, $j, $parent->id);
+            }
         }
 
         MenuItem::flush();

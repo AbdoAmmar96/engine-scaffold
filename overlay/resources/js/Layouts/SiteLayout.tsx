@@ -35,6 +35,14 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
     const isActive = (url: string) =>
         url === "/" ? currentPath === `/${locale}` : currentPath.startsWith(`/${locale}${url}`);
 
+    // الفوتر بيتقسم لأعمدة: اللي له أبناء بيبقى مجموعة بعنوانها،
+    // والباقي بيتجمّع تحت «الموقع»
+    const footerGroups = menu.footer.filter((item) => item.children.length > 0);
+    const footerLinks = menu.footer.filter((item) => item.children.length === 0);
+
+    // عمود بعنوان وتحته فراغ أسوأ من عمود مش موجود
+    const hasContact = Boolean(contact.phone || contact.email || contact.address);
+
     // لينك القائمة: داخلي بيمشي على Inertia، وخارجي بيفضل <a> عادي
     const navLink = (item: MenuLink, className: string, onClick?: () => void) =>
         item.external ? (
@@ -243,7 +251,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
             {/* ------------------------------ Footer (داكن — زي التصميم) ------------------------------ */}
             <footer className="bg-bg-dark">
                 <div className="mx-auto max-w-7xl px-4 py-12">
-                    <div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1.2fr]">
+                    <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.6fr_repeat(var(--footer-cols),minmax(0,1fr))]" style={{ ["--footer-cols" as string]: footerGroups.length + (footerLinks.length > 0 ? 1 : 0) + (hasContact ? 1 : 0) }}>
                         <div>
                             <div className="flex items-center gap-3">
                                 {branding.logo_path && (
@@ -274,14 +282,29 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-3">
-                            <span className="text-[13px] font-extrabold text-text-dark">{ar ? "الموقع" : "Site"}</span>
-                            {menu.footer.map((item) =>
-                                navLink(item, "text-sm text-white/55 transition hover:text-primary"),
-                            )}
-                        </div>
+                        {/* عنصر أب بأبناء بيبقى عمود بعنوانه، واللي من غير أبناء
+                            بيتجمّعوا في عمود «الموقع» — نفس بيانات القوائم بتاعة
+                            الهيدر، فالأدمن بيرتّبها من /admin/menus من غير كود */}
+                        {footerGroups.map((group) => (
+                            <div key={group.label} className="flex min-w-0 flex-col gap-3">
+                                <span className="text-[13px] font-extrabold text-text-dark">{group.label}</span>
+                                {group.children.map((child) =>
+                                    navLink(child, "text-sm text-white/55 transition hover:text-primary"),
+                                )}
+                            </div>
+                        ))}
 
-                        <div className="flex flex-col gap-3">
+                        {footerLinks.length > 0 && (
+                            <div className="flex min-w-0 flex-col gap-3">
+                                <span className="text-[13px] font-extrabold text-text-dark">{ar ? "الموقع" : "Site"}</span>
+                                {footerLinks.map((item) =>
+                                    navLink(item, "text-sm text-white/55 transition hover:text-primary"),
+                                )}
+                            </div>
+                        )}
+
+                        {hasContact && (
+                        <div className="flex min-w-0 flex-col gap-3">
                             <span className="text-[13px] font-extrabold text-text-dark">{ar ? "تواصل" : "Contact"}</span>
                             {contact.phone && (
                                 <a href={`tel:${contact.phone}`} className="text-sm text-white/55 transition hover:text-primary">
@@ -295,6 +318,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
                             )}
                             {contact.address && <span className="text-sm leading-relaxed text-white/55">{contact.address}</span>}
                         </div>
+                        )}
 
                     </div>
 
