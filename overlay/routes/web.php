@@ -2,6 +2,7 @@
 
 use App\Support\Catalog;
 use App\Support\DemoContent;
+use App\Support\Features;
 use App\Support\Seo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -151,21 +152,31 @@ Route::prefix('{locale}')
             ),
         ]))->name('contact');
 
-        Route::get('/blog', fn (string $locale) => Inertia::render('Site/Blog', [
-            'posts' => Catalog::posts($locale),
-            'meta' => Seo::page(
-                $locale,
-                $locale === 'en' ? 'Real-estate blog' : 'المدونة العقارية',
-                $locale === 'en'
-                    ? 'Analysis and practical guides on the Egyptian property market.'
-                    : 'تحليلات وأدلة عملية عن السوق العقاري المصري.',
-                null,
-                'website',
-                [Seo::breadcrumb($locale, [($locale === 'en' ? 'Blog' : 'المدونة') => '/blog'])],
-            ),
-        ]))->name('blog');
+        /* ---------- المدونة ---------- */
+        // القسم بيتقفل من الإعدادات. الراوت بيفضل مسجّل عن قصد: الـ 404
+        // بيتقرر وقت الطلب، و`blog` يفضل اسمًا محجوزًا في ReservedSlugs
+        // فما تقدرش صفحة محتوى تخطفه وتكسر القسم لما يترجّع.
+        Route::get('/blog', function (string $locale) {
+            abort_unless(Features::enabled('blog'), 404);
+
+            return Inertia::render('Site/Blog', [
+                'posts' => Catalog::posts($locale),
+                'meta' => Seo::page(
+                    $locale,
+                    $locale === 'en' ? 'Real-estate blog' : 'المدونة العقارية',
+                    $locale === 'en'
+                        ? 'Analysis and practical guides on the Egyptian property market.'
+                        : 'تحليلات وأدلة عملية عن السوق العقاري المصري.',
+                    null,
+                    'website',
+                    [Seo::breadcrumb($locale, [($locale === 'en' ? 'Blog' : 'المدونة') => '/blog'])],
+                ),
+            ]);
+        })->name('blog');
 
         Route::get('/blog/{slug}', function (string $locale, string $slug) {
+            abort_unless(Features::enabled('blog'), 404);
+
             $post = Catalog::post($locale, $slug);
 
             abort_if(! $post, 404);

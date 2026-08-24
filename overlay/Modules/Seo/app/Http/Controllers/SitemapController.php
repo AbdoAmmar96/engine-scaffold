@@ -2,6 +2,7 @@
 
 namespace Modules\Seo\Http\Controllers;
 
+use App\Support\Features;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Modules\Blog\Models\Post;
@@ -27,6 +28,9 @@ class SitemapController extends Controller
             '', '/properties', '/properties/residential', '/properties/commercial',
             '/compounds', '/developers', '/areas', '/blog', '/about', '/contact',
         ];
+
+        // القسم المقفول ما يدخلش الخريطة — جوجل يفهرس رابط بيرجّع 404
+        $static = array_values(array_filter($static, fn (string $path) => ! Features::hidden($path)));
 
         foreach ($static as $path) {
             $urls[] = [
@@ -94,7 +98,7 @@ class SitemapController extends Controller
             ];
         }
 
-        foreach (Post::published()->get() as $post) {
+        foreach (Features::enabled('blog') ? Post::published()->get() : [] as $post) {
             $urls[] = [
                 'path' => '/blog/'.$post->slug,
                 'lastmod' => $post->updated_at?->toAtomString(),

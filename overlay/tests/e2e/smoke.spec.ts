@@ -507,7 +507,6 @@ const NO_SCROLL_PAGES = [
     '/ar/compounds',
     '/ar/developers',
     '/ar/areas',
-    '/ar/blog',
     '/ar/about',
     '/ar/contact',
     '/ar/add-property',
@@ -530,5 +529,73 @@ for (const path of NO_SCROLL_PAGES) {
 
         // بكسل سماح للتقريب في القياس
         expect(scrollWidth, `${path} بيطفح ${scrollWidth - clientWidth}px`).toBeLessThanOrEqual(clientWidth + 1);
+    });
+}
+
+
+/* ---------------------------------------------------------------------------
+ | تنسيق الهيدر
+ |
+ | صنف تاني بيعدّي بصمت: الصفحة مبتسحبش يمين وشمال، فاختبار الطفح بيعدّي،
+ | ومع ذلك القائمة بتلمس الشعار أو الأزرار وبتبقى مكرمشة.
+ |
+ | حصل فعلًا: البادينج كان `2xl:px-3.5`، والهيدر محدود بـ `max-w-7xl`
+ | يعني 1280 مهما كبرت الشاشة — فعند 1536 البادينج كبر جوه حاوية ما كبرتش
+ | والقائمة خرجت 36 بكسل عن إطارها ولمست الطرفين.
+ |
+ | وعدد اللينكات نفسه متغيّر: قفل قسم من الإعدادات بيشيل واحد، فالتنسيق
+ | لازم يفضل متوازن بالعددين.
+ ---------------------------------------------------------------------------- */
+
+for (const width of [1280, 1536, 1920]) {
+    test(`the header nav keeps its distance at ${width}px`, async ({ page }, testInfo) => {
+        test.skip(testInfo.project.name !== 'desktop', 'القائمة الأفقية بتظهر من 1280 فوق');
+
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto('/ar', { waitUntil: 'networkidle' });
+
+        const gap = await page.evaluate(() => {
+            const row = document.querySelector('header > div');
+            if (!row) return null;
+
+            const [logo, nav, actions] = [...row.children];
+            const items = [...nav.children].map((el) => el.getBoundingClientRect());
+            if (items.length === 0) return null;
+
+            const box = nav.getBoundingClientRect();
+            const start = Math.min(...items.map((i) => i.left));
+            const end = Math.max(...items.map((i) => i.right));
+
+            return {
+                // اللينكات خرجت عن إطار <nav>؟
+                spill: Math.max(0, box.left - start) + Math.max(0, end - box.right),
+                // rtl: الشعار يمين واللينكات شماله، والأزرار شمال واللينكات يمينها
+                toLogo: logo.getBoundingClientRect().left - end,
+                toActions: start - actions.getBoundingClientRect().right,
+            };
+        });
+
+        expect(gap).not.toBeNull();
+        expect(gap!.spill).toBe(0);
+        expect(gap!.toLogo).toBeGreaterThanOrEqual(16);
+        expect(gap!.toActions).toBeGreaterThanOrEqual(16);
+
+        // الحارس الحقيقي: الصف محدود بـ max-w-7xl فعرضه ثابت، فأي مقاس جوّه
+        // مايتغيرش بعرض الشاشة. الفحص ده بيمسك العطل حتى لو عدد اللينكات
+        // الحالي صغير كفاية إنه يستحمل التوسيع.
+        const scale = await page.evaluate(() => {
+            const link = document.querySelector('header nav a');
+            const row = document.querySelector('header > div');
+
+            return {
+                padding: getComputedStyle(link!).paddingInline,
+                fontSize: getComputedStyle(link!).fontSize,
+                rowWidth: Math.round(row!.getBoundingClientRect().width),
+            };
+        });
+
+        expect(scale.padding).toBe('10px');
+        expect(scale.fontSize).toBe('13.5px');
+        expect(scale.rowWidth).toBeLessThanOrEqual(1280);
     });
 }

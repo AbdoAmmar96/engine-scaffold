@@ -41,22 +41,26 @@ export default function NavMenu({ items }: { items: MenuLink[] }) {
         };
     }, [open]);
 
+    // مقاس واحد ثابت: الهيدر محدود بـ max-w-7xl فعرضه 1280 مهما كبرت الشاشة،
+    // فأي `2xl:` هنا بيكبّر البادينج جوه حاوية ما بتكبرش والقائمة بتلمس الشعار
     const linkClass = (active: boolean) =>
-        `relative block whitespace-nowrap rounded-xl px-3.5 py-2.5 text-[14px] font-extrabold transition ${
+        `relative block whitespace-nowrap rounded-xl px-2.5 py-2.5 text-[13.5px] font-extrabold transition ${
             active ? "text-secondary" : "text-secondary/70 hover:bg-surface hover:text-primary"
         }`;
 
     const underline = (active: boolean) => (
         <span
             aria-hidden
-            className={`pointer-events-none absolute inset-x-3.5 -bottom-1 h-0.5 rounded-full bg-primary transition-opacity ${
+            className={`pointer-events-none absolute inset-x-2.5 -bottom-1 h-0.5 rounded-full bg-primary transition-opacity ${
                 active ? "opacity-100" : "opacity-0"
             }`}
         />
     );
 
     return (
-        <nav ref={wrap} className="hidden items-center gap-2 xl:flex">
+        // flex-1 + min-w-0: القائمة بتاخد المساحة الفاضية وتتوسّط، والشعار
+        // والأزرار على الطرفين — فالتوازن مايتغيّرش لما ينقص لينك أو يزيد
+        <nav ref={wrap} className="hidden min-w-0 flex-1 items-center justify-center gap-1 xl:flex">
             {items.map((item) => {
                 const active = isActive(item);
 

@@ -84,7 +84,7 @@ const systemNav: NavItem[] = [
 ];
 
 export default function AdminLayout({ title, children }: { title: string; children: ReactNode }) {
-    const { auth } = usePage<SharedProps>().props;
+    const { auth, settings } = usePage<SharedProps>().props;
     const path = typeof window !== "undefined" ? window.location.pathname : "";
     const can = auth.user?.can ?? [];
 
@@ -123,6 +123,12 @@ export default function AdminLayout({ title, children }: { title: string; childr
         );
     };
 
+    // القسم المقفول من الإعدادات بيفضل في اللوحة عشان الأدمن يجهّز محتواه،
+    // بس مكتوب عليه «مخفية» — من غير كده بينشر مقال ويستنى ظهوره بلا فايدة
+    const hidden: Record<string, boolean> = {
+        "/admin/posts": settings.general?.blog_enabled !== "1",
+    };
+
     const item = (href: string, label: string, Icon: typeof Home, active: boolean) => (
         <Link
             key={href}
@@ -132,7 +138,15 @@ export default function AdminLayout({ title, children }: { title: string; childr
             }`}
         >
             <Icon size={17} />
-            {label}
+            <span className="min-w-0 flex-1 truncate">{label}</span>
+            {hidden[href] && (
+                <span
+                    title="القسم مقفول من الإعدادات — غير ظاهر على الموقع"
+                    className="shrink-0 rounded-md bg-white/15 px-1.5 py-0.5 text-[10px] font-extrabold text-gray-300"
+                >
+                    مخفية
+                </span>
+            )}
         </Link>
     );
 

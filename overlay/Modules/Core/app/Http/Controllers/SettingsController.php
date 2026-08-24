@@ -33,6 +33,7 @@ class SettingsController extends Controller
         'founded_year' => 'سنة التأسيس',
         'clients_served' => 'عدد العملاء المتعاقدين',
         'team_size' => 'عدد أفراد الفريق',
+        'blog_enabled' => 'إظهار المدونة',
         // about
         'hero_title' => 'عنوان الصفحة (عربي)',
         'hero_title_en' => 'عنوان الصفحة (إنجليزي)',
@@ -102,6 +103,7 @@ class SettingsController extends Controller
      * الأنواع: color · media · select · textarea · text (الافتراضي)
      */
     public const TYPES = [
+        'blog_enabled' => 'toggle',
         'primary' => 'color',
         'primary_fg' => 'color',
         'primary_hover' => 'color',
@@ -171,6 +173,7 @@ class SettingsController extends Controller
     /** شرح تحت الحقل لما يكون محتاج توضيح */
     public const HINTS = [
         'whatsapp' => 'بكود الدولة وبدون + أو مسافات — مثال: 201001234567',
+        'blog_enabled' => 'وهي مقفولة تختفي المدونة من القائمة ومن خريطة الموقع، ويرجع رابطها 404. المقالات تفضل محفوظة وتقدر تكتبها وتجهّزها من «المدونة» في اللوحة قبل ما تفتح القسم.',
         'founded_year' => 'سنة واحدة مثل 2014 — تُحتسب منها «سنة في السوق». اتركها فارغة إن لم ترغب في عرضها.',
         'clients_served' => 'رقم حقيقي فقط. اتركها فارغة ولن يظهر الرقم في الموقع.',
         'team_size' => 'رقم حقيقي فقط. اتركها فارغة ولن يظهر الرقم في الموقع.',
@@ -207,6 +210,7 @@ class SettingsController extends Controller
             $rules["values.{$key}"] = match (self::TYPES[$key] ?? 'text') {
                 'color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{3,8}$/'],
                 'select' => ['nullable', 'string', Rule::in(array_column($options[$key] ?? [], 'value'))],
+                'toggle' => ['nullable', 'string', Rule::in(['0', '1'])],
                 default => ['nullable', 'string', 'max:2000'],
             };
         }

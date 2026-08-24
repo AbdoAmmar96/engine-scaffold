@@ -12,7 +12,7 @@ import { isVideo } from "@/lib/media";
  * عشان لون اتمسح ميتحولش لحقل نص ويضيع الـ color picker.
  */
 
-type FieldType = "color" | "media" | "select" | "textarea" | "text";
+type FieldType = "color" | "media" | "select" | "textarea" | "toggle" | "text";
 
 interface Props {
     group: string;
@@ -40,6 +40,27 @@ export default function Edit({ group, groupLabel, groups, values, labels, types,
         const type: FieldType = types[key] ?? "text";
 
         if (type === "color") return <ColorField value={value ?? ""} onChange={(v) => set(key, v)} />;
+
+        // القيمة بتتخزّن نص "0"/"1" زي باقي الإعدادات — الجدول كله نصوص
+        if (type === "toggle") {
+            const on = value === "1";
+
+            return (
+                <button
+                    type="button"
+                    role="switch"
+                    aria-checked={on}
+                    onClick={() => set(key, on ? "0" : "1")}
+                    className={`relative h-7 w-12 rounded-full transition ${on ? "bg-primary" : "bg-gray-300"}`}
+                >
+                    <span
+                        className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all ${
+                            on ? "start-6" : "start-1"
+                        }`}
+                    />
+                </button>
+            );
+        }
 
         if (type === "select") {
             return (

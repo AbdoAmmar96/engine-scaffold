@@ -108,22 +108,25 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
 
             {/* ------------------------------ Header ------------------------------ */}
             <header className="sticky top-0 z-40 border-b border-gray-100 bg-bg/95 backdrop-blur-md">
-                <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between gap-6 px-4">
-                    <Link href={`/${locale}`} className="flex shrink-0 items-center gap-3">
+                <div className="mx-auto flex h-[68px] max-w-7xl items-center gap-4 px-4">
+                    <Link href={`/${locale}`} className="flex min-w-0 shrink-0 items-center gap-3">
                         {branding.logo_path && (
                             <img src={branding.logo_path} alt={general.site_name ?? ""} className="h-11 w-auto" />
                         )}
-                        <span className="hidden flex-col items-start leading-tight sm:flex">
-                            <span className="text-lg font-black text-secondary">{general.site_name || "BP Engine"}</span>
+                        {/* min-w-0 + truncate: اسم طويل كان بيدفع القائمة ويطفح الهيدر */}
+                        <span className="hidden min-w-0 flex-col items-start leading-tight sm:flex">
+                            <span className="truncate text-lg font-black text-secondary">
+                                {general.site_name || "BP Engine"}
+                            </span>
                             {general.tagline && (
-                                <span className="text-[11px] font-bold text-muted">{general.tagline}</span>
+                                <span className="truncate text-[11px] font-bold text-muted">{general.tagline}</span>
                             )}
                         </span>
                     </Link>
 
                     <NavMenu items={menu.header} />
 
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex shrink-0 items-center gap-2.5">
                         <button
                             onClick={() => (window.location.href = switchUrl())}
                             className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-extrabold text-secondary transition hover:border-primary hover:bg-primary/10 hover:text-primary"

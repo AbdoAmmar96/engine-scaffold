@@ -3,6 +3,7 @@
 namespace Modules\Core\Models;
 
 use App\Support\Bilingual;
+use App\Support\Features;
 use App\Support\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -76,6 +77,16 @@ class MenuItem extends Model
                     $i,
                     $inPlace->where('parent_id', $i->id)->map(fn (self $c) => $link($c))->values()->all(),
                 ))
+                // القسم المقفول بيختفي من القايمة — الكاش على الصفوف مش على
+                // الناتج، فالفلترة بتتم بعد القراءة وتبديل الإعداد بيبان فورًا
+                ->map(fn (array $item) => [
+                    ...$item,
+                    'children' => array_values(array_filter(
+                        $item['children'],
+                        fn (array $child) => ! Features::hidden($child['url']),
+                    )),
+                ])
+                ->reject(fn (array $item) => Features::hidden($item['url']))
                 // عنصر أب من غير رابط ولا أبناء مالوش لازمة
                 ->filter(fn (array $item) => $item['url'] !== '' || $item['children'] !== [])
                 ->values()

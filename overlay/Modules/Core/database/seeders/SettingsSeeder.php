@@ -21,6 +21,9 @@ class SettingsSeeder extends Seeder
                 'founded_year' => '',
                 'clients_served' => '',
                 'team_size' => '',
+                // أقسام بتتقفل من الشاشة — الافتراضي مقفول عشان التثبيت الجديد
+                // ما يطلعش قسم فاضي. راجع App\Support\Features
+                'blog_enabled' => '0',
             ],
 
             // صفحة «من نحن» — كلها فاضية عن قصد.
